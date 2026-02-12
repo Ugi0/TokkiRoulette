@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>My Site</h1>
+    <button onclick="loadData()">Load Dynamic Data</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function loadData() {
+        const res = await fetch("/hello");
+        const data = await res.text();
+        document.getElementById("output").innerText = data;
+        }
+    </script>
+</body>
+</html>
