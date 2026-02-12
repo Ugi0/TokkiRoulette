@@ -1,30 +1,72 @@
+/* Body setup */
 body {
-    font-family: 'Inter',sans-serif;
-    color: #320070;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    background-color: #0e0e0e;
+
+    /* Subtle grid background */
+    background-image:
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 128px 128px;
 }
 
-h1 {
-    font-size: 4rem;
-    font-weight: 800;
-    text-shadow:
-            0 0 5px white,
-            0 0 10px white,
-            0 0 15px white;}
-
+/* Content card */
 #content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #000000;
-    margin: 64px;
-    width: 100%;
-    height: 100%;
-    border-radius: 32px;
-    border: solid 1px #454545;
-    box-shadow: 0px 0px 16px #000000;
+    background-color: rgba(40,40,40,0.7);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    padding: 50px 70px;
+    border-radius: 25px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Slight hover effect */
+#content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+}
+
+/* Headings */
+#content h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255,255,255,0.2), 0 0 30px rgba(255,255,255,0.1);
+}
+
+/* Paragraphs */
+#content p {
+    font-weight: 400;
+    font-size: 1.3rem;
+    color: #ddd;
+    text-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+
+/* Subtle animated glow in background */
+body::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.02), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(255,255,255,0.02), transparent 50%);
+    z-index: 0;
+    pointer-events: none;
+    animation: bgMove 15s infinite alternate;
+}
+
+@keyframes bgMove {
+    0% { background-position: 0% 0%, 100% 100%; }
+    50% { background-position: 20% 10%, 80% 90%; }
+    100% { background-position: 0% 0%, 100% 100%; }
 }
