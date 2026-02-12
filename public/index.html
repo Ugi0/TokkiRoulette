@@ -1,20 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="UTF-8">
     <title>Hello World</title>
-  </head>
-  <body>
-    <h1>Hello World from Frontend!</h1>
-    <button onclick="loadHello()">Call Backend</button>
-    <pre id="output"></pre>
-
-    <script>
-      async function loadHello() {
-        const res = await fetch("/hello");
-        const text = await res.text();
-        document.getElementById("output").innerText = text;
-      }
-    </script>
-  </body>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="content">
+    <h1>Hello World</h1>
+</div>
+</body>
 </html>
