@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html>
-<body>
-    <h1>My Site</h1>
-    <button onclick="loadData()">Load Dynamic Data</button>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World</title>
+  </head>
+  <body>
+    <h1>Hello World from Frontend!</h1>
+    <button onclick="loadHello()">Call Backend</button>
     <pre id="output"></pre>
 
     <script>
-        async function loadData() {
+      async function loadHello() {
         const res = await fetch("/hello");
-        const data = await res.text();
-        document.getElementById("output").innerText = data;
-        }
+        const text = await res.text();
+        document.getElementById("output").innerText = text;
+      }
     </script>
-</body>
+  </body>
 </html>
