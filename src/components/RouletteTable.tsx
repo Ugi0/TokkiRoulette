@@ -3,9 +3,17 @@ import { useState } from "react";
 import "./RouletteTable.css";
 import RouletteWheel from "./RouletteWheel";
 import { numbers, zero } from "./RouletteNumber";
+import { RouletteGen } from "./RouletteGen.tsx";
 
 export default function RouletteTable() {
+
+    type RouletteResult = {
+        number: number;
+        tags: string[];
+    };
+
   const [, setSelected] = useState<number | null>(null);
+  const [result, setResult] = useState<RouletteResult | null>(null);
   const [spinCount, setSpinCount] = useState(0);
 
   return (
@@ -13,7 +21,13 @@ export default function RouletteTable() {
       <h1>Totally not rigged Roulette table</h1>
 
       <div className="spinContainer">
-        <button className="spinButton" onClick={() => setSpinCount(c => c + 1)}>
+        <button className="spinButton" onClick={() =>
+        {
+            setSpinCount(c => c + 1);
+            const spin = Math.floor(Math.random() * 37);
+            const result = RouletteGen(spin);
+            setResult(result);
+        }}>
           Spin ►
         </button>
       </div>
