@@ -15,7 +15,6 @@ const WHEEL_NUMBERS = [
   7, 28, 12, 35, 3, 26,
 ];
 
-// visual constants
 const WHEEL_SIZE = 700;
 const RADIUS = WHEEL_SIZE / 2;
 const FULL_ROTATIONS = 3;
