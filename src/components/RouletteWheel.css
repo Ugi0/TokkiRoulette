@@ -1,0 +1,67 @@
+/* Window only clips visibility */
+.roulette-window {
+  width: 440px;
+  height: 80px;              /* show more of the top arc */
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+}
+
+/* Wheel is perfectly centered */
+.roulette-wheel {
+  position: absolute;
+
+  border-radius: 50%;
+
+  top: 40px;
+
+  transition: transform 5.5s
+    cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+/* Rectangular number tabs */
+.wheel-slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: 46px;
+  height: 28px;
+
+  border-radius: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+  font-size: 15px;
+  color: white;
+
+  transform-origin: center bottom; /* tangent to rim */
+}
+
+/* Color coding */
+.wheel-slot.red {
+  background: #c0392b;
+}
+.wheel-slot.black {
+  background: #111;
+}
+.wheel-slot.green {
+  background: #1a6d34;
+}
+
+/* Fixed indicator */
+.wheel-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 8px;
+  height: 28px;
+  background: gold;
+  z-index: 10;
+}
