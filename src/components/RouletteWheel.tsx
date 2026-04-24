@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./RouletteWheel.css";
+import { numbers } from "./RouletteNumber";
 
 type RouletteWheelProps = {
   spinTrigger: number;
@@ -15,19 +16,21 @@ const WHEEL_NUMBERS = [
 ];
 
 // visual constants
-const WHEEL_SIZE = 320;
-const RADIUS = 200;
-const FULL_ROTATIONS = 6;
+const WHEEL_SIZE = 700;
+const RADIUS = WHEEL_SIZE / 2;
+const FULL_ROTATIONS = 3;
+const POINTER_VARIANCE = 1;
 
 export default function RouletteWheel({
   spinTrigger,
   onFinish,
 }: RouletteWheelProps) {
-  const rotationRef = useRef(0);
-  const isSpinningRef = useRef(false);
   const [rotation, setRotation] = useState(0);
-
+  const isSpinningRef = useRef(false);
+  const lastHandledTriggerRef = useRef(0);
+  const baseRotationRef = useRef(0);
   const onFinishRef = useRef(onFinish);
+
   useEffect(() => {
     onFinishRef.current = onFinish;
   }, [onFinish]);
@@ -44,21 +47,34 @@ export default function RouletteWheel({
   );
 
   useEffect(() => {
-    if (spinTrigger === 0 || isSpinningRef.current) return;
+    if (
+      spinTrigger === 0 ||
+      spinTrigger === lastHandledTriggerRef.current ||
+      isSpinningRef.current
+    ) {
+      return;
+    }
 
     isSpinningRef.current = true;
+    lastHandledTriggerRef.current = spinTrigger;
 
     const winningIndex = Math.floor(
       Math.random() * WHEEL_NUMBERS.length
     );
     const winningNumber = WHEEL_NUMBERS[winningIndex];
+    const slotCenterAngle = (winningIndex + 0.5) * step;
 
+    console.log(winningNumber);
+
+    const randomOffset = (Math.random() - 0.5) * step * POINTER_VARIANCE;
+    baseRotationRef.current += FULL_ROTATIONS * 360;
     const targetRotation =
-      rotationRef.current +
-      FULL_ROTATIONS * 360 +
-      winningIndex * step;
+      baseRotationRef.current +
+      180 -
+      slotCenterAngle +
+      step / 2 +
+      randomOffset;
 
-    rotationRef.current = targetRotation;
     setRotation(targetRotation);
 
     const timeout = setTimeout(() => {
@@ -76,17 +92,20 @@ export default function RouletteWheel({
         style={{
           width: WHEEL_SIZE,
           height: WHEEL_SIZE,
-          transform: `rotate(${rotation}deg)`,
+          transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
         }}
       >
         {positionedNumbers.map(({ value, angle }) => (
           <div
             key={value}
             className={`wheel-slot ${
-              value === 0 ? "green" : value % 2 ? "red" : "black"
+              value === 0
+                ? "green"
+                : numbers.find((n) => n.value === value)?.color
             }`}
             style={{
               transform: `
+                translate(-50%, -50%)
                 rotate(${angle}deg)
                 translateY(${RADIUS}px)
                 rotate(180deg)
