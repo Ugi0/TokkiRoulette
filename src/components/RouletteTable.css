@@ -92,7 +92,12 @@
   border: none;
   cursor: pointer;
 }
-
+.winner {
+    outline: 3px solid gold;
+    box-shadow: 0 0 12px gold;
+    transform: scale(1.15);
+    transition: all 0.2s ease;
+}
 .hover-ef {
     transition:
     border-radius 200ms ease,

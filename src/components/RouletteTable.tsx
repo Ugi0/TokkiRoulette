@@ -24,9 +24,6 @@ export default function RouletteTable() {
         <button className="spinButton" onClick={() =>
         {
             setSpinCount(c => c + 1);
-            const spin = Math.floor(Math.random() * 37);
-            const result = RouletteGen(spin);
-            setResult(result);
         }}>
           Spin ►
         </button>
@@ -34,7 +31,7 @@ export default function RouletteTable() {
 
       <RouletteWheel
         spinTrigger={spinCount}
-        onFinish={(value) => setSelected(value)}
+        onFinish={(value) => {setSelected(value); setResult(RouletteGen(value));}}
       />
 
       <div className="table">
@@ -43,14 +40,18 @@ export default function RouletteTable() {
         >
             0
         </button>
-        {numbers.map((n) => (
-          <button
-            key={n.value}
-            className={`cell hover-ef ${n.color}`}
-          >
-            {n.value}
-          </button>
-        ))}
+          {numbers.map((n) => {
+              const isWinner = result?.number === n.value;
+
+              return (
+                  <button
+                      key={n.value}
+                      className={`cell hover-ef ${n.color} ${isWinner ? "winner" : ""}`}
+                  >
+                      {n.value}
+                  </button>
+              );
+          })}
 
         <button
           className={`dozen first hover-ef`}
