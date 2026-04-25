@@ -23,7 +23,7 @@
   top: 50%;
   left: 50%;
 
-  width: 68px;
+  width: 67px;
   height: 80px;
 
   display: flex;
@@ -42,11 +42,6 @@
     90% 100%,
     10% 100%
   );
-  
-  box-shadow:
-    inset 1px 0 0 #d4af37,
-    inset -1px 0 0 #d4af37;
-
 }
 
 .wheel-slot.red {
