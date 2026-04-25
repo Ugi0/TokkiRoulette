@@ -1,10 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import "./RouletteWheel.css";
 import { numberColorMap } from "./RouletteNumber";
 import { RouletteGen, type RouletteResult } from "./RouletteGen";
 
+export type RouletteWheelHandle = {
+  spin: () => void;
+};
+
 type RouletteWheelProps = {
-  spinTrigger: number;
   onFinish: (result: RouletteResult) => void;
 };
 
@@ -26,106 +35,93 @@ function buildSpinResult(): RouletteResult {
   return RouletteGen(randomNumber);
 }
 
-export default function RouletteWheel({
-                                        spinTrigger,
-                                        onFinish,
-                                      }: RouletteWheelProps) {
-  const [rotation, setRotation] = useState(0);
+const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
+  ({ onFinish }, ref) => {
+    const [rotation, setRotation] = useState(0);
 
-  const isSpinningRef = useRef(false);
-  const lastHandledTriggerRef = useRef(0);
-  const baseRotationRef = useRef(0);
+    const isSpinningRef = useRef(false);
+    const baseRotationRef = useRef(0);
+    const timeoutRef = useRef<number | null>(null);
+    const onFinishRef = useRef(onFinish);
 
-  const onFinishRef = useRef(onFinish);
-
-  useEffect(() => {
     onFinishRef.current = onFinish;
-  }, [onFinish]);
 
-  const step = 360 / WHEEL_NUMBERS.length;
+    const step = 360 / WHEEL_NUMBERS.length;
 
-  const positionedNumbers = useMemo(
+    const positionedNumbers = useMemo(
       () =>
-          WHEEL_NUMBERS.map((value, i) => ({
-            value,
-            angle: i * step,
-          })),
+        WHEEL_NUMBERS.map((value, i) => ({
+          value,
+          angle: i * step,
+        })),
       [step]
-  );
+    );
 
-  useEffect(() => {
-    let cancelled = false;
+    const spin = () => {
+      if (isSpinningRef.current) return;
 
-    if (
-        spinTrigger === 0 ||
-        spinTrigger === lastHandledTriggerRef.current ||
-        isSpinningRef.current
-    ) {
-      return;
-    }
+      isSpinningRef.current = true;
 
-    isSpinningRef.current = true;
-    lastHandledTriggerRef.current = spinTrigger;
+      const result = buildSpinResult();
+      const winningIndex = WHEEL_NUMBERS.indexOf(result.number);
 
-    const result = buildSpinResult();
-    const winningNumber = result.number;
-    const winningIndex = WHEEL_NUMBERS.indexOf(winningNumber);
+      const slotCenterAngle = (winningIndex + 0.5) * step;
+      const randomOffset =
+        (Math.random() - 0.5) * step * POINTER_VARIANCE;
 
-    const slotCenterAngle = (winningIndex + 0.5) * step;
-    const randomOffset = (Math.random() - 0.5) * step * POINTER_VARIANCE;
+      baseRotationRef.current += FULL_ROTATIONS * 360;
 
-    baseRotationRef.current += FULL_ROTATIONS * 360;
-
-    const targetRotation =
+      const targetRotation =
         baseRotationRef.current +
         180 -
         slotCenterAngle +
         step / 2 +
         randomOffset;
 
-    setRotation(targetRotation);
+      setRotation(targetRotation);
 
-    const timeout = setTimeout(() => {
-      if (cancelled) return;
-      onFinishRef.current(result);
-      isSpinningRef.current = false;
-    }, 5500);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
+      timeoutRef.current = window.setTimeout(() => {
+        isSpinningRef.current = false;
+        onFinishRef.current(result);
+      }, 5500);
     };
-  }, [spinTrigger, step]);
 
-  return (
+    useImperativeHandle(ref, () => ({
+      spin,
+    }));
+
+    return (
       <div className="roulette-window">
         <div
-            className="roulette-wheel"
-            style={{
-              width: WHEEL_SIZE,
-              height: WHEEL_SIZE,
-              transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
-            }}
+          className="roulette-wheel"
+          style={{
+            width: WHEEL_SIZE,
+            height: WHEEL_SIZE,
+            transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+          }}
         >
           {positionedNumbers.map(({ value, angle }) => (
-              <div
-                  key={value}
-                  className={`wheel-slot ${numberColorMap.get(value)}`}
-                  style={{
-                    transform: `
-                translate(-50%, -50%)
-                rotate(${angle}deg)
-                translateY(${RADIUS}px)
-                rotate(180deg)
-              `,
-                  }}
-              >
-                {value}
-              </div>
+            <div
+              key={value}
+              className={`wheel-slot ${numberColorMap.get(value)}`}
+              style={{
+                transform: `
+                  translate(-50%, -50%)
+                  rotate(${angle}deg)
+                  translateY(${RADIUS}px)
+                  rotate(180deg)
+                `,
+              }}
+            >
+              {value}
+            </div>
           ))}
         </div>
 
         <div className="wheel-indicator" />
       </div>
-  );
-}
+    );
+  }
+);
+
+export default RouletteWheel;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "./RouletteTable.css";
 import RouletteWheel from "./RouletteWheel";
 import { numbers, zero } from "./RouletteNumber";
@@ -8,10 +8,9 @@ type RouletteResult = {
   tags: string[];
 };
 
-
 export default function RouletteTable() {
   const [result, setResult] = useState<RouletteResult | null>(null);
-  const [spinCount, setSpinCount] = useState(0);
+  const wheelRef = useRef<{ spin: () => void }>(null);
 
   return (
     <section className="roulette-table">
@@ -19,15 +18,15 @@ export default function RouletteTable() {
         <button
           type="button"
           className="spin-button"
-          onClick={() => setSpinCount((count) => count + 1)}
+          onClick={() => wheelRef.current?.spin()}
         >
           Spin &gt;
         </button>
       </div>
 
       <RouletteWheel
-        spinTrigger={spinCount}
         onFinish={(res) => setResult(res)}
+        ref={wheelRef}
       />
 
       <div className="table-shell">
