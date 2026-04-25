@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./RouletteWheel.css";
 import { numberColorMap } from "./RouletteNumber";
-import { RouletteGen } from "./RouletteGen";
-
-type RouletteResult = {
-  number: number;
-  tags: string[];
-};
+import { RouletteGen, type RouletteResult } from "./RouletteGen";
 
 type RouletteWheelProps = {
   spinTrigger: number;
@@ -26,19 +21,9 @@ const RADIUS = WHEEL_SIZE / 2;
 const FULL_ROTATIONS = 3;
 const POINTER_VARIANCE = 1;
 
-async function fetchSpinResult(): Promise<RouletteResult> {
-  try {
-    const res = await fetch("https://roulette-worker.freezefyre501.workers.dev/spin");
-
-    if (!res.ok) {
-      throw new Error(`Spin failed with status ${res.status}`);
-    }
-
-    return await res.json();
-  } catch {
-    const fallbackNumber = Math.floor(Math.random() * 37);
-    return RouletteGen(fallbackNumber);
-  }
+function buildSpinResult(): RouletteResult {
+  const randomNumber = Math.floor(Math.random() * 37);
+  return RouletteGen(randomNumber);
 }
 
 export default function RouletteWheel({
@@ -82,35 +67,33 @@ export default function RouletteWheel({
     isSpinningRef.current = true;
     lastHandledTriggerRef.current = spinTrigger;
 
-    fetchSpinResult().then((result) => {
+    const result = buildSpinResult();
+    const winningNumber = result.number;
+    const winningIndex = WHEEL_NUMBERS.indexOf(winningNumber);
+
+    const slotCenterAngle = (winningIndex + 0.5) * step;
+    const randomOffset = (Math.random() - 0.5) * step * POINTER_VARIANCE;
+
+    baseRotationRef.current += FULL_ROTATIONS * 360;
+
+    const targetRotation =
+        baseRotationRef.current +
+        180 -
+        slotCenterAngle +
+        step / 2 +
+        randomOffset;
+
+    setRotation(targetRotation);
+
+    const timeout = setTimeout(() => {
       if (cancelled) return;
-
-      const winningNumber = result.number;
-      const winningIndex = WHEEL_NUMBERS.indexOf(winningNumber);
-
-      const slotCenterAngle = (winningIndex + 0.5) * step;
-      const randomOffset = (Math.random() - 0.5) * step * POINTER_VARIANCE;
-
-      baseRotationRef.current += FULL_ROTATIONS * 360;
-
-      const targetRotation =
-          baseRotationRef.current +
-          180 -
-          slotCenterAngle +
-          step / 2 +
-          randomOffset;
-
-      setRotation(targetRotation);
-
-      setTimeout(() => {
-        if (cancelled) return;
-        onFinishRef.current(result);
-        isSpinningRef.current = false;
-      }, 5500);
-    });
+      onFinishRef.current(result);
+      isSpinningRef.current = false;
+    }, 5500);
 
     return () => {
       cancelled = true;
+      clearTimeout(timeout);
     };
   }, [spinTrigger, step]);
 
