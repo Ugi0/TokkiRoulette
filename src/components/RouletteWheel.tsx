@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./RouletteWheel.css";
 import { numberColorMap } from "./RouletteNumber";
+import { RouletteGen } from "./RouletteGen";
 
 type RouletteResult = {
   number: number;
@@ -26,13 +27,18 @@ const FULL_ROTATIONS = 3;
 const POINTER_VARIANCE = 1;
 
 async function fetchSpinResult(): Promise<RouletteResult> {
-  const res = await fetch(
-      "https://roulette-worker.freezefyre501.workers.dev/spin"
-  );
+  try {
+    const res = await fetch("https://roulette-worker.freezefyre501.workers.dev/spin");
 
-  if (!res.ok) throw new Error("Spin failed");
+    if (!res.ok) {
+      throw new Error(`Spin failed with status ${res.status}`);
+    }
 
-  return res.json();
+    return await res.json();
+  } catch {
+    const fallbackNumber = Math.floor(Math.random() * 37);
+    return RouletteGen(fallbackNumber);
+  }
 }
 
 export default function RouletteWheel({
@@ -63,6 +69,8 @@ export default function RouletteWheel({
   );
 
   useEffect(() => {
+    let cancelled = false;
+
     if (
         spinTrigger === 0 ||
         spinTrigger === lastHandledTriggerRef.current ||
@@ -75,6 +83,8 @@ export default function RouletteWheel({
     lastHandledTriggerRef.current = spinTrigger;
 
     fetchSpinResult().then((result) => {
+      if (cancelled) return;
+
       const winningNumber = result.number;
       const winningIndex = WHEEL_NUMBERS.indexOf(winningNumber);
 
@@ -93,10 +103,15 @@ export default function RouletteWheel({
       setRotation(targetRotation);
 
       setTimeout(() => {
+        if (cancelled) return;
         onFinishRef.current(result);
         isSpinningRef.current = false;
       }, 5500);
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [spinTrigger, step]);
 
   return (
