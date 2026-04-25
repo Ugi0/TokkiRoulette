@@ -9,7 +9,7 @@ export default function Footer() {
         © {year} TokkiCorp Roulette. All rights reserved.
       </p>
       <small className="disclaimer">
-        The house always wins. And the house just so happens to be TokkiCorp.
+        The house always wins. TokkiCorp has… extensive data on that.
       </small>
     </footer>
   );
