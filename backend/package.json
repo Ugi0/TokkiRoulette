@@ -1,0 +1,19 @@
+{
+  "name": "node-http-typescript-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.39",
+    "@types/pg": "^8.20.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "pg": "^8.20.0"
+  }
+}
