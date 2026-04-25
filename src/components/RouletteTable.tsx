@@ -2,7 +2,12 @@ import { useState } from "react";
 import "./RouletteTable.css";
 import RouletteWheel from "./RouletteWheel";
 import { numbers, zero } from "./RouletteNumber";
-import { RouletteGen, type RouletteResult } from "./RouletteGen";
+
+type RouletteResult = {
+  number: number;
+  tags: string[];
+};
+
 
 export default function RouletteTable() {
   const [result, setResult] = useState<RouletteResult | null>(null);
@@ -19,10 +24,10 @@ export default function RouletteTable() {
           Spin &gt;
         </button>
       </div>
-        
+
       <RouletteWheel
         spinTrigger={spinCount}
-        onFinish={(value) => setResult(RouletteGen(value))}
+        onFinish={(res) => setResult(res)}
       />
 
       <div className="table-shell">
