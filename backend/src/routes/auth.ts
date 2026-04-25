@@ -28,7 +28,7 @@ export default async function authRoutes(
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set(
       "scope",
-      "analytics:read:extensions user:read:email bits:read"
+      "user:read:email channel:manage:predictions channel:read:predictions"
     );
     authUrl.searchParams.set("state", state);
 
