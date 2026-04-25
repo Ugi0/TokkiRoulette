@@ -31,10 +31,16 @@ export default function RouletteTable() {
       />
 
       <div className="table-shell">
+        <div className="table-stack">
+        <div className="table-underlay">
+          <div className="underlay left" style={{ gridColumn: 1, gridRow: "1 / span 3" }}/>
+          <div className="underlay center" style={{ gridColumn: "2 / span 12", gridRow: "1 / span 5" }}/>
+          <div className="underlay right" style={{ gridColumn: 14, gridRow: "1 / span 3" }}/>
+        </div>
         <div className="table-grid">
           <button
             type="button"
-            className={`cell cell--zero cell--bet ${zero.color} ${
+            className={`cell cell--zero tl bl cell--bet ${zero.color} ${
               result?.number === zero.value ? "winner" : ""
             }`}
             style={{ gridColumn: 1, gridRow: "1 / span 3" }}
@@ -62,7 +68,7 @@ export default function RouletteTable() {
 
           <button
             type="button"
-            className="cell cell--bet green"
+            className="cell cell--bet tr green"
             style={{ gridColumn: 14, gridRow: 1 }}
           >
             2:1
@@ -76,7 +82,7 @@ export default function RouletteTable() {
           </button>
           <button
             type="button"
-            className="cell cell--bet green"
+            className="cell cell--bet br green"
             style={{ gridColumn: 14, gridRow: 3 }}
           >
             2:1
@@ -106,7 +112,7 @@ export default function RouletteTable() {
 
           <button
             type="button"
-            className="cell cell--bet green"
+            className="cell bl cell--bet green"
             style={{ gridColumn: "2 / span 2", gridRow: 5 }}
           >
             Low
@@ -120,14 +126,14 @@ export default function RouletteTable() {
           </button>
           <button
             type="button"
-            className="cell cell--bet green"
+            className="cell cell--bet red"
             style={{ gridColumn: "6 / span 2", gridRow: 5 }}
           >
             Red
           </button>
           <button
             type="button"
-            className="cell cell--bet green"
+            className="cell cell--bet black"
             style={{ gridColumn: "8 / span 2", gridRow: 5 }}
           >
             Black
@@ -141,12 +147,13 @@ export default function RouletteTable() {
           </button>
           <button
             type="button"
-            className="cell cell--bet green"
+            className="cell br cell--bet green"
             style={{ gridColumn: "12 / span 2", gridRow: 5 }}
           >
             High
           </button>
         </div>
+      </div>
       </div>
     </section>
   );
