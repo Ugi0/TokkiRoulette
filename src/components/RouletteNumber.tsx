@@ -1,3 +1,15 @@
+export type RouletteColor = "red" | "black" | "green";
+
+export type RouletteNumber = {
+  value: number;
+  color: RouletteColor;
+};
+
+export const redValues = new Set([
+  1, 3, 5, 7, 9, 12, 14, 16, 18,
+  19, 21, 23, 25, 27, 30, 32, 34, 36,
+]);
+
 export const zero: RouletteNumber = { value: 0, color: "green" };
 
 export const numbers: RouletteNumber[] = [
@@ -41,7 +53,6 @@ export const numbers: RouletteNumber[] = [
   { value: 34, color: "red" },
 ];
 
-export type RouletteNumber = {
-  value: number;
-  color: "red" | "black" | "green";
-};
+export const numberColorMap = new Map(
+  [zero, ...numbers].map((entry) => [entry.value, entry.color])
+);

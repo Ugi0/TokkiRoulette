@@ -1,8 +1,14 @@
-import './App.css'
-import RouletteTable from './components/RouletteTable'
+import { BrowserRouter, Route, Routes } from "react-router";
+import HomePage from "./pages/HomePage";
+import RoulettePage from "./pages/RoulettePage";
 
-function App() {
-  return RouletteTable();
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/roulette" element={<RoulettePage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App

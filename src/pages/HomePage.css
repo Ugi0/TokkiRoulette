@@ -1,0 +1,37 @@
+.home-page {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #ffffff;
+  color: #111111;
+  font-family: "JetBrains Mono", sans-serif;
+}
+
+.home-page__card {
+  text-align: center;
+}
+
+.home-page__card h1 {
+  margin: 8px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.home-page__card p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.home-page__link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #111111;
+}
+
+.email {
+  color: #111111;
+  text-decoration: underline;
+}

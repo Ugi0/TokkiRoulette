@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./RouletteWheel.css";
-import { numbers } from "./RouletteNumber";
+import { numberColorMap } from "./RouletteNumber";
 
 type RouletteWheelProps = {
   spinTrigger: number;
@@ -57,13 +57,9 @@ export default function RouletteWheel({
     isSpinningRef.current = true;
     lastHandledTriggerRef.current = spinTrigger;
 
-    const winningIndex = Math.floor(
-      Math.random() * WHEEL_NUMBERS.length
-    );
+    const winningIndex = Math.floor(Math.random() * WHEEL_NUMBERS.length);
     const winningNumber = WHEEL_NUMBERS[winningIndex];
     const slotCenterAngle = (winningIndex + 0.5) * step;
-
-    console.log(winningNumber);
 
     const randomOffset = (Math.random() - 0.5) * step * POINTER_VARIANCE;
     baseRotationRef.current += FULL_ROTATIONS * 360;
@@ -97,11 +93,7 @@ export default function RouletteWheel({
         {positionedNumbers.map(({ value, angle }) => (
           <div
             key={value}
-            className={`wheel-slot ${
-              value === 0
-                ? "green"
-                : numbers.find((n) => n.value === value)?.color
-            }`}
+            className={`wheel-slot ${numberColorMap.get(value)}`}
             style={{
               transform: `
                 translate(-50%, -50%)

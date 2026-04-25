@@ -58,8 +58,6 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-
-  background-color: #34a31e;
 }
 
 body {
