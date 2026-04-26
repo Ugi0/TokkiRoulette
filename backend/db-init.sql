@@ -34,10 +34,8 @@ CREATE TABLE results (
     prediction_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
 
-    option_id TEXT NOT NULL,
     bet_amount INTEGER NOT NULL,
     won_amount INTEGER NOT NULL,
-    prediction_won BOOLEAN NOT NULL,
     result_time TIMESTAMPTZ NOT NULL,
 
     PRIMARY KEY (prediction_id, user_id),
@@ -46,8 +44,20 @@ CREATE TABLE results (
         REFERENCES votes (prediction_id, user_id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (prediction_id, option_id)
-        REFERENCES options (prediction_id, option_id)
+    FOREIGN KEY (prediction_id)
+        REFERENCES prediction_outcomes(prediction_id)
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE prediction_outcomes (
+    prediction_id INTEGER PRIMARY KEY
+        REFERENCES predictions(id) ON DELETE CASCADE,
+
+    winning_option_id TEXT NOT NULL,
+
+    FOREIGN KEY (prediction_id, winning_option_id)
+        REFERENCES options(prediction_id, option_id)
+        ON DELETE RESTRICT
 );
 
 CREATE OR REPLACE FUNCTION enforce_roulette_prediction()

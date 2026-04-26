@@ -68,6 +68,13 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
 
     await db.query(update_state_query, [prediction_event.event.status, prediction_event.event.winning_outcome_id, prediction_event.event.id]);
 
+    const update_prediction_outcomes_query = `
+        INSERT INTO prediction_outcomes (prediction_id, winning_option_id)
+        VALUES ($1, $2)
+    `;
+
+    await db.query(update_prediction_outcomes_query, [prediction_event.event.id, prediction_event.event.winning_outcome_id]);
+
     if (await isPredictionRoulette(prediction_event.event.id)) {
       const winning_outcome_id = prediction_event.event.winning_outcome_id;
 
@@ -77,17 +84,15 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
           const bet_amount = predictor.channel_points_used;
           const won_amount = prediction_won ? predictor.channel_points_won - bet_amount : 0;
           const update_votes_query = `
-              INSERT INTO results (prediction_id, user_id, option_id, bet_amount, won_amount, prediction_won, result_time)
-              VALUES ($1, $2, $3, $4, $5, $6, $7)
+              INSERT INTO results (prediction_id, user_id, bet_amount, won_amount, result_time)
+              VALUES ($1, $2, $3, $4, $5)
           `;
           
           await db.query(update_votes_query, [
               prediction_event.event.id,
               predictor.user_id,
-              outcome.id,
               bet_amount,
               won_amount,
-              prediction_won,
               new Date()
           ]);
         }
