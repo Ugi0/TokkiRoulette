@@ -3,14 +3,10 @@ import { URL } from "node:url";
 import crypto from "node:crypto";
 
 import sendJson from "../utils/sendJson.js";
-import { saveUserToken } from "../services/tokens.js";
 import type { TwitchUser, TwitchTokenResponse } from "../types/twitch.js";
 import { HelixUsersResponse } from "../types/helix.js";
+import { registerTwitchHooks } from "../services/helix.js";
 
-/**
- * Tracks pending OAuth states to protect against CSRF.
- * In production, consider expiring states or storing them in Redis.
- */
 const pendingStates = new Set<string>();
 
 export default async function authRoutes(
@@ -28,7 +24,7 @@ export default async function authRoutes(
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set(
       "scope",
-      "user:read:email channel:manage:predictions channel:read:predictions"
+      "channel:manage:predictions channel:read:predictions"
     );
     authUrl.searchParams.set("state", state);
 
@@ -59,13 +55,13 @@ export default async function authRoutes(
       return sendJson(res, 500, { error: "Failed to fetch user profile" });
     }
 
-    await saveUserToken(userData, tokenData);
+    await registerTwitchHooks(userData.login, userData.id, tokenData.access_token).catch((err) => {
+      console.error("Failed to register Twitch webhook:", err);
+    });
 
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     return res.end(renderSuccessPage(userData.display_name ?? userData.login));
   }
-
-  /* -------------------------------- FALLBACK ------------------------------ */
 
   sendJson(res, 404, { error: "Not found" });
 }
@@ -105,7 +101,7 @@ function renderSuccessPage(username: string): string {
 </head>
 <body>
   <div class="box">
-    <h1>✅ Authentication Successful</h1>
+    <h1>Authentication Successful</h1>
     <p>Welcome, <strong>${escapeHtml(username)}</strong>!</p>
     <p>Your Twitch account is now linked.</p>
     <p>You may close this window.</p>

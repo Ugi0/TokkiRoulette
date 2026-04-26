@@ -2,6 +2,7 @@ import http, { IncomingMessage, ServerResponse } from "node:http";
 import { URL } from "node:url";
 import sendJson from "./utils/sendJson.js";
 import authRoutes from "./routes/auth.js";
+import webhookRoutes from "./routes/webhooks.js";
 
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -42,6 +43,10 @@ const server = http.createServer(
 
       if (url.pathname.startsWith("/debug")) {
         return debugRoutes(req, res, url);
+      }
+
+      if (url.pathname.startsWith("/webhooks")) {
+        return webhookRoutes(req, res, url);
       }
 
       res.writeHead(404, { "Content-Type": "text/plain" });

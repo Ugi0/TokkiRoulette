@@ -1,5 +1,4 @@
 import { TwitchTokenResponse } from "../types/twitch.js";
-import db from "./db.js";
 
 let cachedToken: string | null = null;
 let tokenExpiry = 0;
@@ -65,89 +64,43 @@ async function getAppToken(): Promise<string> {
   return cachedToken;
 }
 
-export async function helixUserRequest(
-  path: string,
-  accessToken: string,
-  params: Record<string, string | string[]> = {},
-  userId?: string
-): Promise<unknown> {
-  async function makeRequest(token: string): Promise<Response> {
-    const url = new URL(`https://api.twitch.tv/helix/${path}`);
-
-    for (const [k, v] of Object.entries(params)) {
-      if (Array.isArray(v)) v.forEach(val => url.searchParams.append(k, val));
-      else url.searchParams.set(k, v);
-    }
-
-    return fetch(url.toString(), {
-      headers: {
-        "Client-ID": process.env.TWITCH_CLIENT_ID!,
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-  }
-
-  let resp = await makeRequest(accessToken);
-
-  if (resp.status === 401 && userId) {
-    console.log(`Access token expired for user ${userId}`);
-
-    const result = await db.query<{ refresh_token: string }>(
-      "SELECT refresh_token FROM twitch_tokens WHERE twitch_user_id=$1",
-      [userId]
-    );
-
-    if (!result.rows[0]?.refresh_token) {
-      throw new Error("User must re-authenticate");
-    }
-
-    const refreshed = await refreshUserToken(result.rows[0].refresh_token);
-
-    await db.query(
-      `
-        UPDATE twitch_tokens
-        SET access_token=$1,
-            refresh_token=$2,
-            expires_at=NOW() + ($3 || ' seconds')::interval
-        WHERE twitch_user_id=$4
-      `,
-      [
-        refreshed.access_token,
-        refreshed.refresh_token,
-        refreshed.expires_in,
-        userId,
-      ]
-    );
-
-    resp = await makeRequest(refreshed.access_token);
-  }
-
-  if (!resp.ok) {
-    throw new Error(`Helix user request failed: ${resp.status}`);
-  }
-
-  return resp.json();
+export async function registerTwitchHooks(username: string, user_id: string, accessToken: string): Promise<void> {
+  await registerPredictionHook(username, user_id, accessToken, "begin");
+  await registerPredictionHook(username, user_id, accessToken, "lock");
+  await registerPredictionHook(username, user_id, accessToken, "end");
 }
 
-
-export async function refreshUserToken(
-  refreshToken: string
-): Promise<TwitchTokenResponse> {
-  const resp = await fetch("https://id.twitch.tv/oauth2/token", {
+export async function registerPredictionHook(
+  username: string, 
+  user_id: string, 
+  accessToken: 
+  string, eventName: "begin" | "progress" | "lock" | "end"
+): Promise<void> {
+  const resp = await fetch(`https://api.twitch.tv/helix/eventsub/subscriptions`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: process.env.TWITCH_CLIENT_ID!,
-      client_secret: process.env.TWITCH_CLIENT_SECRET!,
+    headers: { 
+      "Client-Id": process.env.TWITCH_CLIENT_ID!,
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${await getAppToken()}`,
+      //"Authorization": `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      type: `channel.prediction.${eventName}`,
+      version: "1",
+      condition: {
+        broadcaster_user_id: user_id,
+      },
+      transport: {
+        method: "webhook",
+        callback: `${assertEnv("TWITCH_WEBHOOK_CALLBACK_URL")}?user=${username}`,
+        secret: assertEnv("TWITCH_WEBHOOK_SECRET"),
+      },
     }),
   });
 
   if (!resp.ok) {
-    throw new Error(`Failed to refresh token: ${resp.status}`);
+    const error = await resp.text();
+    throw new Error(`Failed to register EventSub hook: ${error}`);
   }
-
-  return resp.json();
+  
 }
-
