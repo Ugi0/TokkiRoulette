@@ -111,10 +111,18 @@ export async function markPredictionAsRoulette(prediction_id: string) {
 }
 
 export async function recordSpinResult(landed_number: number) {
-    const insert_spin_result_query = `
-        INSERT INTO spin_result (landed_number)
-        VALUES ($1)
+    const query = `
+        UPDATE spin_counter
+        SET count = count + 1
+        WHERE number = $1
+        RETURNING count;
     `;
 
-    await db.query(insert_spin_result_query, [landed_number]);
+    const { rows } = await db.query(query, [landed_number]);
+
+    if (rows.length === 0) {
+        throw new Error(`Invalid landed_number: ${landed_number}`);
+    }
+
+    return rows[0].count;
 }

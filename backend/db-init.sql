@@ -84,10 +84,13 @@ ON results
 FOR EACH ROW
 EXECUTE FUNCTION enforce_roulette_prediction();
 
-CREATE TABLE IF NOT EXISTS spin_result (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    landed_number INTEGER NOT NULL
+CREATE TABLE spin_counter (
+    number INTEGER PRIMARY KEY CHECK (number BETWEEN 0 AND 36),
+    count BIGINT NOT NULL DEFAULT 0
 );
+
+INSERT INTO spin_counter (number)
+SELECT generate_series(0, 36);
 
 CREATE TABLE IF NOT EXISTS user_sessions (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
