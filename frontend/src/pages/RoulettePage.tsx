@@ -2,8 +2,12 @@ import { Link } from "react-router";
 import RouletteTable from "../components/RouletteTable";
 import "./RoulettePage.css";
 import Footer from "../components/Footer";
+import { useState } from "react";
+import Notification from "../components/Notification";
 
 export default function RoulettePage() {
+  const [notification, setNotification] = useState<string | null>(null);
+
   return (
     <div className="page-root">
       <main className="roulette-page">
@@ -14,8 +18,9 @@ export default function RoulettePage() {
           </Link>
         </div>
 
-        <RouletteTable />
+        <RouletteTable setNotification={setNotification}  />
       </main>
+      <Notification notification={notification} onDismiss={() => setNotification(null)} />
       <Footer />
     </div>
   );

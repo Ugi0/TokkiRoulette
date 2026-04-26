@@ -8,7 +8,11 @@ type RouletteResult = {
   tags: string[];
 };
 
-export default function RouletteTable() {
+type RouletteTableProps = {
+  setNotification: React.Dispatch<React.SetStateAction<string | null>>;
+};
+
+export default function RouletteTable({ setNotification }: RouletteTableProps) {
   const [result, setResult] = useState<RouletteResult | null>(null);
   const wheelRef = useRef<{ spin: () => void }>(null);
 
@@ -26,6 +30,7 @@ export default function RouletteTable() {
 
       <RouletteWheel
         onFinish={(res) => setResult(res)}
+        setNotification={setNotification}
         ref={wheelRef}
       />
 

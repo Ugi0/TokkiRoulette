@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 import { TwitchPredictionBeginEvent, TwitchPredictionEndEvent, TwitchPredictionEvent, TwitchPredictionLockEvent } from "../types/events.js";
-import { lockPrediction, newPrediction } from "../services/db_updates.js";
+import { endPrediction, lockPrediction, newPrediction } from "../services/db_updates.js";
 
 export default async function webhookRoutes(
   req: IncomingMessage,
@@ -44,6 +44,8 @@ const user = url.searchParams.get("user");
         case "channel.prediction.end": {
             const event = body as TwitchPredictionEndEvent;
 
+            await endPrediction(event);
+
             console.log("Prediction ended for broadcaster", event.event.broadcaster_user_login);
             break;
         }
@@ -63,7 +65,7 @@ const user = url.searchParams.get("user");
 
 }
 
-function getJsonBody(req: IncomingMessage): Promise<unknown> {
+export function getJsonBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
     let body = "";
 

@@ -15,6 +15,7 @@ export type RouletteWheelHandle = {
 
 type RouletteWheelProps = {
   onFinish: (result: RouletteResult) => void;
+  setNotification: (message: string) => void;
 };
 
 const WHEEL_NUMBERS = [
@@ -36,7 +37,7 @@ function buildSpinResult(): RouletteResult {
 }
 
 const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
-  ({ onFinish }, ref) => {
+  ({ onFinish, setNotification }, ref) => {
     const [rotation, setRotation] = useState(0);
 
     const isSpinningRef = useRef(false);
@@ -83,6 +84,7 @@ const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
       timeoutRef.current = window.setTimeout(() => {
         isSpinningRef.current = false;
         onFinishRef.current(result);
+        sendSpinResult(result, setNotification);
       }, 5500);
     };
 
@@ -123,5 +125,28 @@ const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
     );
   }
 );
+
+async function sendSpinResult(result: RouletteResult, setNotification: (message: string) => void) {
+  try {
+    const res = await fetch("/api/spin-result", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(result)
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data.status === "authorized") {
+      setNotification("Prediction data saved successfully!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 export default RouletteWheel;

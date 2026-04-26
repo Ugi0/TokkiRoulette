@@ -8,6 +8,7 @@ import { HelixUsersResponse } from "../types/helix.js";
 import { registerTwitchHooks } from "../services/helix.js";
 
 const pendingStates = new Set<string>();
+export const SIX_MONTHS = 6 * 30 * 24 * 60 * 60;
 
 export default async function authRoutes(
   req: IncomingMessage,
@@ -58,6 +59,13 @@ export default async function authRoutes(
     await registerTwitchHooks(userData.login, userData.id, tokenData.access_token).catch((err) => {
       console.error("Failed to register Twitch webhook:", err);
     });
+
+    const sessionId = crypto.randomUUID();
+    console.log("User authenticated:", userData.login, "Session ID:", sessionId);
+
+    res.setHeader("Set-Cookie", [
+      `session_id=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SIX_MONTHS}`
+    ]);
 
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     return res.end(renderSuccessPage(userData.display_name ?? userData.login));

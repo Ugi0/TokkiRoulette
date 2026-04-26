@@ -99,3 +99,22 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
       }
     }
 }
+
+export async function markPredictionAsRoulette(prediction_id: string) {
+    const update_query = `
+        UPDATE predictions
+        SET roulette_prediction = true
+        WHERE id = $1
+    `;
+
+    await db.query(update_query, [prediction_id]);
+}
+
+export async function recordSpinResult(landed_number: number) {
+    const insert_spin_result_query = `
+        INSERT INTO spin_result (landed_number)
+        VALUES ($1)
+    `;
+
+    await db.query(insert_spin_result_query, [landed_number]);
+}

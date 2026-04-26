@@ -30,6 +30,17 @@ CREATE TABLE votes (
         ON DELETE CASCADE
 );
 
+CREATE TABLE prediction_outcomes (
+    prediction_id INTEGER PRIMARY KEY
+        REFERENCES predictions(id) ON DELETE CASCADE,
+
+    winning_option_id TEXT NOT NULL,
+
+    FOREIGN KEY (prediction_id, winning_option_id)
+        REFERENCES options(prediction_id, option_id)
+        ON DELETE RESTRICT
+);
+
 CREATE TABLE results (
     prediction_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
@@ -46,17 +57,6 @@ CREATE TABLE results (
 
     FOREIGN KEY (prediction_id)
         REFERENCES prediction_outcomes(prediction_id)
-        ON DELETE RESTRICT
-);
-
-CREATE TABLE prediction_outcomes (
-    prediction_id INTEGER PRIMARY KEY
-        REFERENCES predictions(id) ON DELETE CASCADE,
-
-    winning_option_id TEXT NOT NULL,
-
-    FOREIGN KEY (prediction_id, winning_option_id)
-        REFERENCES options(prediction_id, option_id)
         ON DELETE RESTRICT
 );
 
@@ -83,3 +83,16 @@ BEFORE INSERT OR UPDATE
 ON results
 FOR EACH ROW
 EXECUTE FUNCTION enforce_roulette_prediction();
+
+CREATE TABLE IF NOT EXISTS spin_result (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    landed_number INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    user_name TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
