@@ -180,3 +180,14 @@ export async function recordSpinResult(
 
   return rows[0].count;
 }
+
+export async function saveUserSession(user_id: string, session_id: string, user_name: string) {
+  const query = `
+    INSERT INTO user_sessions (session_id, user_id, user_name)
+    VALUES ($1, $2, $3)
+    ON CONFLICT (user_id) DO UPDATE
+      SET session_id = EXCLUDED.session_id
+  `;
+
+  await db.query(query, [user_id, session_id, user_name]);
+}

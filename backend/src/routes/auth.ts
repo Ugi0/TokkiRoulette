@@ -6,6 +6,7 @@ import sendJson from "../utils/sendJson.js";
 import type { TwitchUser, TwitchTokenResponse } from "../types/twitch.js";
 import { HelixUsersResponse } from "../types/helix.js";
 import { registerTwitchHooks } from "../services/helix.js";
+import { saveUserSession } from "../services/db_updates.js";
 
 const pendingStates = new Set<string>();
 export const SIX_MONTHS = 6 * 30 * 24 * 60 * 60;
@@ -62,6 +63,8 @@ export default async function authRoutes(
 
     const sessionId = crypto.randomUUID();
     console.log("User authenticated:", userData.login, "Session ID:", sessionId);
+
+    await saveUserSession(userData.id, sessionId, userData.login);
 
     res.setHeader("Set-Cookie", [
       `session_id=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SIX_MONTHS}`
