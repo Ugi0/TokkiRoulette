@@ -18,7 +18,7 @@ export async function checkForLockedPrediction(): Promise<number | null> {
   const query = `
     SELECT id
     FROM predictions
-    WHERE prediction_status IN ('locked', 'active')
+    WHERE prediction_status = 'locked'
       AND roulette_prediction = false
       AND start_time > NOW() - INTERVAL '2 hours'
     ORDER BY start_time DESC
