@@ -35,7 +35,7 @@ export async function helixAppRequest(
   return resp.json();
 }
 
-async function getAppToken(): Promise<string> {
+export async function getAppToken(): Promise<string> {
   const now = Date.now();
 
   if (cachedToken && now < tokenExpiry - 60_000) {
@@ -82,7 +82,6 @@ export async function registerPredictionHook(
       "Client-Id": process.env.TWITCH_CLIENT_ID!,
       "Content-Type": "application/json",
       "Authorization": `Bearer ${await getAppToken()}`,
-      //"Authorization": `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       type: `channel.prediction.${eventName}`,

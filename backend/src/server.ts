@@ -4,6 +4,7 @@ import sendJson from "./utils/sendJson.js";
 import authRoutes from "./routes/auth.js";
 import webhookRoutes from "./routes/webhooks.js";
 import spinResult from "./routes/spinResult.js";
+import debugRoutes from "./routes/debug.js";
 
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -66,9 +67,4 @@ const server = http.createServer(
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-export default server;
-function debugRoutes(req: IncomingMessage, res: ServerResponse, url: any) {
-    throw new Error("Function not implemented.");
-}
 

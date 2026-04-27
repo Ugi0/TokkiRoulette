@@ -1,15 +1,28 @@
-import { TwitchPredictionBeginEvent, TwitchPredictionEndEvent, TwitchPredictionLockEvent } from "../types/events.js";
+import {
+  TwitchPredictionBeginEvent,
+  TwitchPredictionEndEvent,
+  TwitchPredictionLockEvent
+} from "../types/events.js";
+
 import db from "./db.js";
 import { isPredictionRoulette } from "./db_queries.js";
 
 export async function newPrediction(event: TwitchPredictionBeginEvent) {
-  const new_prediction_query = `
-    INSERT INTO predictions (broadcaster_name, title, start_time, prediction_status, roulette_prediction)
-    VALUES ($1, $2, $3, $4, $5)
+  const insertPredictionQuery = `
+    INSERT INTO predictions (
+      id,
+      broadcaster_name,
+      title,
+      start_time,
+      prediction_status,
+      roulette_prediction
+    )
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING id
   `;
 
-  const result = await db.query(new_prediction_query, [
+  const { rows } = await db.query(insertPredictionQuery, [
+    Number(event.event.id),
     event.event.broadcaster_user_login,
     event.event.title,
     new Date(event.event.started_at),
@@ -17,112 +30,151 @@ export async function newPrediction(event: TwitchPredictionBeginEvent) {
     false
   ]);
 
-  const option_query = `
-    INSERT INTO options (prediction_id, title, color)
+  const insertOptionQuery = `
+    INSERT INTO options (prediction_id, option_id, title)
     VALUES ($1, $2, $3)
   `;
 
-    for (const outcome of event.event.outcomes) {
-        await db.query(option_query, [
-            result.rows[0].id,
-            outcome.title,
-            outcome.color
-        ]);
-    }
+  for (const outcome of event.event.outcomes) {
+    await db.query(insertOptionQuery, [
+      rows[0].id,
+      outcome.id,
+      outcome.title
+    ]);
+  }
 
-  return result.rows[0].id;
+  return rows[0].id;
 }
 
-export async function lockPrediction(prediction_event: TwitchPredictionLockEvent) {
-    const update_state_query = `
-        UPDATE predictions
-        SET prediction_status = 'locked'
-        WHERE id = $1
-    `;
+export async function lockPrediction(
+  prediction_event: TwitchPredictionLockEvent
+) {
+  const updateStateQuery = `
+    UPDATE predictions
+    SET prediction_status = 'locked'
+    WHERE id = $1
+  `;
 
-    await db.query(update_state_query, [prediction_event.event.id]);
+  await db.query(updateStateQuery, [
+    Number(prediction_event.event.id)
+  ]);
 
-    const insert_outcome_query = `
-        INSERT INTO votes (prediction_id, option_id, points_used, user_name, user_id)
-        VALUES ($1, $2, $3, $4, $5)
-    `;
+  const insertVoteQuery = `
+    INSERT INTO votes (
+      prediction_id,
+      option_id,
+      points_used,
+      user_name,
+      user_id
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (prediction_id, user_id) DO NOTHING
+  `;
 
-    for (const outcome of prediction_event.event.outcomes) {
-        await db.query(insert_outcome_query, [
-            prediction_event.event.id,
-            outcome.id,
-            outcome.channel_points,
-            outcome.top_predictors[0]?.user_name || null,
-            outcome.top_predictors[0]?.user_id || null
-
-        ]);
+  for (const outcome of prediction_event.event.outcomes) {
+    for (const predictor of outcome.top_predictors ?? []) {
+      await db.query(insertVoteQuery, [
+        Number(prediction_event.event.id),
+        outcome.id,
+        predictor.channel_points_used,
+        predictor.user_name,
+        Number(predictor.user_id)
+      ]);
     }
+  }
 }
 
-export async function endPrediction(prediction_event: TwitchPredictionEndEvent) {
-    const update_state_query = `
-        UPDATE predictions
-        SET prediction_status = $1, winning_option_id = $2
-        WHERE id = $3
-    `;
+export async function endPrediction(
+  prediction_event: TwitchPredictionEndEvent
+) {
+  const updateStateQuery = `
+    UPDATE predictions
+    SET prediction_status = $1
+    WHERE id = $2
+  `;
 
-    await db.query(update_state_query, [prediction_event.event.status, prediction_event.event.winning_outcome_id, prediction_event.event.id]);
+  await db.query(updateStateQuery, [
+    prediction_event.event.status,
+    Number(prediction_event.event.id)
+  ]);
 
-    const update_prediction_outcomes_query = `
-        INSERT INTO prediction_outcomes (prediction_id, winning_option_id)
-        VALUES ($1, $2)
-    `;
+  const insertOutcomeQuery = `
+    INSERT INTO prediction_outcomes (
+      prediction_id,
+      winning_option_id
+    )
+    VALUES ($1, $2)
+    ON CONFLICT (prediction_id) DO UPDATE
+      SET winning_option_id = EXCLUDED.winning_option_id
+  `;
 
-    await db.query(update_prediction_outcomes_query, [prediction_event.event.id, prediction_event.event.winning_outcome_id]);
+  await db.query(insertOutcomeQuery, [
+    Number(prediction_event.event.id),
+    prediction_event.event.winning_outcome_id
+  ]);
 
-    if (await isPredictionRoulette(prediction_event.event.id)) {
-      const winning_outcome_id = prediction_event.event.winning_outcome_id;
+  if (!(await isPredictionRoulette(prediction_event.event.id))) return;
 
-      for (const outcome of prediction_event.event.outcomes) {
-        for (const predictor of outcome.top_predictors) {
-          const prediction_won = outcome.id === winning_outcome_id;
-          const bet_amount = predictor.channel_points_used;
-          const won_amount = prediction_won ? predictor.channel_points_won - bet_amount : 0;
-          const update_votes_query = `
-              INSERT INTO results (prediction_id, user_id, bet_amount, won_amount, result_time)
-              VALUES ($1, $2, $3, $4, $5)
-          `;
-          
-          await db.query(update_votes_query, [
-              prediction_event.event.id,
-              predictor.user_id,
-              bet_amount,
-              won_amount,
-              new Date()
-          ]);
-        }
-      }
+  const winningOutcomeId = prediction_event.event.winning_outcome_id;
+
+  const insertResultQuery = `
+    INSERT INTO results (
+      prediction_id,
+      user_id,
+      bet_amount,
+      won_amount,
+      result_time
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (prediction_id, user_id) DO NOTHING
+  `;
+
+  for (const outcome of prediction_event.event.outcomes) {
+    for (const predictor of outcome.top_predictors ?? []) {
+      const betAmount = predictor.channel_points_used;
+      const wonAmount =
+        outcome.id === winningOutcomeId
+          ? predictor.channel_points_won - betAmount
+          : 0;
+
+      await db.query(insertResultQuery, [
+        Number(prediction_event.event.id),
+        Number(predictor.user_id),
+        betAmount,
+        wonAmount,
+        new Date()
+      ]);
     }
+  }
 }
 
-export async function markPredictionAsRoulette(prediction_id: string) {
-    const update_query = `
-        UPDATE predictions
-        SET roulette_prediction = true
-        WHERE id = $1
-    `;
+export async function markPredictionAsRoulette(
+  prediction_id: number
+) {
+  const query = `
+    UPDATE predictions
+    SET roulette_prediction = true
+    WHERE id = $1
+  `;
 
-    await db.query(update_query, [prediction_id]);
+  await db.query(query, [prediction_id]);
 }
 
-export async function recordSpinResult(landed_number: number) {
-    const query = `
-        UPDATE spin_counter
-        SET count = count + 1
-        WHERE number = $1
-        RETURNING count;
-    `;
+export async function recordSpinResult(
+  landed_number: number
+) {
+  const query = `
+    UPDATE spin_counter
+    SET count = count + 1
+    WHERE number = $1
+    RETURNING count
+  `;
 
-    const { rows } = await db.query(query, [landed_number]);
+  const { rows } = await db.query(query, [landed_number]);
 
-    if (rows.length === 0) {
-        throw new Error(`Invalid landed_number: ${landed_number}`);
-    }
+  if (!rows.length) {
+    throw new Error(`Invalid landed_number: ${landed_number}`);
+  }
 
-    return rows[0].count;
+  return rows[0].count;
 }
