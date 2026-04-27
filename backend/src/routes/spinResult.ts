@@ -36,7 +36,7 @@ export default async function spinResult(
 
             await recordSpinResult(landedNumber);
 
-            if (sessionId === await getUserSession(process.env.TOKKI_USER_ID!)) {
+            if (sessionId !== null && sessionId === await getUserSession(process.env.TOKKI_USER_ID!)) {
                 const lockedPredictionId = await checkForLockedPrediction();
 
                 res.setHeader("Set-Cookie", [
