@@ -22,7 +22,7 @@ export async function newPrediction(event: TwitchPredictionBeginEvent) {
   `;
 
   const { rows } = await db.query(insertPredictionQuery, [
-    Number(event.event.id),
+    event.event.id,
     event.event.broadcaster_user_login,
     event.event.title,
     new Date(event.event.started_at),
@@ -56,7 +56,7 @@ export async function lockPrediction(
   `;
 
   await db.query(updateStateQuery, [
-    Number(prediction_event.event.id)
+    prediction_event.event.id
   ]);
 
   const insertVoteQuery = `
@@ -74,11 +74,11 @@ export async function lockPrediction(
   for (const outcome of prediction_event.event.outcomes) {
     for (const predictor of outcome.top_predictors ?? []) {
       await db.query(insertVoteQuery, [
-        Number(prediction_event.event.id),
+        prediction_event.event.id,
         outcome.id,
         predictor.channel_points_used,
         predictor.user_name,
-        Number(predictor.user_id)
+        predictor.user_id
       ]);
     }
   }
@@ -95,7 +95,7 @@ export async function endPrediction(
 
   await db.query(updateStateQuery, [
     prediction_event.event.status,
-    Number(prediction_event.event.id)
+    prediction_event.event.id
   ]);
 
   const insertOutcomeQuery = `
@@ -109,7 +109,7 @@ export async function endPrediction(
   `;
 
   await db.query(insertOutcomeQuery, [
-    Number(prediction_event.event.id),
+    prediction_event.event.id,
     prediction_event.event.winning_outcome_id
   ]);
 
@@ -121,11 +121,12 @@ export async function endPrediction(
     INSERT INTO results (
       prediction_id,
       user_id,
+      user_name,
       bet_amount,
       won_amount,
       result_time
     )
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1, $2, $3, $4, $5, $6)
     ON CONFLICT (prediction_id, user_id) DO NOTHING
   `;
 
@@ -135,11 +136,12 @@ export async function endPrediction(
       const wonAmount =
         outcome.id === winningOutcomeId
           ? predictor.channel_points_won - betAmount
-          : 0;
+          : null;
 
       await db.query(insertResultQuery, [
-        Number(prediction_event.event.id),
-        Number(predictor.user_id),
+        prediction_event.event.id,
+        predictor.user_id,
+        predictor.user_name,
         betAmount,
         wonAmount,
         new Date()

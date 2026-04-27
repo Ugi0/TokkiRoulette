@@ -3,7 +3,7 @@ import "./Notification.css";
 
 export default function Notification({
   notification,
-  duration = 2000,
+  duration = 3000,
   onDismiss,
 }: {
   notification: string | null;
@@ -22,9 +22,17 @@ export default function Notification({
 
   if (!notification) return null;
 
-  return (
-    <div className="notification">
-      <p>{notification}</p>
-    </div>
-  );
+return (
+  <div className="notification">
+    <p className="notification-text">
+      {notification}
+      <img
+        src="/cheer.gif"
+        alt=""
+        className="notification-emote"
+      />
+    </p>
+  </div>
+);
+
 }

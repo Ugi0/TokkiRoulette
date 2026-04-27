@@ -61,10 +61,7 @@ export default async function webhookRoutes(
         const beginEvent = event as TwitchPredictionBeginEvent;
 
         await newPrediction(beginEvent);
-        console.log(
-          "Prediction BEGIN:",
-          beginEvent.event.broadcaster_user_login
-        );
+        console.log(`%s: Prediction BEGIN: %s`, beginEvent.event.started_at, beginEvent.event.broadcaster_user_login);
         break;
       }
 
@@ -72,10 +69,7 @@ export default async function webhookRoutes(
         const lockEvent = event as TwitchPredictionLockEvent;
 
         await lockPrediction(lockEvent);
-        console.log(
-          "Prediction LOCK:",
-          lockEvent.event.broadcaster_user_login
-        );
+        console.log(`Prediction LOCK: %s`, lockEvent.event.broadcaster_user_login);
         break;
       }
 
@@ -84,7 +78,7 @@ export default async function webhookRoutes(
 
         await endPrediction(endEvent);
         console.log(
-          "Prediction END:",
+          `Prediction END: %s`,
           endEvent.event.broadcaster_user_login
         );
         break;

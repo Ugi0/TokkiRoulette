@@ -14,12 +14,12 @@ export async function isPredictionRoulette(prediction_id: string) {
     return result.rows[0].roulette_prediction;
 }
 
-export async function checkForLockedRoulettePrediction(): Promise<number | null> {
+export async function checkForLockedPrediction(): Promise<number | null> {
   const query = `
     SELECT id
     FROM predictions
-    WHERE prediction_status = 'locked'
-      AND roulette_prediction = true
+    WHERE prediction_status IN ('locked', 'active')
+      AND roulette_prediction = false
       AND start_time > NOW() - INTERVAL '2 hours'
     ORDER BY start_time DESC
     LIMIT 1

@@ -1,5 +1,5 @@
 CREATE TABLE predictions (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     broadcaster_name TEXT NOT NULL,
     title TEXT NOT NULL,
     start_time TIMESTAMPTZ NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE predictions (
 );
 
 CREATE TABLE options (
-    prediction_id INTEGER NOT NULL
+    prediction_id TEXT NOT NULL
         REFERENCES predictions(id) ON DELETE CASCADE,
     option_id TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE options (
 );
 
 CREATE TABLE votes (
-    prediction_id INTEGER NOT NULL,
+    prediction_id TEXT NOT NULL,
     option_id TEXT NOT NULL,
     points_used INTEGER NOT NULL,
     user_name TEXT NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE votes (
 );
 
 CREATE TABLE prediction_outcomes (
-    prediction_id INTEGER PRIMARY KEY
+    prediction_id TEXT PRIMARY KEY
         REFERENCES predictions(id) ON DELETE CASCADE,
 
     winning_option_id TEXT NOT NULL,
@@ -42,11 +42,12 @@ CREATE TABLE prediction_outcomes (
 );
 
 CREATE TABLE results (
-    prediction_id INTEGER NOT NULL,
+    prediction_id TEXT NOT NULL,
     user_id INTEGER NOT NULL,
+    user_name TEXT NOT NULL,
 
     bet_amount INTEGER NOT NULL,
-    won_amount INTEGER NOT NULL,
+    won_amount INTEGER,
     result_time TIMESTAMPTZ NOT NULL,
 
     PRIMARY KEY (prediction_id, user_id),
