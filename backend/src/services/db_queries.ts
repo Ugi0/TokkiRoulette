@@ -28,3 +28,14 @@ export async function checkForLockedPrediction(): Promise<number | null> {
   const { rows } = await db.query(query);
   return rows.length ? rows[0].id : null;
 }
+
+export async function getUserSession(user_id: string): Promise<string | null> {
+  const query = `
+    SELECT session_id
+    FROM user_sessions
+    WHERE user_id = $1
+  `;
+
+  const { rows } = await db.query(query, [user_id]);
+  return rows.length ? rows[0].session_id : null;
+}

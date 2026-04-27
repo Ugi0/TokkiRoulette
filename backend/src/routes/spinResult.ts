@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { getJsonBody } from "./webhooks.js";
 import { markPredictionAsRoulette, recordSpinResult } from "../services/db_updates.js";
-import { checkForLockedPrediction } from "../services/db_queries.js";
+import { checkForLockedPrediction, getUserSession } from "../services/db_queries.js";
 import { SIX_MONTHS } from "./auth.js";
 
 type RouletteResult = {
@@ -36,12 +36,12 @@ export default async function spinResult(
 
             await recordSpinResult(landedNumber);
 
-            if (sessionId === process.env.TOKKI_SESSION_ID) {
+            if (sessionId === await getUserSession(process.env.TOKKI_USER_ID!)) {
                 const lockedPredictionId = await checkForLockedPrediction();
 
                 res.setHeader("Set-Cookie", [
                     `session_id=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SIX_MONTHS}`
-                ]);
+                ]); 
 
                 if (lockedPredictionId === null) {
                     res.writeHead(200, { "Content-Type": "text/plain" });
