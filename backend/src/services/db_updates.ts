@@ -189,5 +189,5 @@ export async function saveUserSession(user_id: string, session_id: string, user_
       SET session_id = EXCLUDED.session_id
   `;
 
-  await db.query(query, [user_id, session_id, user_name]);
+  await db.query(query, [session_id, user_id, user_name]);
 }

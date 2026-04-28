@@ -98,5 +98,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     session_id TEXT NOT NULL,
     user_id INTEGER NOT NULL,
     user_name TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (user_id)
 );

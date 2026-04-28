@@ -57,9 +57,11 @@ export default async function authRoutes(
       return sendJson(res, 500, { error: "Failed to fetch user profile" });
     }
 
-    await registerTwitchHooks(userData.login, userData.id, tokenData.access_token).catch((err) => {
-      console.error("Failed to register Twitch webhook:", err);
-    });
+    if (userData.id === process.env.TOKKI_USER_ID) {
+      await registerTwitchHooks(userData.login, userData.id, tokenData.access_token).catch((err) => {
+        console.error("Failed to register Twitch webhook:", err);
+      });
+    }
 
     const sessionId = crypto.randomUUID();
     console.log("User authenticated:", userData.login, "Session ID:", sessionId);
