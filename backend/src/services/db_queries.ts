@@ -1,6 +1,6 @@
 import db from "./db.js";
 
-export async function isPredictionRoulette(prediction_id: string) {
+export async function isPredictionRoulette(prediction_id: string): Promise<boolean> {
     const query = `
         SELECT roulette_prediction
         FROM predictions
@@ -88,6 +88,7 @@ export async function getBiggestIndividual( interval: string,  type: 'w' | 'l' )
         SELECT user_id, user_name, prediction_id, bet_amount, won_amount, SUM(COALESCE(won_amount, 0) - bet_amount) AS net_change
         FROM results
         ${whereClause}
+        AND roulette_prediction = true
         ORDER BY net_change ${orderDir}
         LIMIT 1;
     `;
@@ -141,6 +142,7 @@ export async function getTopLeaders( count: number,  interval: string,  type: 'w
         SELECT user_id, user_name, SUM(COALESCE(won_amount, 0) - bet_amount) AS total_net, COUNT(*) AS predictions_count
         FROM results 
             ${whereClause}
+        AND roulette_prediction = true
         GROUP BY user_id, user_name
         ORDER BY total_net ${orderDir}
         LIMIT $1;

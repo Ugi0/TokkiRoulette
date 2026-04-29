@@ -50,6 +50,8 @@ CREATE TABLE results (
     won_amount INTEGER,
     result_time TIMESTAMPTZ NOT NULL,
 
+    roulette_prediction BOOLEAN NOT NULL,
+
     PRIMARY KEY (prediction_id, user_id),
 
     FOREIGN KEY (prediction_id, user_id)

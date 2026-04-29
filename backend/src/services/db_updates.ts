@@ -113,8 +113,6 @@ export async function endPrediction(
     prediction_event.event.winning_outcome_id
   ]);
 
-  if (!(await isPredictionRoulette(prediction_event.event.id))) return;
-
   const winningOutcomeId = prediction_event.event.winning_outcome_id;
 
   const insertResultQuery = `
@@ -124,11 +122,14 @@ export async function endPrediction(
       user_name,
       bet_amount,
       won_amount,
-      result_time
+      result_time,
+      roulette_prediction
     )
-    VALUES ($1, $2, $3, $4, $5, $6)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
     ON CONFLICT (prediction_id, user_id) DO NOTHING
   `;
+
+  const isRoulette = await isPredictionRoulette(prediction_event.event.id);
 
   for (const outcome of prediction_event.event.outcomes) {
     for (const predictor of outcome.top_predictors ?? []) {
@@ -144,7 +145,8 @@ export async function endPrediction(
         predictor.user_name,
         betAmount,
         wonAmount,
-        new Date()
+        new Date(),
+        isRoulette
       ]);
     }
   }
