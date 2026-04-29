@@ -8,7 +8,7 @@ import { useState } from "react";
 export default function RouletteStatsPage() {
     const [notification, setNotification] = useState<string | null>(null);
 
-    retun (
+    return (
         <div className="page-root">
             <main className="roulette-stats-page">
                 <div className="roulette-stats-page__header">

@@ -9,26 +9,26 @@ export default function RouletteAnalytics() {
 
             <div className="recent">
                 <div className="recent-winners">
-                    <TopLeaders />
+                    <TopLeaders title="Recent Winners" />
                 </div>
                 <div className="recent-losers">
-                    <TopLeaders />
+                    <TopLeaders title="Recent Losers" />
                 </div>
             </div>
             <div className="individuals">
                 <div className="individual-winner">
-                    <TopIndividual />
+                    <TopIndividual title="Top Individual Winner" />
                 </div>
-                <div className="individual-losser">
-                    <TopIndividual />
+                <div className="individual-loser">
+                    <TopIndividual title="Top Individual Loser" />
                 </div>
             </div>
             <div className="leaderboards">
                 <div className="top-winners">
-                    <TopLeaders />
+                    <TopLeaders title="Top Winners" />
                 </div>
                 <div className="top-losers">
-                    <TopLeaders />
+                    <TopLeaders title="Top Losers" />
                 </div>
             </div>
         </section>

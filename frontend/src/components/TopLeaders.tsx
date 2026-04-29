@@ -1,11 +1,17 @@
-export default function TopLeaders(title: string, type: string, isRecent: boolean = false) {
+type TopLeadersProps = {
+  title: string;
+  //type: string;
+  //isRecent?: boolean;
+};
+
+export default function TopLeaders({ title }: TopLeadersProps) {
 
     // If is recent is true you dont show interval button
-    // Add function that returns Winner or Losser with input of w/l
+    // Add function that returns Winner or Loser with input of w/l
     return (
         <section className="top-leaders">
             <div className='leaderboard-header'>
-                <h1>Top Losser/Winner ${title}</h1>
+                <h1>Top Loser/Winner ${title}</h1>
                 <button type={"submit"} className='interval'></button>
             </div>
             <div className="Row">

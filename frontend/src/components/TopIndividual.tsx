@@ -1,11 +1,18 @@
-export default function TopIndividual(title:string, type: string, isRecent: boolean = false) {
+type TopIndividualProps = {
+    title: string;
+    //type: string;
+    //isRecent?: boolean;
+};
+// Add these parameters back when they are needed, react wouldn't compile with them there
+
+export default function TopIndividual({ title }: TopIndividualProps) {
 
     // If is recent is true you dont show interval button
-    // Add function that returns Winner or Losser with input of w/l
+    // Add function that returns Winner or Loser with input of w/l
     return (
         <section className="top-individual">
             <div className='individual-header'>
-                <h1>Top Losser/Winner ${title}</h1>
+                <h1>Top Loser/Winner ${title}</h1>
                 <button type={"submit"} className='interval'></button>
             </div>
             <div className="individual">
