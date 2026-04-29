@@ -63,30 +63,6 @@ CREATE TABLE results (
         ON DELETE RESTRICT
 );
 
-CREATE OR REPLACE FUNCTION enforce_roulette_prediction()
-RETURNS trigger AS $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM predictions
-        WHERE id = NEW.prediction_id
-          AND roulette_prediction = true
-    ) THEN
-        RAISE EXCEPTION
-            'Prediction % is not a roulette prediction; results are not allowed',
-            NEW.prediction_id;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER results_only_for_roulette_predictions
-BEFORE INSERT OR UPDATE
-ON results
-FOR EACH ROW
-EXECUTE FUNCTION enforce_roulette_prediction();
-
 CREATE TABLE spin_counter (
     number INTEGER PRIMARY KEY CHECK (number BETWEEN 0 AND 36),
     count BIGINT NOT NULL DEFAULT 0
