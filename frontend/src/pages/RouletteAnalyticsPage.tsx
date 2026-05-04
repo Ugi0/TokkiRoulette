@@ -1,12 +1,9 @@
 import { Link } from "react-router";
-import "./RouletteStatsPage.css";
+import "./RouletteAnalyticsPage.css";
 import Footer from "../components/Footer";
-import RouletteTable from "../components/RouletteTable.tsx";
-import Notification from "../components/Notification.tsx";
-import { useState } from "react";
+import RouletteAnalytics from "../components/RouletteAnalytics.tsx";
 
-export default function RouletteStatsPage() {
-    const [notification, setNotification] = useState<string | null>(null);
+export default function RouletteAnalyticsPage() {
 
     return (
         <div className="page-root">
@@ -18,9 +15,8 @@ export default function RouletteStatsPage() {
                     </Link>
                 </div>
 
-                <RouletteTable setNotification={setNotification}  />
+                <RouletteAnalytics />
             </main>
-            <Notification notification={notification} onDismiss={() => setNotification(null)} />
             <Footer />
         </div>
     );

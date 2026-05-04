@@ -5,6 +5,7 @@ import { useState } from "react";
 import Notification from "../components/Notification";
 import ResultsButton from "../components/ResultsButton";
 import { useEffect, useRef } from "react";
+import {Link} from "react-router";
 
 export default function RoulettePage() {
   const [notification, setNotification] = useState<string | null>(null);
@@ -19,6 +20,7 @@ export default function RoulettePage() {
       <main className="roulette-page">
         <div className="roulette-page__header">
           <h1>Totally not rigged Roulette table</h1>
+            <Link to={"/analytics"}> Analytics </Link>
         </div>
 
         <RouletteTable setNotification={setNotification} />

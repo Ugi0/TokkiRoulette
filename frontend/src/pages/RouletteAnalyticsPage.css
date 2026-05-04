@@ -1,0 +1,38 @@
+.page-root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    background: #181a1b;
+}
+
+.page-root > main {
+    flex: 1;
+}
+
+.roulette-stats-page {
+    padding: 24px 0 40px;
+}
+
+.roulette-stats-page__header {
+    width: min(1100px, calc(100% - 32px));
+    margin: 0 auto 16px;
+    color: #ffffff;
+    font-family: "JetBrains Mono", sans-serif;
+}
+
+.roulette-stats-page__header h1 {
+    font-family: "JetBrains Mono", sans-serif;
+    font-size: 4rem;
+    color: #ced5d5;
+    font-weight: 400;
+}
+
+.roulette-back__link {
+    color: #ced5d5;
+    text-decoration: underline;
+}
+
+.roulette-back__link:visited {
+    color: #ced5d5;
+}

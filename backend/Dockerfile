@@ -1,3 +1,14 @@
+FROM node:20-alpine AS dev
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+EXPOSE 8080
+CMD ["npm", "run", "dev"]
+
+
 FROM node:20-alpine AS build
 
 WORKDIR /app
@@ -9,7 +20,8 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
-FROM node:20-alpine
+
+FROM node:20-alpine AS prod
 
 WORKDIR /app
 
@@ -22,5 +34,4 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 EXPOSE 8080
-
 CMD ["node", "dist/server.js"]
