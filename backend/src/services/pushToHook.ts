@@ -28,6 +28,7 @@ function pushToSession(
   const ws = clients.get(sessionId);
 
   if (!ws || ws.readyState !== ws.OPEN) {
+    console.log("Websocket not open for session:", sessionId);
     return;
   }
 

@@ -11,15 +11,22 @@ export function useResultsSocket(enabled: boolean, onResults: (data: unknown) =>
     }
 
     console.log("Socket started");
-    const ws = new WebSocket("wss://roulette.ugi0.org/ws");
+    const ws = new WebSocket("wss://roulette.tokkicorp.com/ws");
 
     ws.onmessage = (event) => {
+      console.log("WS message received:", event.data);
       const data = JSON.parse(event.data);
 
       if (data.type === "results-ready") {
+        ws.close();
+        socketRef.current = null;
         onResults(data);
       }
     };
+
+    ws.onopen = () => console.log("WS open");
+    ws.onclose = (e) => console.log("WS closed", e.code, e.reason);
+    ws.onerror = (e) => console.log("WS error", e);
 
     socketRef.current = ws;
 

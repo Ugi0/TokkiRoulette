@@ -7,10 +7,30 @@ import ResultsButton from "../components/ResultsButton";
 import { useResultsSocket } from "../components/Overlay/UseSocket";
 
 export default function RoulettePage() {
-  const [notification, setNotification] = useState<string | null>(null);
+  const [notification, _setNotification] = useState<string | null>(null);
   const [resultsAvailable, setResultsAvailable] = useState(false);
+  const [socketEnabled, setSocketEnabled] = useState(false);
 
-  useResultsSocket(!!notification, () => {
+  const setNotification: React.Dispatch<React.SetStateAction<string | null>> = (value) => {
+    if (typeof value === "function") {
+      _setNotification((prev) => {
+        const next = value(prev);
+
+        if (next) {
+          setSocketEnabled(true);
+        }
+
+        return next;
+      });
+    } else {
+      if (value) {
+        setSocketEnabled(true);
+      }
+      _setNotification(value);
+    }
+  };
+
+  useResultsSocket(socketEnabled, () => {
     setResultsAvailable(true);
   });
 
@@ -26,14 +46,10 @@ export default function RoulettePage() {
 
       <Notification
         notification={notification}
-        onDismiss={() => {
-          setNotification(null);
-        }}
+        onDismiss={() => setNotification(null)}
       />
 
-      {resultsAvailable && (
-        <ResultsButton />
-      )}
+      {resultsAvailable && <ResultsButton />}
 
       <Footer />
     </div>

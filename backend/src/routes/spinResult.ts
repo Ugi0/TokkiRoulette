@@ -3,6 +3,7 @@ import { getJsonBody } from "./twitchWebhooks.js";
 import { markPredictionAsRoulette, recordSpinResult } from "../services/db_updates.js";
 import { checkForLockedPrediction, getUserSession } from "../services/db_queries.js";
 import { SIX_MONTHS } from "./auth.js";
+import { handlePredictionEndPush } from "../services/pushToHook.js";
 
 type RouletteResult = {
   number: number;
@@ -34,7 +35,10 @@ export default async function spinResult(
 
             const landedNumber = body.number;
 
-            await recordSpinResult(landedNumber);
+            res.writeHead(200, { "Content-Type": "text/plain" });
+            return res.end(JSON.stringify({ status: "authorized" }));
+
+            /*await recordSpinResult(landedNumber);
 
             if (sessionId !== null && sessionId === await getUserSession(process.env.TOKKI_USER_ID!)) {
                 const lockedPredictionId = await checkForLockedPrediction();
@@ -45,7 +49,7 @@ export default async function spinResult(
 
                 if (lockedPredictionId === null) {
                     res.writeHead(200, { "Content-Type": "text/plain" });
-                    return res.end("Spin result recorded");
+                    return res.end(JSON.stringify({ status: "Spin result recorded" }));
                 }
 
                 await markPredictionAsRoulette(lockedPredictionId);
@@ -55,7 +59,7 @@ export default async function spinResult(
             }
 
             res.writeHead(200, { "Content-Type": "text/plain" });
-            return res.end("Spin result recorded");
+            return res.end(JSON.stringify({ status: "Spin result recorded" }));*/
         }
         catch (err) {
             console.error("Error recording spin result:", err);
