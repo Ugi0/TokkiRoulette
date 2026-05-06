@@ -4,8 +4,7 @@ import Footer from "../components/Footer";
 import { useState } from "react";
 import Notification from "../components/Notification";
 import ResultsButton from "../components/ResultsButton";
-import { useEffect, useRef } from "react";
-import {Link} from "react-router";
+import { useResultsSocket } from "../components/Overlay/UseSocket";
 
 export default function RoulettePage() {
   const [notification, setNotification] = useState<string | null>(null);
@@ -20,7 +19,6 @@ export default function RoulettePage() {
       <main className="roulette-page">
         <div className="roulette-page__header">
           <h1>Totally not rigged Roulette table</h1>
-            <Link to={"/analytics"}> Analytics </Link>
         </div>
 
         <RouletteTable setNotification={setNotification} />
@@ -40,30 +38,4 @@ export default function RoulettePage() {
       <Footer />
     </div>
   );
-}
-
-function useResultsSocket(enabled: boolean, onResults: (data: unknown) => void) {
-  const socketRef = useRef<WebSocket | null>(null);
-
-  useEffect(() => {
-    if (!enabled) {
-      socketRef.current?.close();
-      socketRef.current = null;
-      return;
-    }
-
-    const ws = new WebSocket("wss://your-backend/ws");
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === "results-ready") {
-        onResults(data);
-      }
-    };
-
-    socketRef.current = ws;
-
-    return () => ws.close();
-  }, [enabled, onResults]);
 }

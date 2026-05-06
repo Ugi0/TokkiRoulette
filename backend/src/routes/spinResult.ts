@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { getJsonBody } from "./webhooks.js";
+import { getJsonBody } from "./twitchWebhooks.js";
 import { markPredictionAsRoulette, recordSpinResult } from "../services/db_updates.js";
 import { checkForLockedPrediction, getUserSession } from "../services/db_queries.js";
 import { SIX_MONTHS } from "./auth.js";
@@ -68,7 +68,7 @@ export default async function spinResult(
     return res.end("Not Found");
 }
 
-function parseCookies(req: IncomingMessage): Record<string, string> {
+export function parseCookies(req: IncomingMessage): Record<string, string> {
   const header = req.headers.cookie;
   if (!header) return {};
 
