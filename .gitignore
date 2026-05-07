@@ -10,6 +10,9 @@ yarn-error.log*
 dist/
 build/
 
+# Install artifacts
+package-lock.json
+
 # Cloudflare Pages/Functions local caches
 wrangler.toml.local
 *.log
