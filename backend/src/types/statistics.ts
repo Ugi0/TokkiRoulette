@@ -15,10 +15,10 @@ export type Individual = {
 };
 
 export const Interval = {
-    ONE_MONTH: {query_param: '1m'},
-    THREE_MONTHS: {query_param: '3m'},
-    SIX_MONTHS: {query_param: '6m'},
-    ONE_YEAR: {query_param: '1y'},
+    ONE_MONTH: {query_param: '1 month'},
+    THREE_MONTHS: {query_param: '3 months'},
+    SIX_MONTHS: {query_param: '6 months'},
+    ONE_YEAR: {query_param: '1 year'},
     ALL: {query_param: 'ALL'},
     RECENT: {query_param: 'RECENT'}
 } as const;

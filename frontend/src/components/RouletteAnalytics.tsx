@@ -18,32 +18,16 @@ export default function RouletteAnalytics() {
                 </div>
             </div>
             <div className='stats'>
-                <h1>Last Prediction Stats</h1>
-                <div className="content">
-                    <Leaderboard
-                        title='Recent Winners'
-                        endpoint='/api/analytics/recent'
-                    />
-                    <Leaderboard
-                        title='Recent Losers'
-                        endpoint='/api/analytics/recent'
-                    />
-                </div>
-
-            </div>
-            <div className='stats'>
-                <h1>Overall Top Stats</h1>
+                <h1>Top Stats</h1>
                 <div className="content">
                     <Leaderboard
                         title="Top Winners"
                         endpoint="/api/analytics/leaderboard?type=w&limit=10"
-                        allowInterval={true}
                     />
 
                     <Leaderboard
                         title="Top Losers"
                         endpoint="/api/analytics/leaderboard?type=l&limit=10"
-                        allowInterval={true}
                     />
                 </div>
 

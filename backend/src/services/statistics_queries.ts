@@ -1,6 +1,8 @@
 import db from "./db.js";
 import { UserLeaders, Individual, Interval } from "../types/statistics.js";
 
+const netChangeSql = "COALESCE(won_amount, -bet_amount)";
+
 export function parseInterval(value: string | null): Interval {
     if (
         value === "ONE_MONTH" ||
@@ -24,9 +26,50 @@ export function parseType(value: string | null): "w" | "l" {
     return 'w';
 }
 
+export async function getIntervals(): Promise<Interval[]> {
+    const query = `
+        SELECT MIN(result_time) AS oldest_result_time
+        FROM results
+        WHERE roulette_prediction = true;
+    `;
+
+    const { rows } = await db.query<{ oldest_result_time: Date | string | null }>(query);
+    const oldestDate = rows[0]?.oldest_result_time;
+
+    if (!oldestDate) {
+        return ["RECENT", "ALL"];
+    }
+
+    const oldestTime = new Date(oldestDate).getTime();
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
+    const elapsedDays = Math.floor((Date.now() - oldestTime) / millisecondsPerDay);
+
+    const intervals: Interval[] = ["RECENT"];
+
+    if (elapsedDays >= 30) {
+        intervals.push("ONE_MONTH");
+    }
+
+    if (elapsedDays >= 90) {
+        intervals.push("THREE_MONTHS");
+    }
+
+    if (elapsedDays >= 180) {
+        intervals.push("SIX_MONTHS");
+    }
+
+    if (elapsedDays >= 365) {
+        intervals.push("ONE_YEAR");
+    }
+
+    intervals.push("ALL");
+
+    return intervals;
+}
+
 
 // Supported inputs for interval are {1m,3m,6m,1y,all,recent} and supported types for type are {w,l}
-export async function getBiggestIndividual( interval: Interval,  type: 'w' | 'l' ): Promise<Individual | null> {
+export async function getSingle(interval: Interval, type: 'w' | 'l' ): Promise<Individual | null> {
     const orderDir = type === 'w' ? 'DESC' : 'ASC';
 
     let whereClause = 'WHERE roulette_prediction = true';
@@ -35,9 +78,10 @@ export async function getBiggestIndividual( interval: Interval,  type: 'w' | 'l'
         whereClause = `
             WHERE roulette_prediction = true
             AND prediction_id = (
-                SELECT id
-                FROM predictions
-                ORDER BY start_time DESC
+                SELECT prediction_id
+                FROM results
+                WHERE roulette_prediction = true
+                ORDER BY result_time DESC
                 LIMIT 1
             )
         `;
@@ -50,7 +94,7 @@ export async function getBiggestIndividual( interval: Interval,  type: 'w' | 'l'
     }
 
     const query = `
-        SELECT user_id, user_name, prediction_id, bet_amount, won_amount, COALESCE(won_amount, 0) - bet_amount AS net_change
+        SELECT user_id, user_name, prediction_id, bet_amount, won_amount, ${netChangeSql} AS net_change
         FROM results
         ${whereClause}
         ORDER BY net_change ${orderDir}
@@ -62,7 +106,7 @@ export async function getBiggestIndividual( interval: Interval,  type: 'w' | 'l'
 }
 
 // Supported inputs for interval are {1m,3m,6m,1y,all,recent} and supported types for type are {w,l}
-export async function getTopLeaders( count: number,  interval: Interval,  type: 'w' | 'l' ): Promise<UserLeaders[]> {
+export async function getLeaderboard(count: number, interval: Interval, type: 'w' | 'l' ): Promise<UserLeaders[]> {
     const orderDir = type === 'w' ? 'DESC' : 'ASC';
 
     let whereClause = 'WHERE roulette_prediction = true';
@@ -71,9 +115,10 @@ export async function getTopLeaders( count: number,  interval: Interval,  type: 
         whereClause = `
             WHERE roulette_prediction = true
             AND prediction_id = (
-                SELECT id
-                FROM predictions
-                ORDER BY start_time DESC
+                SELECT prediction_id
+                FROM results
+                WHERE roulette_prediction = true
+                ORDER BY result_time DESC
                 LIMIT 1
             )
         `;
@@ -86,7 +131,12 @@ export async function getTopLeaders( count: number,  interval: Interval,  type: 
     }
 
     const query = `
-        SELECT user_id, user_name, SUM(COALESCE(won_amount, 0) - bet_amount) AS total_net, COUNT(*) AS predictions_count
+        SELECT
+            user_id,
+            user_name,
+            SUM(bet_amount) AS bet_amount,
+            SUM(${netChangeSql}) AS total_net,
+            COUNT(*) AS predictions_count
         FROM results 
             ${whereClause}
         GROUP BY user_id, user_name

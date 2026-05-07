@@ -11,24 +11,24 @@ export type StatsInterval =
     (typeof StatsInterval)[keyof typeof StatsInterval]["queryParam"];
 
 export type LeaderboardEntry = {
-    user_Id: string;
-    user_Name: string;
-    profile_Image_URL: string | null;
-    chat_Color: string | null;
-    bet_Amount: number;
-    total_Net: number;
-    predictions_Count: number;
+    user_id: number;
+    user_name: string;
+    profile_image_url?: string | null;
+    chat_color?: string | null;
+    bet_amount?: number | string;
+    total_net: number | string;
+    predictions_count: number | string;
 };
 
 export type SingleEntry = {
-    user_Id: string;
-    user_Name: string;
-    profile_Image_URL: string | null;
-    chat_Color: string | null;
-    prediction_Id: string;
-    bet_Amount: number;
-    won_Amount: number | null;
-    net_Change: number;
+    user_id: number;
+    user_name: string;
+    profile_image_url?: string | null;
+    chat_color?: string | null;
+    prediction_id: string;
+    bet_amount: number;
+    won_amount: number | null;
+    net_change: number | string;
 };
 
 export type Analytics = {

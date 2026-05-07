@@ -21,28 +21,56 @@ function formatNet(value: number): string {
     return "0";
 }
 
+function toNumber(value: number | string | undefined): number {
+    return Number(value ?? 0);
+}
+
+function intervalLabel(value: StatsInterval): string {
+    switch (value) {
+        case "RECENT":
+            return "Recent";
+        case "ONE_MONTH":
+            return "1 Month";
+        case "THREE_MONTHS":
+            return "3 Months";
+        case "SIX_MONTHS":
+            return "6 Months";
+        case "ONE_YEAR":
+            return "1 Year";
+        case "ALL":
+            return "All Time";
+    }
+}
+
 export default function Individual({
     title,
     endpoint,
-    allowInterval = false,
 }: IndividualProps) {
     const [interval, setInterval] = useState<StatsInterval>(
         StatsInterval.ALL.queryParam
     );
+    const [availableIntervals, setAvailableIntervals] = useState<StatsInterval[]>([])
     const [entries, setEntries] = useState<SingleEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        async function loadIntervals() {
+            const response = await fetch("/api/analytics/intervals");
+            const data = await response.json();
+            setAvailableIntervals(data);
+        }
+
+        loadIntervals();
+
         async function loadIndividual() {
             try {
                 setLoading(true);
                 setError(null);
 
                 const separator = endpoint.includes("?") ? "&" : "?";
-                const requestUrl = allowInterval
-                    ? `${endpoint}${separator}interval=${interval}`
-                    : endpoint;
+                const requestUrl = `${endpoint}${separator}interval=${interval}`;
+
 
                 const response = await fetch(requestUrl, {
                     credentials: "include",
@@ -63,22 +91,19 @@ export default function Individual({
         }
 
         loadIndividual();
-    }, [endpoint, interval, allowInterval]);
+    }, [endpoint, interval]);
 
     return (
         <section className="leaderboard">
             <div className="header">
                 <h2>{title}</h2>
-
-                {allowInterval && (
                     <div className="interval-buttons">
-                        <button onClick={() => setInterval(StatsInterval.ONE_MONTH.queryParam)}>1m</button>
-                        <button onClick={() => setInterval(StatsInterval.THREE_MONTHS.queryParam)}>3m</button>
-                        <button onClick={() => setInterval(StatsInterval.SIX_MONTHS.queryParam)}>6m</button>
-                        <button onClick={() => setInterval(StatsInterval.ONE_YEAR.queryParam)}>1y</button>
-                        <button onClick={() => setInterval(StatsInterval.ALL.queryParam)}>All</button>
+                        {availableIntervals.map((value) => (
+                            <button key={value} onClick={() => setInterval(value)}>
+                                {intervalLabel(value)}
+                            </button>
+                        ))}
                     </div>
-                )}
             </div>
 
             {loading && <p>Loading...</p>}
@@ -86,27 +111,30 @@ export default function Individual({
 
             {!loading && !error && (
                 <div className="body">
-                    {entries.map((entry) => (
-                        <div className="entry" key={entry.user_Id}>
+                    {entries.map((entry) => {
+                        const netChange = toNumber(entry.net_change);
+
+                        return (
+                        <div className="entry" key={entry.user_id}>
                             <img
                                 className="pfp"
-                                src={entry.profile_Image_URL ?? "/default-pfp.jpg"}
+                                src={entry.profile_image_url ?? "/default-pfp.jpg"}
                                 alt={"/default-pfp.jpg"}
                             />
                             <div
                                 className="name"
-                                style={{ color: entry.chat_Color ?? "#000000" }}
+                                style={{ color: entry.chat_color ?? "#000000" }}
                             >
-                                {entry.user_Name}
+                                {entry.user_name}
                             </div>
-                            <div className="bet">Bet {entry.bet_Amount} $TKS</div>
+                            <div className="bet">Bet {entry.bet_amount} $TKS</div>
                             <div
-                                className={`net ${entry.net_Change < 0 ? "negative" : entry.net_Change > 0 ? "positive" : ""}`}
+                                className={`net ${netChange < 0 ? "negative" : netChange > 0 ? "positive" : ""}`}
                             >
-                                {formatNet(entry.net_Change)}
+                                {formatNet(netChange)}
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
             )}
         </section>

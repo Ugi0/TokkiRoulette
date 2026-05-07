@@ -1,5 +1,5 @@
 import {IncomingMessage, ServerResponse} from "http";
-import {getBiggestIndividual, getTopLeaders} from "../services/statistics_queries.js";
+import {getSingle, getLeaderboard, getIntervals} from "../services/statistics_queries.js";
 import sendJson from "../utils/sendJson.js";
 import {parseInterval} from "../services/statistics_queries.js";
 import {parseType} from "../services/statistics_queries.js";
@@ -16,17 +16,10 @@ export default async function statsRoutes(
         const type = parseType(url.searchParams.get("type"));
 
 
-        const result = await getTopLeaders(limit, interval, type);
+        const result = await getLeaderboard(limit, interval, type);
 
         return sendJson(res, 200, result);
     }
-
-
-    if (url.pathname.startsWith("/analytics/recent")) {
-        return sendJson(res, 501, { error: "Recent analytics not yet implemented" });
-    }
-
-
 
     if (url.pathname.startsWith("/analytics/single")) {
         // call single biggest win/loss function
@@ -35,7 +28,13 @@ export default async function statsRoutes(
         const type = parseType(url.searchParams.get("type"));
 
 
-        const result = await getBiggestIndividual(interval, type);
+        const result = await getSingle(interval, type);
+
+        return sendJson(res, 200, result);
+    }
+
+    if (url.pathname.startsWith("/analytics/intervals")) {
+        const result = await getIntervals();
 
         return sendJson(res, 200, result);
     }

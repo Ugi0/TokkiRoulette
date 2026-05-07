@@ -29,6 +29,10 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Local/private database dumps
+*.sql
+!backend/db-init.sql
+
 # Optional: coverage
 coverage/
 
