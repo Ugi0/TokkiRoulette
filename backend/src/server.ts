@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.js";
 import webhookRoutes from "./routes/webhooks.js";
 import spinResult from "./routes/spinResult.js";
 import debugRoutes from "./routes/debug.js";
+import statsRoutes from "./routes/stats.js";
 
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -32,7 +33,7 @@ const server = http.createServer(
         res.writeHead(404, { "Content-Type": "text/plain" });
         return res.end("Not Found");
       }
-      
+
       url.pathname = url.pathname.slice(4) || "/";
 
       if (url.pathname === "/healthz") {
@@ -40,19 +41,23 @@ const server = http.createServer(
       }
 
       if (url.pathname.startsWith("/auth")) {
-        return authRoutes(req, res, url);
+        return await authRoutes(req, res, url);
       }
 
       if (url.pathname.startsWith("/debug")) {
-        return debugRoutes(req, res, url);
+        return await debugRoutes(req, res, url);
       }
 
       if (url.pathname.startsWith("/webhooks")) {
-        return webhookRoutes(req, res, url);
+        return await webhookRoutes(req, res, url);
       }
 
       if (url.pathname.startsWith("/spin-result")) {
-        return spinResult(req, res, url);
+        return await spinResult(req, res, url);
+      }
+
+      if (url.pathname.startsWith("/analytics")) {
+        return await statsRoutes(req, res, url);
       }
 
       res.writeHead(404, { "Content-Type": "text/plain" });

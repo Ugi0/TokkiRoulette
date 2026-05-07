@@ -39,8 +39,9 @@ export default function Individual({
                 setLoading(true);
                 setError(null);
 
+                const separator = endpoint.includes("?") ? "&" : "?";
                 const requestUrl = allowInterval
-                    ? `${endpoint}?interval=${interval}`
+                    ? `${endpoint}${separator}interval=${interval}`
                     : endpoint;
 
                 const response = await fetch(requestUrl, {
@@ -53,7 +54,7 @@ export default function Individual({
                     throw new Error(data.error ?? "Failed to load individual;");
                 }
 
-                setEntries(data);
+                setEntries(Array.isArray(data) ? data : data ? [data] : []);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Unknown error");
             } finally {

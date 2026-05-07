@@ -41,8 +41,9 @@ export default function Leaderboard({
                 setLoading(true);
                 setError(null);
 
+                const separator = endpoint.includes("?") ? "&" : "?";
                 const requestUrl = allowInterval
-                    ? `${endpoint}?interval=${interval}`
+                    ? `${endpoint}${separator}interval=${interval}`
                     : endpoint;
 
                 const response = await fetch(requestUrl, {

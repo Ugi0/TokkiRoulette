@@ -8,12 +8,12 @@ export default function RouletteAnalytics() {
                 <h1>Top Singular Bet Stats</h1>
                 <div className="content">
                     <Individual
-                        title='Biggest Single Win'
-                        endpoint='/api/stats/biggest-win'
+                        title="Biggest Single Win"
+                        endpoint="/api/analytics/single?type=w&interval=ALL"
                     />
                     <Individual
-                        title='Biggest Single Loss'
-                        endpoint='/api/stats/biggest-loss'
+                        title="Biggest Single Loss"
+                        endpoint="/api/analytics/single?type=l&interval=ALL"
                     />
                 </div>
             </div>
@@ -22,11 +22,11 @@ export default function RouletteAnalytics() {
                 <div className="content">
                     <Leaderboard
                         title='Recent Winners'
-                        endpoint='/api/stats/recent-winners'
+                        endpoint='/api/analytics/recent'
                     />
                     <Leaderboard
                         title='Recent Losers'
-                        endpoint='/api/stats/recent-losers'
+                        endpoint='/api/analytics/recent'
                     />
                 </div>
 
@@ -35,13 +35,14 @@ export default function RouletteAnalytics() {
                 <h1>Overall Top Stats</h1>
                 <div className="content">
                     <Leaderboard
-                        title='Top Winners'
-                        endpoint='/api/stats/top-winners'
+                        title="Top Winners"
+                        endpoint="/api/analytics/leaderboard?type=w&limit=10"
                         allowInterval={true}
                     />
+
                     <Leaderboard
-                        title='Top Losers'
-                        endpoint='/api/stats/top-losers'
+                        title="Top Losers"
+                        endpoint="/api/analytics/leaderboard?type=l&limit=10"
                         allowInterval={true}
                     />
                 </div>
