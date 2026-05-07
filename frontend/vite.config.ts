@@ -1,12 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
-  server: {
-    proxy: {
-      '/api': 'http://localhost:6001',
+  ...(command === 'serve' && {
+    server: {
+      host: true,
+      port: 5173,
+      watch: {
+        usePolling: true,
+      },
+      proxy: {
+        '/api': {
+          target: 'http://backend:8080', // Docker service name + port
+          changeOrigin: true,
+        }
+      }
     },
-  },
-})
+  }),
+}))

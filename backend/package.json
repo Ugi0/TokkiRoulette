@@ -6,11 +6,12 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "tsc --watch"
+    "dev": "tsx watch src/server.ts"
   },
   "devDependencies": {
     "@types/node": "^20.19.39",
     "@types/pg": "^8.20.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.5.0"
   },
   "dependencies": {

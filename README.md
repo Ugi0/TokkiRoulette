@@ -4,9 +4,7 @@ This project is made for TokkiCorp, to have a new roulette page, since the old o
 
 ## Development
 
-To start developing the project, you should run `npm install` in both backend and frontend folders to install required packages. The whole project can be started by running `docker-compose up -d` in the root folder, but this doesn't provide hotloading.
-
-A hotloaded frontend can be started by running `npm run dev` in the frontend folder. There is no real good way to test backend code without a working frontend.
+To start developing the project, you should run `npm install` in both backend and frontend folders to install required packages. A hotloaded version of the project can be started with `docker compose -d -f docker-compose.dev.yml up --build`, after which the frontend can be accessed at `localhost:80`
 
 ## Deployment
 
