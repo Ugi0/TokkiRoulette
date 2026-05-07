@@ -63,3 +63,6 @@ dist-ssr
 
 # deploy script
 deploy.sh
+
+# Tokki model, not to be distributed
+frontend/public/models/chibi/*

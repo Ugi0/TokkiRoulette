@@ -4,7 +4,7 @@ import { HookData } from "../types/hookData.js";
 import { getTotalPredictionResults, getUserSession } from "./db_queries.js";
 
 export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent) {
-  const sessionId = await getUserSession(endEvent.event.broadcaster_user_id);
+  const sessionId = "0";//await getUserSession(endEvent.event.broadcaster_user_id);
 
   if (!sessionId) {
     console.error("No active session found for broadcaster:", endEvent.event.broadcaster_user_id);

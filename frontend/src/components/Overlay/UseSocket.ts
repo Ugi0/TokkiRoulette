@@ -11,7 +11,8 @@ export function useResultsSocket(enabled: boolean, onResults: (data: unknown) =>
     }
 
     console.log("Socket started");
-    const ws = new WebSocket("wss://roulette.tokkicorp.com/ws");
+    const protocol = location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${protocol}://${location.host}/ws`);
 
     ws.onmessage = (event) => {
       console.log("WS message received:", event.data);

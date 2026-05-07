@@ -14,18 +14,18 @@ export function initWebSocketServer(server: any) {
     console.log("New WS connection");
     try {
       const cookies = parseCookies(req);
-      const sessionId = cookies.session_id;
+      const sessionId = "0"; //cookies.session_id;
 
-      if (!sessionId) {
+      /*if (!sessionId) {
         console.log("Websocket connected without session_id cookie, closing connection");
         ws.close(1008, "No session");
         return;
-      }
+      }*/
 
       setTimeout(async () => {
         await handlePredictionEndPush({
           event: {
-            id: "39a07654-8522-4867-9f35-2c71320a9eed",
+            id: "12832829-7e41-41ba-9a47-25d58d15f03d",
             broadcaster_user_id: "61785838",
             broadcaster_user_login: "test",
             broadcaster_user_name: "test",

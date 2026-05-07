@@ -3,8 +3,8 @@ import "./RoulettePage.css";
 import Footer from "../components/Footer";
 import { useState } from "react";
 import Notification from "../components/Notification";
-import ResultsButton from "../components/ResultsButton";
 import { useResultsSocket } from "../components/Overlay/UseSocket";
+import { AssistantUI } from "../components/ResultsPanel/AssistantUI";
 
 export default function RoulettePage() {
   const [notification, _setNotification] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function RoulettePage() {
         onDismiss={() => setNotification(null)}
       />
 
-      {resultsAvailable && <ResultsButton />}
+      {resultsAvailable && <AssistantUI show={resultsAvailable} />}
 
       <Footer />
     </div>
