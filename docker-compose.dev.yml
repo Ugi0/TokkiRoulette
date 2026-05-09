@@ -14,7 +14,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-    restart: unless-stopped
+    restart: unever
 
 
   backend:
@@ -31,6 +31,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+    restart: unever
 
   database:
     image: postgres:16
@@ -42,7 +43,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./backend/db-init.sql:/docker-entrypoint-initdb.d/db-init.sql:ro
-    restart: unless-stopped
+    restart: never
 
 volumes:
   pgdata:
