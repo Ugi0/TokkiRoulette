@@ -1,30 +1,34 @@
 import { motion } from "framer-motion";
 import { ChibiCharacter } from "./ChibiCharacter";
 import { ResultsPanel } from "./ResultsPanel";
+import { useState } from "react";
+import type { HookData } from "../../types/hookData";
 
-export function AssistantUI({ show }: { show: boolean }) {
+export function AssistantUI({ data, setResults }: { data: HookData; setResults: React.Dispatch<React.SetStateAction<HookData | null>> }) {
+  const [x, setX] = useState<number>(0);
+  const [time, setTime] = useState<number>(0);
+
+  const showPanel = time >= 10;
+
   return (
     <>
       {/* Character */}
       <motion.div
-        initial={{ x: 500 }}
-        animate={{ x: show ? 100 : 500 }}
-        transition={{ type: "spring", stiffness: 120 }}
         style={{
           position: "fixed",
           width: "600px",
           height: "600px",
-          right: '1000px',
-          bottom: '320px',
+          left: "-25vw",
+          bottom: "200px",
           zIndex: 20,
-          pointerEvents: "none",
+          transform: `translateX(${x}vw)`,
         }}
       >
-        <ChibiCharacter />
+        <ChibiCharacter setX={setX} setTime={setTime} data={data} />
       </motion.div>
 
-      {/* Panel <ResultsPanel open={show} /> */}
-      <ResultsPanel open={show} />
+      {/* Panel appears after 15s */}
+      {showPanel && <ResultsPanel data={data} time={time} onClose={() => setResults(null)} />}
     </>
   );
 }

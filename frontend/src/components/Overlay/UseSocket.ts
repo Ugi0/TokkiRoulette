@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
+import type { HookData } from "../../types/hookData";
 
-export function useResultsSocket(enabled: boolean, onResults: (data: unknown) => void) {
+export function useResultsSocket(enabled: boolean, onResults: (data: HookData) => void) {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -21,7 +22,18 @@ export function useResultsSocket(enabled: boolean, onResults: (data: unknown) =>
       if (data.type === "results-ready") {
         ws.close();
         socketRef.current = null;
-        onResults(data);
+        const resultData = data["data"] as HookData;
+
+        /*const multipliedData: HookData = {
+          ...resultData,
+          losers: [
+            ...resultData.losers,
+            ...resultData.losers,
+            ...resultData.losers,
+          ],
+        };*/
+
+        onResults(resultData);
       }
     };
 

@@ -5,10 +5,11 @@ import { useState } from "react";
 import Notification from "../components/Notification";
 import { useResultsSocket } from "../components/Overlay/UseSocket";
 import { AssistantUI } from "../components/ResultsPanel/AssistantUI";
+import type { HookData } from "../types/hookData";
 
 export default function RoulettePage() {
   const [notification, _setNotification] = useState<string | null>(null);
-  const [resultsAvailable, setResultsAvailable] = useState(false);
+  const [results, setResults] = useState<HookData | null>(null);
   const [socketEnabled, setSocketEnabled] = useState(false);
 
   const setNotification: React.Dispatch<React.SetStateAction<string | null>> = (value) => {
@@ -30,8 +31,10 @@ export default function RoulettePage() {
     }
   };
 
-  useResultsSocket(socketEnabled, () => {
-    setResultsAvailable(true);
+  useResultsSocket(socketEnabled, (data: HookData) => {
+    if (results == null) {
+      setResults(data);
+    }
   });
 
   return (
@@ -49,7 +52,7 @@ export default function RoulettePage() {
         onDismiss={() => setNotification(null)}
       />
 
-      {resultsAvailable && <AssistantUI show={resultsAvailable} />}
+      {results != null && <AssistantUI data={results} setResults={() => { setResults(null); setSocketEnabled(false) }} />}
 
       <Footer />
     </div>
