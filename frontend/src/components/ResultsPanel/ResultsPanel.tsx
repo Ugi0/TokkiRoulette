@@ -239,12 +239,30 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
             ...rowStyle,
             fontSize: "20px",
             textDecoration: "underline",
-            minHeight: "58px",
+            minHeight: "29px",
             justifyContent: "center",
             paddingTop: "15px",
           }}
         >
           Lucky winners
+        </div>
+
+        <div
+          style={{
+            ...rowStyle,
+            display: "grid",
+            gridTemplateColumns: "1fr 70px 70px",
+            columnGap: "8px",
+            minHeight: "29px",
+
+            fontSize: "14px",
+            fontWeight: "bold",
+            color: "#222",
+          }}
+        >
+          <span style={{ justifySelf: "start", transform: "rotate(-8deg)" }}>Name</span>
+          <span style={{ justifySelf: "start", transform: "rotate(-4deg)" }}>Bet</span>
+          <span style={{ justifySelf: "end" }}>Won</span>
         </div>
 
         {[...Array(totalLines)].map((_, i) => {
@@ -257,16 +275,31 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
               animate={{ opacity: 1, x: 0 }}
               style={{
                 ...rowStyle,
-                justifyContent: "space-between",
-                display: "flex",
+                
+                display: "grid",
+                gridTemplateColumns: "1fr 70px 70px",
+
                 alignItems: "flex-end",
+                paddingRight: "6px",
+                columnGap: "8px",
+
               }}
             >
-              <TypewriterText text={sortedWinners[i]?.user_name ?? ""} />
-              <TypewriterText
-                text={sortedWinners[i]?.bet_amount ?? ""}
+              <span style={{ justifySelf: "start" }}>
+                <TypewriterText text={sortedWinners[i]?.user_name ?? ""} />
+              </span>
+              <span style={{ justifySelf: "start" }}>
+                <TypewriterText 
+                text={sortedWinners[i]?.bet_amount ?? ""} 
+                delay={Math.max(0, writeTime * 0.)}
+              />
+              </span>
+              <span style={{ justifySelf: "end" }}>
+                <TypewriterText
+                text={sortedWinners[i]?.won_amount ?? ""}
                 delay={Math.max(0, writeTime * 0.4)}
               />
+              </span>
             </motion.div>
           );
         })}
@@ -285,12 +318,25 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
             ...rowStyle,
             fontSize: "20px",
             textDecoration: "underline",
-            minHeight: "58px",
+            minHeight: "29px",
             justifyContent: "center",
             paddingTop: "15px",
           }}
         >
           Sore losers
+        </div>
+
+        <div
+          style={{
+            ...rowStyle,
+            justifyContent: "space-between",
+            display: "flex",
+            alignItems: "flex-end",
+            fontSize: "14px",
+          }}
+        >
+          <span style={{ justifySelf: "start", transform: "rotate(2deg)" }}>Name</span>
+          <span style={{ justifySelf: "end", transform: "rotate(6deg)" }}>Lost</span>
         </div>
 
         {[...Array(sortedLosers.length)].map((_, i) => {

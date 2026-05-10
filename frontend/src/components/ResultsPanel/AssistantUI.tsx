@@ -5,7 +5,6 @@ import { useState } from "react";
 import type { HookData } from "../../types/hookData";
 
 export function AssistantUI({ data, setResults }: { data: HookData; setResults: React.Dispatch<React.SetStateAction<HookData | null>> }) {
-  const [x, setX] = useState<number>(0);
   const [time, setTime] = useState<number>(0);
 
   const showPanel = time >= 10;
@@ -16,15 +15,12 @@ export function AssistantUI({ data, setResults }: { data: HookData; setResults: 
       <motion.div
         style={{
           position: "fixed",
-          width: "600px",
-          height: "600px",
-          left: "-25vw",
-          bottom: "200px",
+          width: "100vw",
+          height: "100vh",
           zIndex: 20,
-          transform: `translateX(${x}vw)`,
         }}
       >
-        <ChibiCharacter setX={setX} setTime={setTime} data={data} />
+        <ChibiCharacter setTime={setTime} data={data} />
       </motion.div>
 
       {/* Panel appears after 15s */}

@@ -1,7 +1,8 @@
 import type { HookData } from "../../../types/hookData";
+import * as PIXI from "pixi.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function bringOutTablet(model: any, time: number, _setX: React.Dispatch<React.SetStateAction<number>>, data: HookData) {
+export function bringOutTablet(model: any, time: number, data: HookData) {
   model.expression("Tablet");
 
   const totalTime = 15;
@@ -71,8 +72,20 @@ export function hideTablet(model: any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function stopWriting(model: any) {
+export function stopWriting(model: any, _time: number, _data: HookData, app: PIXI.Application) {
     model.expression("Tablet");
+
+    const pos = app.renderer.plugins.interaction.mouse.global;
+    const rect = app.view.getBoundingClientRect();
+
+    const normX = ((pos.x - rect.left) / rect.width) * 2 - 1;
+    const normY = ((pos.y - rect.top) / rect.height) * 2 - 1;
+
+    const x = -normX * 30;
+    const y = -normY * 30;
+
+    model.internalModel.coreModel.setParameterValueById("DrawX", x);
+    model.internalModel.coreModel.setParameterValueById("DrawY", y);
 }
 
 export function getTiming(data: HookData) {

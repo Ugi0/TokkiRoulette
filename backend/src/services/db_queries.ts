@@ -115,7 +115,7 @@ export async function getTotalPredictionResults(predictionId: string): Promise<H
     let won_amount: number | null = null;
 
     if (isWinner && winningPool > 0) {
-      won_amount = Math.floor(row.bet_amount * (totalPool / winningPool));
+      won_amount = Math.floor(row.bet_amount * (totalPool / winningPool)) - row.bet_amount;
     } else if (!isWinner) {
       won_amount = null;
     }

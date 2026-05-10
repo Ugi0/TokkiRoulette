@@ -7,7 +7,7 @@ import { blink, updateBlink } from "./customAnimations/blink";
 import type { HookData } from "../../types/hookData";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sequenceTimings: Record<number, (model: any, time: number, setX: React.Dispatch<React.SetStateAction<number>>, data: HookData) => void> = {
+const sequenceTimings: Record<number, (model: any, time: number, data: HookData, app: PIXI.Application) => void> = {
   0: walkAnimation,
   5: blink,
   10: bringOutTablet,
@@ -15,10 +15,10 @@ const sequenceTimings: Record<number, (model: any, time: number, setX: React.Dis
 };
 
 // TODO LIST
-// After being done with writing, have the character move the drawX and drawY based on the position of the mouse
+// Instead of having the character disappear, have it walk off screen after closing the panel
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function runSequence(time: number): ((model: any, time: number, setX: React.Dispatch<React.SetStateAction<number>>, data: HookData) => void) | undefined {
+function runSequence(time: number): ((model: any, time: number, data: HookData, app: PIXI.Application) => void) | undefined {
   const timings = Object.keys(sequenceTimings)
     .map(Number)
     .sort((a, b) => a - b);
@@ -38,7 +38,7 @@ function runSequence(time: number): ((model: any, time: number, setX: React.Disp
   }
 }
 
-export function ChibiCharacter( { setX, setTime, data }: { setX: React.Dispatch<React.SetStateAction<number>>; setTime: React.Dispatch<React.SetStateAction<number>>; data: HookData }) {
+export function ChibiCharacter( { setTime, data }: { setTime: React.Dispatch<React.SetStateAction<number>>; data: HookData }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,8 +46,8 @@ export function ChibiCharacter( { setX, setTime, data }: { setX: React.Dispatch<
 
     (async () => {
       const app = new PIXI.Application({
-        width: 900,
-        height: 900,
+        width: window.innerWidth,
+        height: window.innerHeight,
         transparent: true,
         antialias: true,
         clearBeforeRender: true,
@@ -64,8 +64,11 @@ export function ChibiCharacter( { setX, setTime, data }: { setX: React.Dispatch<
 
         model.anchor.set(0.5, 1);
         model.scale.set(0.2);
-        model.x = app.screen.width / 2;
-        model.y = app.screen.height;
+
+        const walkRange = app.renderer.width * 0.25;
+
+        model.x = -walkRange;
+        model.y = app.renderer.height - (model.height * 0.1);
 
         pixiModel.tint = 0xffffff;
         pixiModel.alpha = 1;
@@ -89,7 +92,7 @@ export function ChibiCharacter( { setX, setTime, data }: { setX: React.Dispatch<
 
           const animation = runSequence(time);
           if (animation) {
-            animation(model, time, setX, data);
+            animation(model, time, data, app);
           }
 
           if (animation != blink) {
@@ -107,8 +110,8 @@ export function ChibiCharacter( { setX, setTime, data }: { setX: React.Dispatch<
     <div
       ref={containerRef}
       style={{
-        width: "900px",
-        height: "900px",
+        width: "100vw",
+        height: "100vh",
       }}
     />
   );

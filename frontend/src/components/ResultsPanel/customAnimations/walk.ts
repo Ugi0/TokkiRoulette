@@ -2,7 +2,7 @@ let position = 0;
 let lastTime = 0;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function walkAnimation(model: any, time: number, setX: React.Dispatch<React.SetStateAction<number>>) {
+export function walkAnimation(model: any, time: number) {
   const totalDuration = 4.5;
   const cycles = 4;
 
@@ -39,5 +39,7 @@ export function walkAnimation(model: any, time: number, setX: React.Dispatch<Rea
     position = Math.min(position, distance);
   }
 
-  setX(position);
+  console.log(position);
+
+  model.x = position * 10;
 }
