@@ -6,6 +6,7 @@ import webhookRoutes from "./routes/twitchWebhooks.js";
 import spinResult from "./routes/spinResult.js";
 import debugRoutes from "./routes/debug.js";
 import { initWebSocketServer } from "./routes/wsServer.js";
+import { handleResourcesRoute } from "./routes/resources.js";
 
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -54,6 +55,10 @@ const server = http.createServer(
 
       if (url.pathname.startsWith("/spin-result")) {
         return spinResult(req, res, url);
+      }
+
+      if (url.pathname.startsWith("/resources")) {
+        return handleResourcesRoute(req, res, url);
       }
 
       res.writeHead(404, { "Content-Type": "text/plain" });

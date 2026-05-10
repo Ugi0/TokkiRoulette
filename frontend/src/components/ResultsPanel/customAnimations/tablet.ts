@@ -2,13 +2,13 @@ import type { HookData } from "../../../types/hookData";
 import * as PIXI from "pixi.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function bringOutTablet(model: any, time: number, data: HookData) {
+export function bringOutTablet(model: any, time: number, data: HookData | null) {
   model.expression("Tablet");
 
   const totalTime = 15;
 
   const totalLines = Math.min(
-    Math.max(data.winners.length, data.losers.length),
+    Math.max(data?.winners.length || 0, data?.losers.length || 0),
     18
   );
 
@@ -57,7 +57,7 @@ export function bringOutTablet(model: any, time: number, data: HookData) {
 
   let writingWobble = 0;
   if (t < writeTime) {
-    writingWobble = Math.sin(localTime * 12) * 2;
+    writingWobble = Math.sin(localTime * 20) * 4;
   }
 
   const totalY = lineOffset + writingWobble;
@@ -72,7 +72,7 @@ export function hideTablet(model: any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function stopWriting(model: any, _time: number, _data: HookData, app: PIXI.Application) {
+export function stopWriting(model: any, _time: number, _data: HookData | null, app: PIXI.Application) {
     model.expression("Tablet");
 
     const pos = app.renderer.plugins.interaction.mouse.global;
@@ -88,11 +88,11 @@ export function stopWriting(model: any, _time: number, _data: HookData, app: PIX
     model.internalModel.coreModel.setParameterValueById("DrawY", y);
 }
 
-export function getTiming(data: HookData) {
+export function getTiming(data: HookData | null) {
   const totalTime = 15;
 
   const totalLines = Math.min(
-    Math.max(data.winners.length, data.losers.length),
+    Math.max(data?.winners.length || 0, data?.losers.length || 0),
     18
   );
 

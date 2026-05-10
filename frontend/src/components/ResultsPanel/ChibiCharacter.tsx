@@ -1,24 +1,21 @@
 import { useEffect, useRef } from "react";
 import * as PIXI from "pixi.js";
 import { Live2DModel } from "pixi-live2d-display/cubism4";
-import { walkAnimation } from "./customAnimations/walk";
+import { walkAnimation, walkOff } from "./customAnimations/walk";
 import { bringOutTablet, stopWriting } from "./customAnimations/tablet";
 import { blink, updateBlink } from "./customAnimations/blink";
 import type { HookData } from "../../types/hookData";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sequenceTimings: Record<number, (model: any, time: number, data: HookData, app: PIXI.Application) => void> = {
+const sequenceTimings: Record<number, (model: any, time: number, data: HookData | null, app: PIXI.Application) => void> = {
   0: walkAnimation,
   5: blink,
   10: bringOutTablet,
-  27: stopWriting
+  28: stopWriting
 };
 
-// TODO LIST
-// Instead of having the character disappear, have it walk off screen after closing the panel
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function runSequence(time: number): ((model: any, time: number, data: HookData, app: PIXI.Application) => void) | undefined {
+function runSequence(time: number): ((model: any, time: number, data: HookData | null, app: PIXI.Application) => void) | undefined {
   const timings = Object.keys(sequenceTimings)
     .map(Number)
     .sort((a, b) => a - b);
@@ -38,21 +35,25 @@ function runSequence(time: number): ((model: any, time: number, data: HookData, 
   }
 }
 
-export function ChibiCharacter( { setTime, data }: { setTime: React.Dispatch<React.SetStateAction<number>>; data: HookData }) {
+
+export function ChibiCharacter({setTime, data, stateRef}: {setTime: React.Dispatch<React.SetStateAction<number>>; data: HookData | null; stateRef: React.MutableRefObject<"active" | "walkingOut">;}) {
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
+    let app: PIXI.Application;
+    let tickerFn: ((delta: number) => void) | null = null;
+
     (async () => {
-      const app = new PIXI.Application({
+      app = new PIXI.Application({
         width: window.innerWidth,
         height: window.innerHeight,
         transparent: true,
         antialias: true,
         clearBeforeRender: true,
         preserveDrawingBuffer: true,
-
       });
 
       containerRef.current!.appendChild(app.view as HTMLCanvasElement);
@@ -65,30 +66,36 @@ export function ChibiCharacter( { setTime, data }: { setTime: React.Dispatch<Rea
         model.anchor.set(0.5, 1);
         model.scale.set(0.2);
 
-        const walkRange = app.renderer.width * 0.25;
+        const walkRange = app.renderer.width * 0.05;
 
         model.x = -walkRange;
-        model.y = app.renderer.height - (model.height * 0.1);
+        model.y = app.renderer.height + (model.height * 0.1);
 
         pixiModel.tint = 0xffffff;
         pixiModel.alpha = 1;
 
         for (const child of model.children) {
-          (child as PIXI.Container & { blendMode: PIXI.BLEND_MODES }).blendMode = PIXI.BLEND_MODES.NORMAL;
+          (child as PIXI.Container & { blendMode: PIXI.BLEND_MODES }).blendMode =
+            PIXI.BLEND_MODES.NORMAL;
         }
 
         app.stage.addChild(model);
 
         let time = 0;
 
-        app.ticker.add((delta) => {
-          
+        tickerFn = (delta: number) => {
           const dt = delta * 16.6667;
           time += dt / 1000;
 
           model.update(dt);
 
           setTime(time);
+
+          if (stateRef.current === "walkingOut") {
+            walkOff(model, time);
+            updateBlink(model, time);
+            return;
+          }
 
           const animation = runSequence(time);
           if (animation) {
@@ -98,11 +105,32 @@ export function ChibiCharacter( { setTime, data }: { setTime: React.Dispatch<Rea
           if (animation != blink) {
             updateBlink(model, time);
           }
-        });
+        };
+
+        app.ticker.add(tickerFn);
+
       } catch (e) {
         console.error("Model failed to load:", e);
       }
     })();
+
+    return () => {
+      console.log("Cleaning up PIXI");
+
+      if (app) {
+        if (tickerFn) {
+          app.ticker.remove(tickerFn);
+        }
+
+        app.ticker.stop();
+        app.destroy(true);
+
+        if (containerRef.current && app.view) {
+          // eslint-disable-next-line react-hooks/exhaustive-deps
+          containerRef.current.removeChild(app.view as HTMLCanvasElement);
+        }
+      }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

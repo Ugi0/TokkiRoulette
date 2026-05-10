@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import React from "react";
 import type { HookData, UserData } from "../../types/hookData";
 
-export function ResultsPanel({data, time, onClose}: {data: HookData; time: number; onClose: () => void}) {
+export function ResultsPanel({data, time, onClose, closing}: {data: HookData; time: number; onClose: () => void; closing: boolean})
+ {
   const winners: UserData[] = data.winners;
   const losers: UserData[] = data.losers;
 
@@ -31,6 +32,8 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
     display: "flex",
     alignItems: "flex-start",
     paddingLeft: "6px",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
   };
 
   const sortedLosers = [...losers].sort(
@@ -71,7 +74,7 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
   return (
     <motion.div
       initial={{ x: 400 }}
-      animate={{ x: data ? 0 : 400 }}
+      animate={{ x: closing ? 1000 : 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       style={{
         position: "fixed",
@@ -226,7 +229,6 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
         />
       </div>
 
-      {/* LEFT PAGE */}
       <div
         style={{
           ...pageStyle,
@@ -251,7 +253,7 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
           style={{
             ...rowStyle,
             display: "grid",
-            gridTemplateColumns: "1fr 70px 70px",
+            gridTemplateColumns: "1fr minmax(0, 80px) 70px",
             columnGap: "8px",
             minHeight: "29px",
 
@@ -277,7 +279,7 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
                 ...rowStyle,
                 
                 display: "grid",
-                gridTemplateColumns: "1fr 70px 70px",
+                gridTemplateColumns: "1fr minmax(0, 80px) 70px",
 
                 alignItems: "flex-end",
                 paddingRight: "6px",
@@ -288,10 +290,10 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
               <span style={{ justifySelf: "start" }}>
                 <TypewriterText text={sortedWinners[i]?.user_name ?? ""} />
               </span>
-              <span style={{ justifySelf: "start" }}>
+              <span style={{ justifySelf: "center" }}>
                 <TypewriterText 
                 text={sortedWinners[i]?.bet_amount ?? ""} 
-                delay={Math.max(0, writeTime * 0.)}
+                delay={Math.max(0, writeTime * 0.2)}
               />
               </span>
               <span style={{ justifySelf: "end" }}>
@@ -305,7 +307,6 @@ export function ResultsPanel({data, time, onClose}: {data: HookData; time: numbe
         })}
       </div>
 
-      {/* RIGHT PAGE */}
       <div
         style={{
           ...pageStyle,
