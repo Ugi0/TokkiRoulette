@@ -1,5 +1,5 @@
+import type { Application } from "pixi.js";
 import type { HookData } from "../../../types/hookData";
-import * as PIXI from "pixi.js";
 import type { PIXIModel } from "../../../types/pixi";
 
 export function bringOutTablet(model: PIXIModel, time: number, data: HookData | null) {
@@ -70,7 +70,7 @@ export function hideTablet(model: PIXIModel) {
     model.expression("B1");
 }
 
-export function stopWriting(model: PIXIModel, _time: number, _data: HookData | null, app: PIXI.Application) {
+export function stopWriting(model: PIXIModel, _time: number, _data: HookData | null, app: Application) {
     model.expression("Tablet");
 
     const pos = app.renderer.plugins.interaction.mouse.global;

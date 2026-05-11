@@ -1,22 +1,39 @@
 import { useEffect, useRef } from "react";
-import * as PIXI from "pixi.js";
-import { Live2DModel } from "pixi-live2d-display/cubism4";
+import type { Application, BLEND_MODES, Container } from "pixi.js";
 import { walkAnimation, walkOff } from "./customAnimations/walk";
 import { bringOutTablet, stopWriting } from "./customAnimations/tablet";
 import { blink, updateBlink } from "./customAnimations/blink";
 import type { HookData } from "../../types/hookData";
 import type { PIXIModel } from "../../types/pixi";
 
-const sequenceTimings: Record<number, (model: PIXIModel, time: number, data: HookData | null, app: PIXI.Application) => void> = {
+async function loadCubismCore() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!(window as any).Live2DCubismCore) {
+    const script = document.createElement("script");
+    script.src =
+      "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js";
+
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    await new Promise((resolve, reject) => {
+      script.onload = resolve;
+      script.onerror = reject;
+    });
+  }
+}
+
+const sequenceTimings: Record<number, (model: PIXIModel, time: number, data: HookData | null, app: Application) => void> = {
   0: walkAnimation,
   5: blink,
   10: bringOutTablet,
   28: stopWriting
 };
 
-function runSequence(time: number): ((model: PIXIModel, time: number, data: HookData | null, app: PIXI.Application) => void) | undefined {
+function runSequence(time: number): ((model: PIXIModel, time: number, data: HookData | null, app: Application) => void) | undefined {
   const timings = Object.keys(sequenceTimings)
-    .map(Number)
+    .map(Number)    
     .sort((a, b) => a - b);
 
   let selected = null;
@@ -35,32 +52,52 @@ function runSequence(time: number): ((model: PIXIModel, time: number, data: Hook
 }
 
 
-export function ChibiCharacter({setTime, data, stateRef}: {setTime: React.Dispatch<React.SetStateAction<number>>; data: HookData | null; stateRef: React.MutableRefObject<"active" | "walkingOut">;}) {
-
+export function ChibiCharacter({
+  setTime,
+  data,
+  stateRef,
+}: {
+  setTime: React.Dispatch<React.SetStateAction<number>>;
+  data: HookData | null;
+  stateRef: React.MutableRefObject<"active" | "walkingOut">;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    let app: PIXI.Application;
+    let app: Application | null = null;
     let tickerFn: ((delta: number) => void) | null = null;
 
-    (async () => {
-      app = new PIXI.Application({
-        width: window.innerWidth,
-        height: window.innerHeight,
-        transparent: true,
-        antialias: true,
-        clearBeforeRender: true,
-        preserveDrawingBuffer: true,
-      });
+    let destroyed = false;
 
-      containerRef.current!.appendChild(app.view as HTMLCanvasElement);
-
+    async function setup() {
       try {
-        const model = await Live2DModel.from("/api/model/chibi/TT Tokki.model3.json") as unknown as PIXIModel;
+        await loadCubismCore();
 
-        const pixiModel = model as unknown as PIXIModel;
+        const PIXI = await import("pixi.js");
+        const { Live2DModel } = await import(
+          "pixi-live2d-display/cubism4"
+        );
+
+        if (destroyed) return;
+
+        app = new PIXI.Application({
+          width: window.innerWidth,
+          height: window.innerHeight,
+          transparent: true,
+          antialias: true,
+          clearBeforeRender: true,
+          preserveDrawingBuffer: true,
+        });
+
+        containerRef.current!.appendChild(
+          app.view as HTMLCanvasElement
+        );
+
+        const model = (await Live2DModel.from(
+          "/api/resources/model/chibi/TT Tokki.model3.json"
+        )) as unknown as PIXIModel;
 
         model.anchor.set(0.5, 1);
         model.scale.set(0.2);
@@ -68,14 +105,15 @@ export function ChibiCharacter({setTime, data, stateRef}: {setTime: React.Dispat
         const walkRange = app.renderer.width * 0.05;
 
         model.x = -walkRange;
-        model.y = app.renderer.height + (model.height * 0.1);
+        model.y = app.renderer.height + model.height * 0.1;
 
-        pixiModel.tint = 0xffffff;
-        pixiModel.alpha = 1;
+        model.tint = 0xffffff;
+        model.alpha = 1;
 
         for (const child of model.children) {
-          (child as PIXI.Container & { blendMode: PIXI.BLEND_MODES }).blendMode =
-            PIXI.BLEND_MODES.NORMAL;
+          (
+            child as Container & { blendMode: BLEND_MODES }
+          ).blendMode = PIXI.BLEND_MODES.NORMAL;
         }
 
         app.stage.addChild(model);
@@ -87,7 +125,6 @@ export function ChibiCharacter({setTime, data, stateRef}: {setTime: React.Dispat
           time += dt / 1000;
 
           model.update(dt);
-
           setTime(time);
 
           if (stateRef.current === "walkingOut") {
@@ -98,22 +135,24 @@ export function ChibiCharacter({setTime, data, stateRef}: {setTime: React.Dispat
 
           const animation = runSequence(time);
           if (animation) {
-            animation(model, time, data, app);
+            animation(model, time, data, app!);
           }
 
-          if (animation != blink) {
+          if (animation !== blink) {
             updateBlink(model, time);
           }
         };
 
         app.ticker.add(tickerFn);
-
       } catch (e) {
-        console.error("Model failed to load:", e);
+        console.error("Model setup failed:", e);
       }
-    })();
+    }
+
+    setup();
 
     return () => {
+      destroyed = true;
       console.log("Cleaning up PIXI");
 
       if (app) {
@@ -125,8 +164,14 @@ export function ChibiCharacter({setTime, data, stateRef}: {setTime: React.Dispat
         app.destroy(true);
 
         if (containerRef.current && app.view) {
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          containerRef.current.removeChild(app.view as HTMLCanvasElement);
+          try {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            containerRef.current.removeChild(
+              app.view as HTMLCanvasElement
+            );
+          } catch {
+            // Ignore if already removed
+          }
         }
       }
     };

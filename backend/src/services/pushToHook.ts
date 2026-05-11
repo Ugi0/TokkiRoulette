@@ -4,7 +4,8 @@ import { HookData } from "../types/hookData.js";
 import { getTotalPredictionResults, getUserSession } from "./db_queries.js";
 
 export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent) {
-  const sessionId = "0";//await getUserSession(endEvent.event.broadcaster_user_id);
+  // Change to endEvent.event.broadcaster_user_id if need to support other broadcasters in the future
+  const sessionId = await getUserSession(process.env.TOKKI_USER_ID!);
 
   if (!sessionId) {
     console.error("No active session found for broadcaster:", endEvent.event.broadcaster_user_id);
@@ -21,10 +22,7 @@ export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent
   pushToSession(sessionId, payload);
 }
 
-function pushToSession(
-  sessionId: string,
-  payload: Payload
-) {
+function pushToSession(sessionId: string, payload: Payload) {
   const ws = clients.get(sessionId);
 
   if (!ws || ws.readyState !== ws.OPEN) {

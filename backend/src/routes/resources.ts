@@ -3,7 +3,8 @@ import { IncomingMessage, ServerResponse } from "http";
 import path from "path";
 import { parseCookies } from "./spinResult.js";
 
-const MODEL_ROOT = path.join(process.cwd(), "storage/models");
+const MODEL_ROOT = path.join(process.cwd(), "resources/");
+console.log(MODEL_ROOT)
 
 export async function handleResourcesRoute(req: IncomingMessage, res: ServerResponse, url: URL) {
   const cookies = parseCookies(req);
@@ -14,8 +15,10 @@ export async function handleResourcesRoute(req: IncomingMessage, res: ServerResp
     return res.end("Unauthorized");
   }
 
-  const requestedPath = url.pathname.replace("/models", "");
-  const safePath = path.normalize(requestedPath);
+  const decodedPath = decodeURIComponent(url.pathname);
+  let strippedPath = decodedPath.replace(/^\/resources/, "");
+
+  const safePath = path.normalize(strippedPath);
 
   if (safePath.includes("..")) {
     res.writeHead(400, { "Content-Type": "text/plain" });
