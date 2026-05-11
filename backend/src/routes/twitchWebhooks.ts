@@ -78,7 +78,7 @@ export default async function webhookRoutes(
       case "channel.prediction.progress": {
         const progressEvent = event as TwitchPredictionLockEvent;
 
-        progressPrediction(progressEvent);
+        await progressPrediction(progressEvent);
         console.log(`Prediction PROGRESS: %s`, progressEvent.event.broadcaster_user_login);
         break;
       }
@@ -86,7 +86,13 @@ export default async function webhookRoutes(
       case "channel.prediction.end": {
         const endEvent = event as TwitchPredictionEndEvent;
 
-        await endPrediction(endEvent);
+        if (endEvent.event.status === "canceled") {
+          console.log(`Prediction CANCELED: %s`, endEvent.event.broadcaster_user_login);
+          break;
+        }
+
+        await progressPrediction(endEvent);
+
         await handlePredictionEndPush(endEvent);
 
         console.log(
@@ -134,8 +140,8 @@ export function getJsonBody(req: IncomingMessage): Promise<unknown> {
   });
 }
 
-function progressPrediction(prediction_event: TwitchPredictionLockEvent) {
-  cacheUserResults(prediction_event.event.id, prediction_event.event.outcomes.flatMap(outcome =>
+async function progressPrediction(prediction_event: TwitchPredictionLockEvent | TwitchPredictionEndEvent) {
+  await cacheUserResults(prediction_event.event.id, prediction_event.event.outcomes.flatMap(outcome =>
     outcome.top_predictors.map(pred => ({
       user_id: pred.user_id,
       user_name: pred.user_name,

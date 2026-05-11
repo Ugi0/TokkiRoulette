@@ -1,7 +1,8 @@
 import { clients } from "../routes/wsServer.js";
 import { TwitchPredictionEndEvent } from "../types/events.js";
 import { HookData } from "../types/hookData.js";
-import { getTotalPredictionResults, getUserSession } from "./db_queries.js";
+import { getTotalPredictionResults } from "./cache.js";
+import { getUserSession } from "./db_queries.js";
 
 export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent) {
   // Change to endEvent.event.broadcaster_user_id if need to support other broadcasters in the future
@@ -12,17 +13,17 @@ export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent
     return;
   }
 
-  const totalResults = await getTotalPredictionResults(endEvent.event.id);
+  const totalResults = await getTotalPredictionResults(endEvent);
 
   const payload: Payload = {
     type: "results-ready",
     data: totalResults,
   };
 
-  pushToSession(sessionId, payload);
+  await pushToSession(sessionId, payload);
 }
 
-function pushToSession(sessionId: string, payload: Payload) {
+async function pushToSession(sessionId: string, payload: Payload) {
   const ws = clients.get(sessionId);
 
   if (!ws || ws.readyState !== WebSocket.OPEN) {
