@@ -37,20 +37,7 @@ export type TwitchPredictionLockEvent = {
         broadcaster_user_login: string;
         broadcaster_user_name: string;
         title: string;
-        outcomes: {
-            id: string;
-            title: string;
-            color: string;
-            users: number;
-            channel_points: number;
-            top_predictors: {
-                user_name: string;
-                user_login: string;
-                user_id: string;
-                channel_points_won: number;
-                channel_points_used: number;
-            }[];
-        }[];
+        outcomes: PredictionOutcome[];
         started_at: string;
         locks_at: string;
     }
@@ -65,24 +52,28 @@ export type TwitchPredictionEndEvent = {
         broadcaster_user_name: string;
         title: string;
         winning_outcome_id: string;
-        outcomes: {
-            id: string;
-            title: string;
-            color: string;
-            users: number;
-            channel_points: number;
-            top_predictors: {
-                user_name: string;
-                user_login: string;
-                user_id: string;
-                channel_points_won: number;
-                channel_points_used: number;
-            }[];
-        }[];
+        outcomes: PredictionOutcome[];
         status: "resolved" | "canceled";
         started_at: string;
         ended_at: string;
     }
+}
+
+export type PredictionOutcome = {
+    id: string;
+    title: string;
+    color: string;
+    users: number;
+    channel_points: number;
+    top_predictors: TopPrediction[];
+}
+
+export type TopPrediction = {
+    user_name: string;
+    user_login: string;
+    user_id: string;
+    channel_points_won: number;
+    channel_points_used: number;
 }
 
 export type TwitchPredictionEvent = TwitchPredictionBeginEvent | TwitchPredictionLockEvent | TwitchPredictionEndEvent;

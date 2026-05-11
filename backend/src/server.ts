@@ -2,9 +2,11 @@ import http, { IncomingMessage, ServerResponse } from "node:http";
 import { URL } from "node:url";
 import sendJson from "./utils/sendJson.js";
 import authRoutes from "./routes/auth.js";
-import webhookRoutes from "./routes/webhooks.js";
+import webhookRoutes from "./routes/twitchWebhooks.js";
 import spinResult from "./routes/spinResult.js";
 import debugRoutes from "./routes/debug.js";
+import { initWebSocketServer } from "./routes/wsServer.js";
+import { handleResourcesRoute } from "./routes/resources.js";
 
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -55,6 +57,10 @@ const server = http.createServer(
         return spinResult(req, res, url);
       }
 
+      if (url.pathname.startsWith("/resources")) {
+        return handleResourcesRoute(req, res, url);
+      }
+
       res.writeHead(404, { "Content-Type": "text/plain" });
       res.end("Not Found");
     } catch (err) {
@@ -63,6 +69,8 @@ const server = http.createServer(
     }
   }
 );
+
+initWebSocketServer(server);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

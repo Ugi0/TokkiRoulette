@@ -3,6 +3,7 @@ import {
   TwitchPredictionEndEvent,
   TwitchPredictionLockEvent
 } from "../types/events.js";
+import { getTotalPredictionResults } from "./cache.js";
 
 import db from "./db.js";
 import { isPredictionRoulette } from "./db_queries.js";
@@ -84,36 +85,27 @@ export async function lockPrediction(
   }
 }
 
-export async function endPrediction(
-  prediction_event: TwitchPredictionEndEvent
-) {
-  const updateStateQuery = `
-    UPDATE predictions
-    SET prediction_status = $1
-    WHERE id = $2
-  `;
+export async function endPrediction(prediction_event: TwitchPredictionEndEvent) {
+  const predictionId = prediction_event.event.id;
 
-  await db.query(updateStateQuery, [
-    prediction_event.event.status,
-    prediction_event.event.id
-  ]);
+  await db.query(
+    `UPDATE predictions
+     SET prediction_status = $1
+     WHERE id = $2`,
+    [prediction_event.event.status, predictionId]
+  );
 
-  const insertOutcomeQuery = `
-    INSERT INTO prediction_outcomes (
-      prediction_id,
-      winning_option_id
-    )
-    VALUES ($1, $2)
-    ON CONFLICT (prediction_id) DO UPDATE
-      SET winning_option_id = EXCLUDED.winning_option_id
-  `;
+  await db.query(
+    `INSERT INTO prediction_outcomes (prediction_id, winning_option_id)
+     VALUES ($1, $2)
+     ON CONFLICT (prediction_id) DO UPDATE
+     SET winning_option_id = EXCLUDED.winning_option_id`,
+    [predictionId, prediction_event.event.winning_outcome_id]
+  );
 
-  await db.query(insertOutcomeQuery, [
-    prediction_event.event.id,
-    prediction_event.event.winning_outcome_id
-  ]);
+  const isRoulette = await isPredictionRoulette(predictionId);
 
-  const winningOutcomeId = prediction_event.event.winning_outcome_id;
+  const hookData = await getTotalPredictionResults(prediction_event);
 
   const insertResultQuery = `
     INSERT INTO results (
@@ -129,26 +121,18 @@ export async function endPrediction(
     ON CONFLICT (prediction_id, user_id) DO NOTHING
   `;
 
-  const isRoulette = await isPredictionRoulette(prediction_event.event.id);
+  const allUsers = [...hookData.winners, ...hookData.losers];
 
-  for (const outcome of prediction_event.event.outcomes) {
-    for (const predictor of outcome.top_predictors ?? []) {
-      const betAmount = predictor.channel_points_used;
-      const wonAmount =
-        outcome.id === winningOutcomeId
-          ? predictor.channel_points_won - betAmount
-          : null;
-
-      await db.query(insertResultQuery, [
-        prediction_event.event.id,
-        predictor.user_id,
-        predictor.user_name,
-        betAmount,
-        wonAmount,
-        new Date(),
-        isRoulette
-      ]);
-    }
+  for (const user of allUsers) {
+    await db.query(insertResultQuery, [
+      predictionId,
+      user.user_id,
+      user.user_name,
+      user.bet_amount,
+      user.won_amount,
+      new Date(),
+      isRoulette
+    ]);
   }
 }
 

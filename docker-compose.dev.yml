@@ -2,27 +2,37 @@ version: "3.9"
 
 services:
   frontend:
-    image: react-frontend-prod
     build:
       context: frontend
       dockerfile: Dockerfile
-    container_name: frontend
+      target: dev
+    container_name: frontend-dev
     ports:
-      - "6000:80"
-    restart: unless-stopped
+      - "80:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: on-failure
+
 
   backend:
-    image: node-backend-prod
     build:
       context: backend
-      dockerfile: Dockerfile
-    container_name: backend
+      target: dev
+    container_name: backend-dev
     env_file:
       - backend/.env
     ports:
-      - "6001:8080"
-    restart: unless-stopped
-    
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: on-failure
+
   database:
     image: postgres:16
     container_name: roulette-db
@@ -33,7 +43,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./backend/db-init.sql:/docker-entrypoint-initdb.d/db-init.sql:ro
-    restart: unless-stopped
+    restart: on-failure
 
 volumes:
   pgdata:

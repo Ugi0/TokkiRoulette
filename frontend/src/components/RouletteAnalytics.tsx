@@ -1,37 +1,53 @@
 import "./RouletteAnalytics.css"
-import TopIndividual from "./TopIndividual.tsx";
-import TopLeaders from "./TopLeaders.tsx";
-
+import Individual from "./Individual.tsx";
+import Leaderboard from "./Leaderboard.tsx";
 export default function RouletteAnalytics() {
-
     return (
-        <section className="roulette-analytics">
+        <div className="roulette-analytics">
+            <div className='stats'>
+                <h1>Top Singular Bet Stats</h1>
+                <div className="content">
+                    <Individual
+                        title='Biggest Single Win'
+                        endpoint='/api/stats/biggest-win'
+                    />
+                    <Individual
+                        title='Biggest Single Loss'
+                        endpoint='/api/stats/biggest-loss'
+                    />
+                </div>
+            </div>
+            <div className='stats'>
+                <h1>Last Prediction Stats</h1>
+                <div className="content">
+                    <Leaderboard
+                        title='Recent Winners'
+                        endpoint='/api/stats/recent-winners'
+                    />
+                    <Leaderboard
+                        title='Recent Losers'
+                        endpoint='/api/stats/recent-losers'
+                    />
+                </div>
 
-            <div className="recent">
-                <div className="recent-winners">
-                    <TopLeaders title="Recent Winners" />
-                </div>
-                <div className="recent-losers">
-                    <TopLeaders title="Recent Losers" />
-                </div>
             </div>
-            <div className="individuals">
-                <div className="individual-winner">
-                    <TopIndividual title="Top Individual Winner" />
+            <div className='stats'>
+                <h1>Overall Top Stats</h1>
+                <div className="content">
+                    <Leaderboard
+                        title='Top Winners'
+                        endpoint='/api/stats/top-winners'
+                        allowInterval={true}
+                    />
+                    <Leaderboard
+                        title='Top Losers'
+                        endpoint='/api/stats/top-losers'
+                        allowInterval={true}
+                    />
                 </div>
-                <div className="individual-loser">
-                    <TopIndividual title="Top Individual Loser" />
-                </div>
+
             </div>
-            <div className="leaderboards">
-                <div className="top-winners">
-                    <TopLeaders title="Top Winners" />
-                </div>
-                <div className="top-losers">
-                    <TopLeaders title="Top Losers" />
-                </div>
-            </div>
-        </section>
+        </div>
 
     );
 }

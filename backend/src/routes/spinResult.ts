@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { getJsonBody } from "./webhooks.js";
+import { getJsonBody } from "./twitchWebhooks.js";
 import { markPredictionAsRoulette, recordSpinResult } from "../services/db_updates.js";
 import { checkForLockedPrediction, getUserSession } from "../services/db_queries.js";
 import { SIX_MONTHS } from "./auth.js";
@@ -44,18 +44,18 @@ export default async function spinResult(
                 ]); 
 
                 if (lockedPredictionId === null) {
-                    res.writeHead(200, { "Content-Type": "text/plain" });
-                    return res.end("Spin result recorded");
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    return res.end(JSON.stringify({ status: "Spin result recorded" }));
                 }
 
                 await markPredictionAsRoulette(lockedPredictionId);
 
-                res.writeHead(200, { "Content-Type": "text/plain" });
+                res.writeHead(200, { "Content-Type": "application/json" });
                 return res.end(JSON.stringify({ status: "authorized" }));
             }
 
-            res.writeHead(200, { "Content-Type": "text/plain" });
-            return res.end("Spin result recorded");
+            res.writeHead(200, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ status: "Spin result recorded" }));
         }
         catch (err) {
             console.error("Error recording spin result:", err);
@@ -68,7 +68,7 @@ export default async function spinResult(
     return res.end("Not Found");
 }
 
-function parseCookies(req: IncomingMessage): Record<string, string> {
+export function parseCookies(req: IncomingMessage): Record<string, string> {
   const header = req.headers.cookie;
   if (!header) return {};
 
