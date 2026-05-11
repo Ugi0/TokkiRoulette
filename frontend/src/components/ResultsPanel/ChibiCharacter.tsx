@@ -52,15 +52,7 @@ function runSequence(time: number): ((model: PIXIModel, time: number, data: Hook
 }
 
 
-export function ChibiCharacter({
-  setTime,
-  data,
-  stateRef,
-}: {
-  setTime: React.Dispatch<React.SetStateAction<number>>;
-  data: HookData | null;
-  stateRef: React.MutableRefObject<"active" | "walkingOut">;
-}) {
+export function ChibiCharacter({setTime, data, stateRef,}: {setTime: React.Dispatch<React.SetStateAction<number>>; data: HookData | null; stateRef: React.MutableRefObject<"active" | "walkingOut">;}) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -24,7 +24,7 @@ function applyWalkMotion(model: PIXIModel, localTime: number, progress: number, 
   const step = Math.sin(localTime * frequency);
   const bounceBase = 1 - Math.cos(localTime * frequency * 2);
 
-  const bounce = Math.pow(bounceBase, 1.2) * 2 * envelope;
+  const bounce = Math.pow(bounceBase, 1.2) * 3 * envelope;
   const twist = step * 10 * envelope;
 
   model.internalModel.coreModel.setParameterValueById("ParamBodyAngleY", bounce);

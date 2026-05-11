@@ -3,6 +3,7 @@ import { TwitchPredictionEndEvent } from "../types/events.js";
 import { HookData } from "../types/hookData.js";
 import { getTotalPredictionResults } from "./cache.js";
 import { getUserSession } from "./db_queries.js";
+import WebSocket from "ws";
 
 export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent) {
   // Change to endEvent.event.broadcaster_user_id if need to support other broadcasters in the future

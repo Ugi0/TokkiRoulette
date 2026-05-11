@@ -2,8 +2,7 @@ import { motion } from "framer-motion";
 import React from "react";
 import type { HookData, UserData } from "../../types/hookData";
 
-export function ResultsPanel({data, time, onClose, closing}: {data: HookData; time: number; onClose: () => void; closing: boolean})
- {
+export function ResultsPanel({data, time, onClose, closing}: {data: HookData; time: number; onClose: () => void; closing: boolean}) {
   const winners: UserData[] = data.winners;
   const losers: UserData[] = data.losers;
 
@@ -263,7 +262,7 @@ export function ResultsPanel({data, time, onClose, closing}: {data: HookData; ti
           }}
         >
           <span style={{ justifySelf: "start", transform: "rotate(-8deg)" }}>Name</span>
-          <span style={{ justifySelf: "start", transform: "rotate(-4deg)" }}>Bet</span>
+          <span style={{ justifySelf: "center", transform: "rotate(-4deg)" }}>Bet</span>
           <span style={{ justifySelf: "end" }}>Won</span>
         </div>
 
