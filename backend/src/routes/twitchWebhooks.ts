@@ -93,6 +93,8 @@ export default async function webhookRoutes(
 
         await progressPrediction(endEvent);
 
+        await endPrediction(endEvent);
+
         await handlePredictionEndPush(endEvent);
 
         console.log(
