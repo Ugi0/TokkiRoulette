@@ -35,10 +35,7 @@ export default async function spinResult(
 
             const landedNumber = body.number;
 
-            res.writeHead(200, { "Content-Type": "text/plain" });
-            return res.end(JSON.stringify({ status: "authorized" }));
-
-            /*await recordSpinResult(landedNumber);
+            await recordSpinResult(landedNumber);
 
             if (sessionId !== null && sessionId === await getUserSession(process.env.TOKKI_USER_ID!)) {
                 const lockedPredictionId = await checkForLockedPrediction();
@@ -59,7 +56,7 @@ export default async function spinResult(
             }
 
             res.writeHead(200, { "Content-Type": "text/plain" });
-            return res.end(JSON.stringify({ status: "Spin result recorded" }));*/
+            return res.end(JSON.stringify({ status: "Spin result recorded" }));
         }
         catch (err) {
             console.error("Error recording spin result:", err);

@@ -1,3 +1,5 @@
+import type { PIXIModel } from "../../../types/pixi";
+
 let walkLastTime = 0;
 let walkOffLastTime = 0;
 let walkStartTime: number | null = null;
@@ -15,8 +17,7 @@ function getDelta(time: number, lastTime: number) {
   return Math.max(0, Math.min(dtRaw, 0.05));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyWalkMotion(model: any, localTime: number, progress: number, cycles: number, totalDuration: number) {
+function applyWalkMotion(model: PIXIModel, localTime: number, progress: number, cycles: number, totalDuration: number) {
   const frequency = (cycles * 2 * Math.PI) / totalDuration;
   const envelope = 1 - Math.pow(progress, 3);
 
@@ -40,13 +41,12 @@ function getVelocity(step: number, envelope: number, distance: number, totalDura
     const boost = push * 2 * envelope;
     return (baseSpeed + boost) * envelope * multiplier;
   } else {
-    const boost = push * 2; // ✅ no envelope decay
+    const boost = push * 2;
     return (baseSpeed + boost) * multiplier;
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function walkAnimation(model: any, time: number) {
+export function walkAnimation(model: PIXIModel, time: number) {
   const { totalDuration, cycles, distance } = getWalkParams();
 
   if (walkStartTime === null) {
@@ -70,8 +70,7 @@ export function walkAnimation(model: any, time: number) {
   model.x += velocity * dt;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function walkOff(model: any, time: number) {
+export function walkOff(model: PIXIModel, time: number) {
   const { totalDuration, cycles, distance } = getWalkParams();
 
   if (walkOffStartTime === null) {

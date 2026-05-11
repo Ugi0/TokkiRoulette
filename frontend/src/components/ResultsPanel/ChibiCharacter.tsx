@@ -5,17 +5,16 @@ import { walkAnimation, walkOff } from "./customAnimations/walk";
 import { bringOutTablet, stopWriting } from "./customAnimations/tablet";
 import { blink, updateBlink } from "./customAnimations/blink";
 import type { HookData } from "../../types/hookData";
+import type { PIXIModel } from "../../types/pixi";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sequenceTimings: Record<number, (model: any, time: number, data: HookData | null, app: PIXI.Application) => void> = {
+const sequenceTimings: Record<number, (model: PIXIModel, time: number, data: HookData | null, app: PIXI.Application) => void> = {
   0: walkAnimation,
   5: blink,
   10: bringOutTablet,
   28: stopWriting
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function runSequence(time: number): ((model: any, time: number, data: HookData | null, app: PIXI.Application) => void) | undefined {
+function runSequence(time: number): ((model: PIXIModel, time: number, data: HookData | null, app: PIXI.Application) => void) | undefined {
   const timings = Object.keys(sequenceTimings)
     .map(Number)
     .sort((a, b) => a - b);
@@ -59,9 +58,9 @@ export function ChibiCharacter({setTime, data, stateRef}: {setTime: React.Dispat
       containerRef.current!.appendChild(app.view as HTMLCanvasElement);
 
       try {
-        const model = await Live2DModel.from("/models/chibi/TT Tokki.model3.json");
+        const model = await Live2DModel.from("/api/model/chibi/TT Tokki.model3.json") as unknown as PIXIModel;
 
-        const pixiModel = model as unknown as PIXI.Container & { tint: number };
+        const pixiModel = model as unknown as PIXIModel;
 
         model.anchor.set(0.5, 1);
         model.scale.set(0.2);

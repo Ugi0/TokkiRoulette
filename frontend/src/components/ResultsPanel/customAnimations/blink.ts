@@ -1,6 +1,6 @@
+import type { PIXIModel } from "../../../types/pixi";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function blink(model: any, time: number) {
+export function blink(model: PIXIModel, time: number) {
   const cycleDuration = 1.5;
   const blinkDuration = 0.2;
 
@@ -27,8 +27,7 @@ export function blink(model: any, time: number) {
   model.internalModel.coreModel.setParameterValueById("ParamEyeROpen", value);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function updateBlink(model: any, time: number) {
+export function updateBlink(model: PIXIModel, time: number) {
 
   const blinkInterval = 4;
   const blinkDuration = 0.2;
