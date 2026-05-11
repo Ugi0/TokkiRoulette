@@ -3,7 +3,6 @@ import { getJsonBody } from "./twitchWebhooks.js";
 import { markPredictionAsRoulette, recordSpinResult } from "../services/db_updates.js";
 import { checkForLockedPrediction, getUserSession } from "../services/db_queries.js";
 import { SIX_MONTHS } from "./auth.js";
-import { handlePredictionEndPush } from "../services/pushToHook.js";
 
 type RouletteResult = {
   number: number;

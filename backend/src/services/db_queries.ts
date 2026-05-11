@@ -1,5 +1,3 @@
-import { TwitchPredictionEndEvent } from "../types/events.js";
-import { HookData, UserData } from "../types/hookData.js";
 import db from "./db.js";
 
 export async function isPredictionRoulette(prediction_id: string): Promise<boolean> {

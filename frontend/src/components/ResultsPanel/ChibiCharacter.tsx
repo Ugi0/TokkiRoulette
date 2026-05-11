@@ -5,6 +5,7 @@ import { bringOutTablet, stopWriting } from "./customAnimations/tablet";
 import { blink, updateBlink } from "./customAnimations/blink";
 import type { HookData } from "../../types/hookData";
 import type { PIXIModel } from "../../types/pixi";
+import { log } from "../../utils/log";
 
 async function loadCubismCore() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,7 +146,7 @@ export function ChibiCharacter({setTime, data, stateRef,}: {setTime: React.Dispa
 
     return () => {
       destroyed = true;
-      console.log("Cleaning up PIXI");
+      log("Cleaning up PIXI");
 
       if (app) {
         if (tickerFn) {

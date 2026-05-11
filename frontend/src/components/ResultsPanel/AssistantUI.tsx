@@ -4,6 +4,7 @@ import { ResultsPanel } from "./ResultsPanel";
 import { useEffect, useRef, useState } from "react";
 import type { HookData } from "../../types/hookData";
 import { resetWalkAnimation } from "./customAnimations/walk";
+import { log } from "../../utils/log";
 
 export function AssistantUI({data, setResults,}: {data: HookData | null; setResults: React.Dispatch<React.SetStateAction<HookData | null>>;}) {
   const [time, setTime] = useState<number>(0);
@@ -24,7 +25,7 @@ export function AssistantUI({data, setResults,}: {data: HookData | null; setResu
   }, [data]);
 
   const handleClose = () => {
-    console.log("Closing panel...");
+    log("Closing panel...");
     setIsClosing(true);
     setCharacterState("walkingOut");
 
