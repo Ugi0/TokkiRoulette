@@ -10,9 +10,6 @@ yarn-error.log*
 dist/
 build/
 
-# Install artifacts
-package-lock.json
-
 # Cloudflare Pages/Functions local caches
 wrangler.toml.local
 *.log
@@ -68,4 +65,4 @@ dist-ssr
 deploy.sh
 
 # Tokki model, not to be distributed
-backend/src/resources/model/chibi/*
+backend/src/resources/model/*

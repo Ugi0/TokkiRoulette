@@ -8,7 +8,7 @@ export function bringOutTablet(model: PIXIModel, time: number, data: HookData | 
   const totalTime = 15;
 
   const totalLines = Math.min(
-    Math.max(data?.winners.length || 0, data?.losers.length || 0),
+    Math.max(data?.winners.length || 0, data?.losers.length || 0, 1),
     18
   );
 

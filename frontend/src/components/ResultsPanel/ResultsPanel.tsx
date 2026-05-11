@@ -10,7 +10,7 @@ export function ResultsPanel({data, time, onClose, closing}: {data: HookData; ti
   const totalTime = 15;
 
   const totalLines = Math.min(
-    Math.max(winners.length, losers.length),
+    Math.max(winners.length, losers.length, 1),
     18
   );
 

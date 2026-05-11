@@ -33,6 +33,7 @@ export default function RoulettePage() {
 
   useResultsSocket(socketEnabled, (data: HookData) => {
     if (results == null) {
+      setSocketEnabled(false);
       setResults(data);
     }
   });

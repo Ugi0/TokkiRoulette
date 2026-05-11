@@ -25,7 +25,7 @@ export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent
 function pushToSession(sessionId: string, payload: Payload) {
   const ws = clients.get(sessionId);
 
-  if (!ws || ws.readyState !== ws.OPEN) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
     console.log("Websocket not open for session:", sessionId);
     return;
   }

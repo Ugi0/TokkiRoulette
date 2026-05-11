@@ -4,7 +4,6 @@ import path from "path";
 import { parseCookies } from "./spinResult.js";
 
 const MODEL_ROOT = path.join(process.cwd(), "resources/");
-console.log(MODEL_ROOT)
 
 export async function handleResourcesRoute(req: IncomingMessage, res: ServerResponse, url: URL) {
   const cookies = parseCookies(req);
@@ -18,21 +17,21 @@ export async function handleResourcesRoute(req: IncomingMessage, res: ServerResp
   const decodedPath = decodeURIComponent(url.pathname);
   let strippedPath = decodedPath.replace(/^\/resources/, "");
 
-  const safePath = path.normalize(strippedPath);
+  strippedPath = strippedPath.replace(/^\/+/, "");
 
-  if (safePath.includes("..")) {
+  const resolvedPath = path.resolve(MODEL_ROOT, strippedPath);
+
+  if (!resolvedPath.startsWith(path.resolve(MODEL_ROOT) + path.sep)) {
     res.writeHead(400, { "Content-Type": "text/plain" });
     return res.end("Invalid path");
   }
 
-  const filePath = path.join(MODEL_ROOT, safePath);
-
-  if (!fs.existsSync(filePath)) {
+  if (!fs.existsSync(resolvedPath)) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     return res.end("Not found");
   }
 
-  const ext = path.extname(filePath).toLowerCase();
+  const ext = path.extname(resolvedPath).toLowerCase();
 
   const contentTypes: Record<string, string> = {
     ".json": "application/json",
@@ -51,5 +50,5 @@ export async function handleResourcesRoute(req: IncomingMessage, res: ServerResp
     "Access-Control-Allow-Origin": "*",
   });
 
-  fs.createReadStream(filePath).pipe(res);
+  fs.createReadStream(resolvedPath).pipe(res);
 }

@@ -1,7 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { parseCookies } from "./spinResult.js";
-import { handlePredictionEndPush } from "../services/pushToHook.js";
 
 type ClientMap = Map<string, WebSocket>;
 

@@ -11,7 +11,7 @@ async function loadCubismCore() {
   if (!(window as any).Live2DCubismCore) {
     const script = document.createElement("script");
     script.src =
-      "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js";
+      "/api/resources/model/live2dcubismcore.min.js";
 
     script.async = true;
 

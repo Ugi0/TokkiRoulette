@@ -45,17 +45,17 @@ export default async function spinResult(
                 ]); 
 
                 if (lockedPredictionId === null) {
-                    res.writeHead(200, { "Content-Type": "text/plain" });
+                    res.writeHead(200, { "Content-Type": "application/json" });
                     return res.end(JSON.stringify({ status: "Spin result recorded" }));
                 }
 
                 await markPredictionAsRoulette(lockedPredictionId);
 
-                res.writeHead(200, { "Content-Type": "text/plain" });
+                res.writeHead(200, { "Content-Type": "application/json" });
                 return res.end(JSON.stringify({ status: "authorized" }));
             }
 
-            res.writeHead(200, { "Content-Type": "text/plain" });
+            res.writeHead(200, { "Content-Type": "application/json" });
             return res.end(JSON.stringify({ status: "Spin result recorded" }));
         }
         catch (err) {
