@@ -29,8 +29,18 @@ export function useResultsSocket(enabled: boolean, onResults: (data: HookData) =
       }
     };
 
+    ws.onclose = () => {
+      log("Socket closed");
+    }
+
+    ws.onerror = (error) => {
+      log("Socket error:", error);
+      ws.close();
+    }
+
     socketRef.current = ws;
 
     return () => ws.close();
-  }, [enabled, onResults]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 }
