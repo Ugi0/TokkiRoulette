@@ -3,7 +3,7 @@ import {
   TwitchPredictionEndEvent,
   TwitchPredictionLockEvent
 } from "../types/events.js";
-import { getTotalPredictionResults } from "./cache.js";
+import { getCache, getTotalPredictionResults } from "./cache.js";
 
 import db from "./db.js";
 import { isPredictionRoulette } from "./db_queries.js";
@@ -47,18 +47,23 @@ export async function newPrediction(event: TwitchPredictionBeginEvent) {
   return rows[0].id;
 }
 
-export async function lockPrediction(
-  prediction_event: TwitchPredictionLockEvent
-) {
-  const updateStateQuery = `
+export async function lockPrediction(prediction_event: TwitchPredictionLockEvent) {
+  const predictionId = prediction_event.event.id;
+
+  await db.query(
+    `
     UPDATE predictions
     SET prediction_status = 'locked'
     WHERE id = $1
-  `;
+    `,
+    [predictionId]
+  );
 
-  await db.query(updateStateQuery, [
-    prediction_event.event.id
-  ]);
+  const cached = getCache(predictionId);
+
+  if (!cached) {
+    throw new Error("Missing cache for prediction");
+  }
 
   const insertVoteQuery = `
     INSERT INTO votes (
@@ -72,16 +77,14 @@ export async function lockPrediction(
     ON CONFLICT (prediction_id, user_id) DO NOTHING
   `;
 
-  for (const outcome of prediction_event.event.outcomes) {
-    for (const predictor of outcome.top_predictors ?? []) {
-      await db.query(insertVoteQuery, [
-        prediction_event.event.id,
-        outcome.id,
-        predictor.channel_points_used,
-        predictor.user_name,
-        predictor.user_id
-      ]);
-    }
+  for (const user of cached.predictionStatus) {
+    await db.query(insertVoteQuery, [
+      predictionId,
+      user.voted_option,
+      user.bet_amount,
+      user.user_name,
+      user.user_id
+    ]);
   }
 }
 

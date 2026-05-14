@@ -12,7 +12,7 @@ export function useResultsSocket(enabled: boolean, onResults: (data: HookData) =
       return;
     }
 
-    log("Socket started");
+    console.log("Socket started");
     const protocol = location.protocol === "https:" ? "wss" : "ws";
     const ws = new WebSocket(`${protocol}://${location.host}/ws`);
 
@@ -34,7 +34,7 @@ export function useResultsSocket(enabled: boolean, onResults: (data: HookData) =
     }
 
     ws.onerror = (error) => {
-      log("Socket error:", error);
+      console.log("Socket error:", error);
       ws.close();
     }
 
