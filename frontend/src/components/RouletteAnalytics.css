@@ -13,12 +13,12 @@
     align-items: center;
     justify-content: center;
 }
-h1 {
+.roulette-page h1 {
     font-family: "JetBrains Mono", sans-serif;
     font-size: 36px;
     color: #ced5d5;
 }
-h2 {
+.roulette-page h2 {
     font-family: "JetBrains Mono", sans-serif;
     font-size: 20px;
     font-weight: 500;

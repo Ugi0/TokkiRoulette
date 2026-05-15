@@ -9,7 +9,7 @@ EXPOSE 5173
 CMD ["npm", "run", "dev"]
 
 
-FROM node:20-alpine AS build
+FROM node:20 AS build
 
 WORKDIR /app
 COPY package*.json ./
