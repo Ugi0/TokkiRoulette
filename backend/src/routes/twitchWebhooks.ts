@@ -6,6 +6,7 @@ import {
   TwitchPredictionEvent,
 } from "../types/events.js";
 import {
+  cancelPrediction,
   endPrediction,
   lockPrediction,
   newPrediction,
@@ -88,6 +89,7 @@ export default async function webhookRoutes(
 
         if (endEvent.event.status === "canceled") {
           console.log(`Prediction CANCELED - %s: %s`, endEvent.event.id, endEvent.event.broadcaster_user_login);
+          await cancelPrediction(endEvent);
           break;
         }
 

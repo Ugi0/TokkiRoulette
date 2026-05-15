@@ -47,6 +47,17 @@ export async function newPrediction(event: TwitchPredictionBeginEvent) {
   return rows[0].id;
 }
 
+export async function cancelPrediction(prediction_event: TwitchPredictionEndEvent) {
+  const predictionId = prediction_event.event.id;
+
+  await db.query(
+    `UPDATE predictions
+     SET prediction_status = 'canceled'
+     WHERE id = $1`,
+    [predictionId]
+  );
+}
+
 export async function lockPrediction(prediction_event: TwitchPredictionLockEvent) {
   const predictionId = prediction_event.event.id;
 

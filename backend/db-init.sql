@@ -4,7 +4,7 @@ CREATE TABLE predictions (
     title TEXT NOT NULL,
     start_time TIMESTAMPTZ NOT NULL,
     prediction_status TEXT NOT NULL
-        CHECK (prediction_status IN ('active','locked','resolved','cancelled')),
+        CHECK (prediction_status IN ('active','locked','resolved','canceled')),
     roulette_prediction BOOLEAN NOT NULL
 );
 
