@@ -3,7 +3,7 @@ import { IncomingMessage, ServerResponse } from "http";
 import path from "path";
 import { parseCookies } from "./spinResult.js";
 
-const MODEL_ROOT = path.join(process.cwd(), "resources/");
+const MODEL_ROOT = path.join(process.cwd(), process.env.NODE_ENV === "development" ? "src/resources/" : "resources/");
 
 export async function handleResourcesRoute(req: IncomingMessage, res: ServerResponse, url: URL) {
   const cookies = parseCookies(req);

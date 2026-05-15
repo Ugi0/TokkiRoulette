@@ -37,11 +37,14 @@ export default async function spinResult(
             await recordSpinResult(landedNumber);
 
             if (sessionId !== null && sessionId === await getUserSession(process.env.TOKKI_USER_ID!)) {
+                console.log("Authorized spin result received");
                 const lockedPredictionId = await checkForLockedPrediction();
 
                 res.setHeader("Set-Cookie", [
                     `session_id=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SIX_MONTHS}`
-                ]); 
+                ]);
+
+                console.log("Checked for locked prediction, ID:", lockedPredictionId);
 
                 if (lockedPredictionId === null) {
                     res.writeHead(200, { "Content-Type": "application/json" });

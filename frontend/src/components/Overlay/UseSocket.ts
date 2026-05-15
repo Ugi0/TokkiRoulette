@@ -12,7 +12,7 @@ export function useResultsSocket(enabled: boolean, onResults: (data: HookData) =
       return;
     }
 
-    log("Socket started");
+    console.log("Socket started");
     const protocol = location.protocol === "https:" ? "wss" : "ws";
     const ws = new WebSocket(`${protocol}://${location.host}/ws`);
 
@@ -29,8 +29,18 @@ export function useResultsSocket(enabled: boolean, onResults: (data: HookData) =
       }
     };
 
+    ws.onclose = () => {
+      log("Socket closed");
+    }
+
+    ws.onerror = (error) => {
+      console.log("Socket error:", error);
+      ws.close();
+    }
+
     socketRef.current = ws;
 
     return () => ws.close();
-  }, [enabled, onResults]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 }
