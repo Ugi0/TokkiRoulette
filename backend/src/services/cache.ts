@@ -17,25 +17,22 @@ type UserPrediction = {
 const cache = new Map<string, CacheEntry>();
 
 export function cacheUserResults(id: string, values: UserPrediction[]) {
-    const existingEntry = cache.get(id);
-
     for (const value of values) {
+        const existingEntry = cache.get(id);
         if (!existingEntry) {
             cache.set(id, {
                 predictionId: id,
                 predictionStatus: [value]
             });
-            continue;
         } else {
-            if (existingEntry.predictionStatus.some(pred => pred.user_id === value.user_id)) {
-                existingEntry.predictionStatus = existingEntry.predictionStatus.map(pred =>
-                    pred.user_id === value.user_id ? value : pred
-                );
+            const existing = existingEntry.predictionStatus;
+            const index = existing.findIndex(pred => pred.user_id === value.user_id);
+            if (index !== -1) {
+                existing[index] = value;
             } else {
-                existingEntry.predictionStatus.push(value);
+                existing.push(value);
             }
             cache.set(id, existingEntry);
-            return;
         }
     }
 }
