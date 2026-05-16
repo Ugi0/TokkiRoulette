@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@pixi/interaction": "^6.5.10",
+    "bootstrap": "^5.3.8",
     "framer-motion": "^12.38.0",
     "glob": "^13.0.6",
     "inflight": "npm:lru-cache@^10.0.0",
     "pixi-live2d-display": "^0.4.0",
     "pixi.js": "^6.5.10",
-    "bootstrap": "^5.3.8",
     "react": "^19.2.5",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.5",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^25.8.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
