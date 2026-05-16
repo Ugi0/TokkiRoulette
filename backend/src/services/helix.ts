@@ -67,6 +67,7 @@ export async function getAppToken(): Promise<string> {
 export async function registerTwitchHooks(username: string, user_id: string, accessToken: string): Promise<void> {
   await registerPredictionHook(username, user_id, accessToken, "begin");
   await registerPredictionHook(username, user_id, accessToken, "lock");
+  await registerPredictionHook(username, user_id, accessToken, "progress");
   await registerPredictionHook(username, user_id, accessToken, "end");
 }
 
