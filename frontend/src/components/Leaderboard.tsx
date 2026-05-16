@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-
 import { StatsInterval, type LeaderboardEntry } from "../types/analytics.ts";
+import IntervalMenu from "./IntervalMenu.tsx";
 import "./Leaderboard.css";
 
 
@@ -9,6 +9,7 @@ type LeaderboardProps = {
     endpoint: string;
     allowInterval?: boolean;
 };
+
 
 function formatNet(value: number): string {
     if (value > 0) {
@@ -27,22 +28,6 @@ function toNumber(value: number | string | undefined): number {
 }
 
 
-function intervalLabel(value: StatsInterval): string {
-    switch (value) {
-        case "RECENT":
-            return "Recent";
-        case "ONE_MONTH":
-            return "1 Month";
-        case "THREE_MONTHS":
-            return "3 Months";
-        case "SIX_MONTHS":
-            return "6 Months";
-        case "ONE_YEAR":
-            return "1 Year";
-        case "ALL":
-            return "All Time";
-    }
-}
 
 
 export default function Leaderboard({
@@ -100,13 +85,11 @@ export default function Leaderboard({
         <section className="leaderboard">
             <div className="header">
                 <h2>{title}</h2>
-                    <div className="interval-buttons">
-                        {availableIntervals.map((value) => (
-                            <button key={value} onClick={() => setInterval(value)}>
-                                {intervalLabel(value)}
-                            </button>
-                        ))}
-                    </div>
+                <IntervalMenu
+                    value={interval}
+                    options={availableIntervals}
+                    onChange={setInterval}
+                />
             </div>
 
             {loading && <p>Loading...</p>}

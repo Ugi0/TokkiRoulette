@@ -24,9 +24,5 @@
   font-family: "JetBrains Mono", sans-serif;
   font-size: 36px;
   color: #ced5d5;
-  margin: 0 0 8px;
-}
-
-.roulette-page__link {
-  color: #ced5d5;
+  margin: 0;
 }

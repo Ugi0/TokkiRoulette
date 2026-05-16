@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 
 import { StatsInterval, type SingleEntry } from "../types/analytics.ts";
+import IntervalMenu from "./IntervalMenu.tsx";
 import "./Leaderboard.css";
+import "./IntervalMenu.css";
 
 type IndividualProps = {
     title: string;
@@ -23,23 +25,6 @@ function formatNet(value: number): string {
 
 function toNumber(value: number | string | undefined): number {
     return Number(value ?? 0);
-}
-
-function intervalLabel(value: StatsInterval): string {
-    switch (value) {
-        case "RECENT":
-            return "Recent";
-        case "ONE_MONTH":
-            return "1 Month";
-        case "THREE_MONTHS":
-            return "3 Months";
-        case "SIX_MONTHS":
-            return "6 Months";
-        case "ONE_YEAR":
-            return "1 Year";
-        case "ALL":
-            return "All Time";
-    }
 }
 
 export default function Individual({
@@ -97,13 +82,11 @@ export default function Individual({
         <section className="leaderboard">
             <div className="header">
                 <h2>{title}</h2>
-                    <div className="interval-buttons">
-                        {availableIntervals.map((value) => (
-                            <button key={value} onClick={() => setInterval(value)}>
-                                {intervalLabel(value)}
-                            </button>
-                        ))}
-                    </div>
+                <IntervalMenu
+                    value={interval}
+                    options={availableIntervals}
+                    onChange={setInterval}
+                />
             </div>
 
             {loading && <p>Loading...</p>}

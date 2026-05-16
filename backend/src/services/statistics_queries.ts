@@ -109,6 +109,10 @@ export async function getSingle(interval: Interval, type: 'w' | 'l' ): Promise<I
 export async function getLeaderboard(count: number, interval: Interval, type: 'w' | 'l' ): Promise<UserLeaders[]> {
     const orderDir = type === 'w' ? 'DESC' : 'ASC';
 
+    const havingClause = type === 'w'
+        ? `HAVING SUM(${netChangeSql}) > 0`
+        : `HAVING SUM(${netChangeSql}) < 0`;
+
     let whereClause = 'WHERE roulette_prediction = true';
 
     if (interval === Interval.RECENT.query_param) {
@@ -140,6 +144,7 @@ export async function getLeaderboard(count: number, interval: Interval, type: 'w
         FROM results 
             ${whereClause}
         GROUP BY user_id, user_name
+        ${havingClause}
         ORDER BY total_net ${orderDir}
         LIMIT $1;
     `;

@@ -3,17 +3,17 @@ import "./RoulettePage.css";
 import Footer from "../components/Footer";
 import { useState } from "react";
 import Notification from "../components/Notification";
-import {Link} from "react-router";
+import SiteHeader from "../components/SiteHeader";
 
 export default function RoulettePage() {
   const [notification, setNotification] = useState<string | null>(null);
 
   return (
     <div className="page-root">
+      <SiteHeader />
       <main className="roulette-page">
         <div className="roulette-page__header">
           <h1>Totally not rigged Roulette table</h1>
-            <Link to={"/analytics"}> Analytics </Link>
         </div>
 
         <RouletteTable setNotification={setNotification}  />

@@ -1,0 +1,55 @@
+.interval-dropdown {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    border-radius: 10px;
+    background:  #d8dcdf;
+}
+
+.btn.interval-toggle {
+    min-width: 5.8rem;
+    border: 0;
+    color: #000000;
+    background:  #d8dcdf;
+    font-family: "JetBrains Mono", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.35;
+    border-radius: 8px;
+}
+
+.btn.interval-toggle:hover,
+.btn.interval-toggle:focus,
+.btn.interval-toggle:active,
+.btn.interval-toggle.show {
+    background: #e7ebed;
+    color: #58595a;
+}
+
+.interval-menu {
+    min-width: 5.8rem;
+    padding: 4px;
+    border: 1px solid  #d8dcdf;
+    border-radius: 8px;
+    background: #FFFFFF;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+.interval-menu-item {
+    border-radius: 6px;
+    color: #000000;
+    font-family: "JetBrains Mono", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.interval-menu-item:hover,
+.interval-menu-item:focus {
+    background: #eef2f3;
+    color: #58595a;
+}
+
+.interval-menu-item.active {
+    background: #d8dcdf;
+    color: #ffffff;
+}
