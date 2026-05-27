@@ -102,51 +102,59 @@ export async function lockPrediction(prediction_event: TwitchPredictionLockEvent
 export async function endPrediction(prediction_event: TwitchPredictionEndEvent) {
   const predictionId = prediction_event.event.id;
 
-  await db.query(
-    `UPDATE predictions
-     SET prediction_status = $1
-     WHERE id = $2`,
-    [prediction_event.event.status, predictionId]
-  );
+  await db.query("BEGIN");
 
-  await db.query(
-    `INSERT INTO prediction_outcomes (prediction_id, winning_option_id)
-     VALUES ($1, $2)
-     ON CONFLICT (prediction_id) DO UPDATE
-     SET winning_option_id = EXCLUDED.winning_option_id`,
-    [predictionId, prediction_event.event.winning_outcome_id]
-  );
+  try {
+    await db.query(
+      `UPDATE predictions
+       SET prediction_status = $1
+       WHERE id = $2`,
+      [prediction_event.event.status, predictionId]
+    );
 
-  const isRoulette = await isPredictionRoulette(predictionId);
+    await db.query(
+      `INSERT INTO prediction_outcomes (prediction_id, winning_option_id)
+       VALUES ($1, $2)
+       ON CONFLICT (prediction_id) DO UPDATE
+       SET winning_option_id = EXCLUDED.winning_option_id`,
+      [predictionId, prediction_event.event.winning_outcome_id]
+    );
 
-  const hookData = await getTotalPredictionResults(prediction_event);
+    const isRoulette = await isPredictionRoulette(predictionId);
+    const hookData = await getTotalPredictionResults(prediction_event);
 
-  const insertResultQuery = `
-    INSERT INTO results (
-      prediction_id,
-      user_id,
-      user_name,
-      bet_amount,
-      won_amount,
-      result_time,
-      roulette_prediction
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    ON CONFLICT (prediction_id, user_id) DO NOTHING
-  `;
+    const insertResultQuery = `
+      INSERT INTO results (
+        prediction_id,
+        user_id,
+        user_name,
+        bet_amount,
+        won_amount,
+        result_time,
+        roulette_prediction
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT (prediction_id, user_id) DO NOTHING
+    `;
 
-  const allUsers = [...hookData.winners, ...hookData.losers];
+    const allUsers = [...hookData.winners, ...hookData.losers];
 
-  for (const user of allUsers) {
-    await db.query(insertResultQuery, [
-      predictionId,
-      user.user_id,
-      user.user_name,
-      user.bet_amount,
-      user.won_amount,
-      new Date(),
-      isRoulette
-    ]);
+    for (const user of allUsers) {
+      await db.query(insertResultQuery, [
+        predictionId,
+        user.user_id,
+        user.user_name,
+        user.bet_amount,
+        user.won_amount,
+        new Date(),
+        isRoulette
+      ]);
+    }
+
+    await db.query("COMMIT");
+  } catch (err) {
+    await db.query("ROLLBACK");
+    throw err;
   }
 }
 
