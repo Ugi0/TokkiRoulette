@@ -1,4 +1,4 @@
-import RouletteTable from "../components/RouletteTable";
+import RouletteTable from "../components/RouletteComponents/RouletteTable";
 import "./RoulettePage.css";
 import Footer from "../components/Footer";
 import { useState } from "react";

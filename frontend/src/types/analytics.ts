@@ -32,10 +32,12 @@ export type SingleEntry = {
 };
 
 export type Analytics = {
-    recentWinners: LeaderboardEntry[];
-    recentLosers: LeaderboardEntry[];
-    topWinners: LeaderboardEntry[];
-    topLosers: LeaderboardEntry[];
-    topProfit: SingleEntry;
-    topLost: SingleEntry;
+    leaderboardEntries: {
+        topWinners: LeaderboardEntry[];
+        topLosers: LeaderboardEntry[];
+    }
+    singleEntries: {
+        topProfit: SingleEntry;
+        topLost: SingleEntry;
+    }
 };

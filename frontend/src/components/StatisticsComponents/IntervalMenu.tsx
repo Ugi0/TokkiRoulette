@@ -1,11 +1,11 @@
 import Dropdown from "react-bootstrap/Dropdown";
-import type { StatsInterval } from "../types/analytics.ts";
+import type { StatsInterval } from "../../types/analytics.ts";
 import "./IntervalMenu.css";
 
 function intervalLabel(value: StatsInterval): string {
     switch (value) {
         case "RECENT":
-            return "Recent";
+            return "Last";
         case "ONE_MONTH":
             return "1 Month";
         case "THREE_MONTHS":

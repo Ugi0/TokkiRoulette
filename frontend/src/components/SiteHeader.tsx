@@ -1,12 +1,12 @@
 import { NavLink } from "react-router";
 import "./SiteHeader.css";
 
-export default function SiteHeader() {
+export default function SiteHeader({ titleExtra }: { titleExtra?: string }) {
     return (
         <header className="site-header">
             <nav className="site-header__nav" aria-label="Primary navigation">
                 <NavLink className="site-header__brand" to="/">
-                    Tokki Roulette
+                    Tokki Roulette {titleExtra}
                 </NavLink>
                 <div className="site-header__links">
                     <NavLink

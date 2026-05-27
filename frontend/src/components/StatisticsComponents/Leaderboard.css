@@ -7,6 +7,7 @@
     background:  #d8dcdf;
     border-radius: 16px;
 }
+
 .header {
     display: flex;
     flex-direction: row;
@@ -22,6 +23,7 @@
     gap: 12px;
     box-sizing: border-box;
 }
+
 .header h2 {
     color: #000000;
     font-weight: bold;
@@ -37,6 +39,7 @@
     flex-direction: column;
     gap: 4px;
 }
+
 .entry{
     display: grid;
     grid-template-columns: 3rem minmax(9ch, 1fr) clamp(11ch, 24vw, 15ch) clamp(7ch, 18vw, 10ch);
@@ -47,11 +50,13 @@
     width: 100%;
     box-sizing: border-box;
 }
+
 .pfp {
     width: 3rem;
     aspect-ratio: 1 / 1;
     border-radius: 100%;
 }
+
 .name {
     font-family: "JetBrains Mono", sans-serif;
     font-size: 1.2rem;
@@ -59,6 +64,7 @@
     min-width: 0;
     white-space: nowrap;
 }
+
 .bet {
     font-family: "JetBrains Mono", sans-serif;
     font-size: 1rem;
@@ -68,6 +74,7 @@
     white-space: nowrap;
     color: #000000;
 }
+
 .net {
     font-family: "JetBrains Mono", sans-serif;
     font-size: 0.95rem;

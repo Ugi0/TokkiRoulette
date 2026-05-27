@@ -1,17 +1,22 @@
 export type UserLeaders = {
     user_id: number;
     user_name: string;
-    total_net: number;
-    predictions_count: number;
+    profile_image_url?: string | null;
+    chat_color?: string | null;
+    bet_amount?: number | string;
+    total_net: number | string;
+    predictions_count: number | string;
 };
 
 export type Individual = {
     user_id: number;
     user_name: string;
-    prediction_id: number;
+    profile_image_url?: string | null;
+    chat_color?: string | null;
+    prediction_id: string;
     bet_amount: number;
-    won_amount: number;
-    net_change: number;
+    won_amount: number | null;
+    net_change: number | string;
 };
 
 export const Interval = {
@@ -24,3 +29,14 @@ export const Interval = {
 } as const;
 
 export type Interval = keyof typeof Interval;
+
+export type Analytics = {
+    leaderboardEntries: {
+        topWinners: UserLeaders[];
+        topLosers: UserLeaders[];
+    }
+    singleEntries: {
+        topProfit: Individual;
+        topLost: Individual;
+    }
+};

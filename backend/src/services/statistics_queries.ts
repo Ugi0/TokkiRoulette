@@ -3,29 +3,6 @@ import { UserLeaders, Individual, Interval } from "../types/statistics.js";
 
 const netChangeSql = "COALESCE(won_amount, -bet_amount)";
 
-export function parseInterval(value: string | null): Interval {
-    if (
-        value === "ONE_MONTH" ||
-        value === "THREE_MONTHS" ||
-        value === "SIX_MONTHS" ||
-        value === "ONE_YEAR" ||
-        value === "ALL" ||
-        value === "RECENT"
-    ) {
-        return value;
-    }
-
-    return "ONE_MONTH";
-}
-
-
-export function parseType(value: string | null): "w" | "l" {
-    if (value === "w" || value === "l") {
-        return value;
-    }
-    return 'w';
-}
-
 export async function getIntervals(): Promise<Interval[]> {
     const query = `
         SELECT MIN(result_time) AS oldest_result_time
@@ -69,8 +46,8 @@ export async function getIntervals(): Promise<Interval[]> {
 
 
 // Supported inputs for interval are {1m,3m,6m,1y,all,recent} and supported types for type are {w,l}
-export async function getSingle(interval: Interval, type: 'w' | 'l' ): Promise<Individual | null> {
-    const orderDir = type === 'w' ? 'DESC' : 'ASC';
+export async function getSingle(interval: Interval, type: "win" | "loss" ): Promise<Individual | null> {
+    const orderDir = type === "win" ? 'DESC' : 'ASC';
 
     let whereClause = 'WHERE roulette_prediction = true';
 
@@ -106,10 +83,10 @@ export async function getSingle(interval: Interval, type: 'w' | 'l' ): Promise<I
 }
 
 // Supported inputs for interval are {1m,3m,6m,1y,all,recent} and supported types for type are {w,l}
-export async function getLeaderboard(count: number, interval: Interval, type: 'w' | 'l' ): Promise<UserLeaders[]> {
-    const orderDir = type === 'w' ? 'DESC' : 'ASC';
+export async function getLeaderboard(count: number, interval: Interval, type: "win" | "loss" ): Promise<UserLeaders[]> {
+    const orderDir = type === "win" ? 'DESC' : 'ASC';
 
-    const havingClause = type === 'w'
+    const havingClause = type === "win"
         ? `HAVING SUM(${netChangeSql}) > 0`
         : `HAVING SUM(${netChangeSql}) < 0`;
 

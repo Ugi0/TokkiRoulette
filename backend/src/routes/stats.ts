@@ -1,34 +1,24 @@
 import {IncomingMessage, ServerResponse} from "http";
 import {getSingle, getLeaderboard, getIntervals} from "../services/statistics_queries.js";
 import sendJson from "../utils/sendJson.js";
-import {parseInterval} from "../services/statistics_queries.js";
-import {parseType} from "../services/statistics_queries.js";
+import { parseInterval } from "../utils/statisticsHelpers.js";
+import { Analytics } from "../types/statistics.js";
 
-export default async function statsRoutes(
-    req: IncomingMessage,
-    res: ServerResponse,
-    url: URL
-): Promise<IncomingMessage | ServerResponse | void> {
-    if (url.pathname.startsWith("/analytics/leaderboard")) {
-        // call single biggest win/loss function
+export default async function statsRoutes(req: IncomingMessage, res: ServerResponse, url: URL): Promise<IncomingMessage | ServerResponse | void> {
+    if (url.pathname.startsWith("/analytics/data")) {
         const limit = Number(url.searchParams.get("limit") ?? "10");
         const interval = parseInterval(url.searchParams.get("interval"));
-        const type = parseType(url.searchParams.get("type"));
 
-
-        const result = await getLeaderboard(limit, interval, type);
-
-        return sendJson(res, 200, result);
-    }
-
-    if (url.pathname.startsWith("/analytics/single")) {
-        // call single biggest win/loss function
-
-        const interval = parseInterval(url.searchParams.get("interval"));
-        const type = parseType(url.searchParams.get("type"));
-
-
-        const result = await getSingle(interval, type);
+        const result = {
+            leaderboardEntries: {
+                topWinners: await getLeaderboard(limit, interval, "win"),
+                topLosers: await getLeaderboard(limit, interval, "loss"),
+            },
+            singleEntries: {
+                topProfit: await getSingle(interval, "win"),
+                topLost: await getSingle(interval, "loss"),
+            }
+        } as Analytics;
 
         return sendJson(res, 200, result);
     }
@@ -40,12 +30,3 @@ export default async function statsRoutes(
     }
 
 }
-
-// Top losses, Top Winners
-/*
-
-I need to create a function that can get called with a request that asks for one of the databases sorts,
-along with a time period like all time, or last month, it should then return a list of the users in sorted order
-corresponding to the database type requested
-
-*/
