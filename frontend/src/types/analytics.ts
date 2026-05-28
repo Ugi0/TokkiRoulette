@@ -29,6 +29,7 @@ export type SingleEntry = {
     bet_amount: number;
     won_amount: number | null;
     net_change: number | string;
+    bet_time?: string;
 };
 
 export type Analytics = {
@@ -37,7 +38,15 @@ export type Analytics = {
         topLosers: LeaderboardEntry[];
     }
     singleEntries: {
-        topProfit: SingleEntry;
-        topLost: SingleEntry;
-    }
+        topProfit: SingleEntry[];
+        topLost: SingleEntry[];
+    },
+    interval: StatsInterval;
+    predictions: PredictionEntry[];
+};
+
+export type PredictionEntry = {
+    prediction_id: string;
+    prediction_start_time: string;
+    prediction_title: string;
 };

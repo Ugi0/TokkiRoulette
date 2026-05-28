@@ -1,43 +1,73 @@
 import "./Leaderboard.css";
 import "./IntervalMenu.css";
-import { formatNet, toNumber } from "../../utils/statisticsCommon.ts";
+import { formatNet, parseDateToLocaleStringShort, toNumber } from "../../utils/statisticsCommon.ts";
 import type { SingleEntry } from "../../types/analytics.ts";
+import { ExpandableList } from "./ExpandableList.tsx";
 
 type IndividualProps = {
     title: string;
-    data: SingleEntry;
+    data: SingleEntry[];
+    expanded: boolean;
 };
 
-export default function Individual({ title, data }: IndividualProps) {
-    const netChange = toNumber(data.net_change);
+export default function Individual({ title, data, expanded }: IndividualProps) {
+  return (
+    <section className="leaderboard">
+      <div className="header">
+        <h2>{title}</h2>
+      </div>
 
-    return (
-        <section className="leaderboard">
-            <div className="header">
-                <h2>{title}</h2>
-            </div>
+      <div className="body">
+        <ExpandableList
+          data={data}
+          expanded={expanded}
+          renderItem={(entry) => {
+            const netChange = toNumber(entry.net_change);
 
-            <div className="body">
-                <div className="entry" key={data.user_id}>
-                    <img
-                        className="pfp"
-                        src={data.profile_image_url ?? "/default-pfp.jpg"}
-                        alt={"/default-pfp.jpg"}
-                    />
-                    <div
-                        className="name"
-                        style={{ color: data.chat_color ?? "#000000" }}
-                    >
-                        {data.user_name}
-                    </div>
-                    <div className="bet">Bet {data.bet_amount} $TKS</div>
-                    <div
-                        className={`net ${netChange < 0 ? "negative" : netChange > 0 ? "positive" : ""}`}
-                    >
-                        {formatNet(netChange)}
-                    </div>
+            return (
+              <div className="entry" key={entry.user_id}>
+                <img
+                  className="pfp"
+                  src={entry.profile_image_url ?? "/default-pfp.jpg"}
+                  alt="˙◠˙"
+                />
+
+                <div
+                  className="name"
+                  style={{ color: entry.chat_color ?? "#000000" }}
+                >
+                  {entry.user_name}
                 </div>
-            </div>
-        </section>
-    );
+
+                <div className="bet individual">
+                        <>
+                        {netChange > 0 && (
+                        <div className="bet-amount">
+                            Bet {entry.bet_amount}
+                        </div>
+                        )}
+                        <div className="bet-time">
+                            {parseDateToLocaleStringShort(new Date(entry.bet_time!))}
+                        </div>
+                        </>
+                </div>
+
+                <div
+                  className={`net ${
+                    netChange < 0
+                      ? "negative"
+                      : netChange > 0
+                      ? "positive"
+                      : ""
+                  }`}
+                >
+                  {formatNet(netChange)}
+                </div>
+              </div>
+            );
+          }}
+        />
+      </div>
+    </section>
+  );
 }

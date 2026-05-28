@@ -22,3 +22,19 @@ export function parseType(value: string | null): "win" | "loss" {
     }
     return "win";
 }
+
+export function getIntervalCondition(interval: Interval): string {
+    if (interval === "RECENT") {
+        return `AND p.id = (
+            SELECT p2.id
+            FROM predictions p2
+            WHERE p2.roulette_prediction = true
+            ORDER BY p2.start_time DESC
+            LIMIT 1
+        )`;
+    }
+    if (interval === "ALL") {
+        return "";
+    }
+    return `AND p.start_time > NOW() - INTERVAL '${Interval[interval].query_param}'`;
+}

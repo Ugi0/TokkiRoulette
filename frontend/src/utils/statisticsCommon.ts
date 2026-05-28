@@ -25,3 +25,19 @@ export function netClassName(netChange: number): string {
 
     return "";
 }
+
+export function parseDateToLocaleString(date: Date): string {
+    return date.toLocaleString('en-US', { 
+        timeZone: 'America/Chicago', 
+        timeStyle: 'short', 
+        dateStyle: 'full' 
+    });
+}
+
+export function parseDateToLocaleStringShort(date: Date): string {
+    return date.toLocaleString('en-US', { 
+        timeZone: 'America/Chicago', 
+        timeStyle: 'short', 
+        dateStyle: 'short' 
+    });
+}

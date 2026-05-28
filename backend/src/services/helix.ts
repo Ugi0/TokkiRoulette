@@ -1,4 +1,6 @@
+import { HelixUser } from "../types/helix.js";
 import { TwitchTokenResponse } from "../types/twitch.js";
+import { saveUserProfile } from "./statistics_queries.js";
 
 let cachedToken: string | null = null;
 let tokenExpiry = 0;
@@ -103,4 +105,27 @@ export async function registerPredictionHook(
     throw new Error(`Failed to register EventSub hook: ${error}`);
   }
   
+}
+
+export async function fetchUserProfile(username: string): Promise<HelixUser> {
+  const resp = await fetch(`https://api.twitch.tv/helix/users?login=${encodeURIComponent(username)}`, {
+    headers: {
+      "Client-ID": process.env.TWITCH_CLIENT_ID!,
+      "Authorization": `Bearer ${await getAppToken()}`,
+    },
+  });
+
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch user profile: ${resp.status}`);
+  }
+
+  const data = await resp.json();
+
+  const result: HelixUser = data.data[0];
+
+  if (result) {
+    await saveUserProfile(username, result.profile_image_url);
+  }
+
+  return result;
 }

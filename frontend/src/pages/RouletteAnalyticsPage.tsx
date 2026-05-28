@@ -59,7 +59,7 @@ export default function RouletteAnalyticsPage() {
             {loading || !analytics && <p>Loading...</p>}
             {error && <p>{error}</p>}
 
-            {!loading && !error && (
+            {analytics && !error && (
                 <div className="page-root">
                     <SiteHeader titleExtra={"Analytics"} />
                     <IntervalMenu

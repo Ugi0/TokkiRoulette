@@ -7,7 +7,6 @@
     background:  #d8dcdf;
     border-radius: 16px;
 }
-
 .header {
     display: flex;
     flex-direction: row;
@@ -69,10 +68,25 @@
     font-family: "JetBrains Mono", sans-serif;
     font-size: 1rem;
     font-weight: 400;
-    text-align: right;
+    text-align: center;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     color: #000000;
+}
+
+.bet.individual {
+  display: flex;
+  flex-direction: column;
+}
+
+.bet-amount {
+  font-weight: 600;
+}
+
+.bet-time {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #666;
 }
 
 .net {
@@ -90,4 +104,32 @@
 
 .net.negative {
     color: #FF0000;
+}
+
+.expand-controls {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.expand-controls button {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.expand-controls button:hover {
+  background: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
+.expand-controls button:active {
+  transform: scale(0.97);
 }
