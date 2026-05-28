@@ -31,7 +31,11 @@ export type Analytics = {
     singleEntries: {
         topProfit: UserEntry[];
         topLost: UserEntry[];
-    },
+    }
+    winRatios: {
+        highest: WinRatioEntry[];
+        lowest: WinRatioEntry[];
+    }
     interval: Interval;
 };
 
@@ -39,4 +43,13 @@ export type PredictionEntry = {
     prediction_id: string;
     prediction_start_time: string;
     prediction_title: string;
+}
+
+export type WinRatioEntry = {
+    user_id: number;
+    user_name: string;
+    profile_image_url?: string | null;
+    win_percentage: number;
+    total_predictions: number;
+    won_predictions: number;
 }

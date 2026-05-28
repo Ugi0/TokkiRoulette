@@ -42,6 +42,10 @@ export type Analytics = {
         topLost: SingleEntry[];
     },
     interval: StatsInterval;
+    winRatios: {
+        highest: WinRatioEntry[];
+        lowest: WinRatioEntry[];
+    };
     predictions: PredictionEntry[];
 };
 
@@ -50,3 +54,12 @@ export type PredictionEntry = {
     prediction_start_time: string;
     prediction_title: string;
 };
+
+export type WinRatioEntry = {
+    user_id: number;
+    user_name: string;
+    profile_image_url?: string | null;
+    win_percentage: number;
+    total_predictions: number;
+    won_predictions: number;
+}

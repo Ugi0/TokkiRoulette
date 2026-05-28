@@ -133,3 +133,17 @@
 .expand-controls button:active {
   transform: scale(0.97);
 }
+
+.win-ratio {
+  font-weight: 600;
+}
+
+.win-details {
+  font-size: 0.75rem;
+  color: #777;
+}
+
+.entry .bet {
+  display: flex;
+  flex-direction: column;
+}

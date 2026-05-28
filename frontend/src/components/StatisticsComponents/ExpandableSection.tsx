@@ -13,7 +13,6 @@ export function ExpandableSection({
   children,
 }: ExpandableSectionProps) {
   const [expanded, setExpanded] = useState(interval == "RECENT");
-  console.log(interval);
 
   return (
     <div className="stats">

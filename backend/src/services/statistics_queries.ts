@@ -1,5 +1,5 @@
 import db from "./db.js";
-import { Interval, PredictionEntry, UserEntry } from "../types/statistics.js";
+import { Interval, PredictionEntry, UserEntry, WinRatioEntry } from "../types/statistics.js";
 import { getIntervalCondition } from "../utils/statisticsHelpers.js";
 
 const netChangeSql = "COALESCE(won_amount, -bet_amount)";
@@ -186,4 +186,32 @@ export async function getPredictionsForInterval(interval: Interval): Promise<Pre
 
     const { rows } = await db.query<PredictionEntry>(query);
     return rows;
+}
+
+export async function getWinRatios(interval: Interval): Promise<{ highest: WinRatioEntry[]; lowest: WinRatioEntry[] }> {
+    if (interval === "RECENT") {
+        return { highest: [], lowest: [] };
+    }
+
+    const query = `
+        SELECT 
+            user_id,
+            user_name,
+            COUNT(*) AS total_predictions,
+            SUM(CASE WHEN won_amount IS NOT NULL THEN 1 ELSE 0 END) AS won_predictions,
+            (SUM(CASE WHEN won_amount IS NOT NULL THEN 1 ELSE 0 END)::float / COUNT(*)) * 100 AS win_percentage
+        FROM results
+        WHERE roulette_prediction = true
+        ${getIntervalCondition(interval)}
+        GROUP BY user_id, user_name
+        HAVING COUNT(*) >= 3
+        ORDER BY win_percentage DESC;
+    `;
+
+    const { rows } = await db.query<WinRatioEntry>(query);
+
+    const highest = rows.slice(0, 10);
+    const lowest = rows.slice(-10).reverse();
+
+    return { highest, lowest };
 }

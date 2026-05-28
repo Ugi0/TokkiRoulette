@@ -1,8 +1,8 @@
 import {IncomingMessage, ServerResponse} from "http";
-import {getSingles, getLeaderboard, getIntervals, getUserProfiles, getPredictionsForInterval} from "../services/statistics_queries.js";
+import {getSingles, getLeaderboard, getIntervals, getUserProfiles, getPredictionsForInterval, getWinRatios} from "../services/statistics_queries.js";
 import sendJson from "../utils/sendJson.js";
 import { parseInterval } from "../utils/statisticsHelpers.js";
-import { Analytics, Interval, type UserEntry} from "../types/statistics.js";
+import { Analytics, Interval, WinRatioEntry, type UserEntry} from "../types/statistics.js";
 import { fetchUserProfile } from "../services/helix.js";
 
 export default async function statsRoutes(req: IncomingMessage, res: ServerResponse, url: URL): Promise<IncomingMessage | ServerResponse | void> {
@@ -28,7 +28,8 @@ export default async function statsRoutes(req: IncomingMessage, res: ServerRespo
                 ),
             },
             interval,
-            predictions: await getPredictionsForInterval(interval)
+            predictions: await getPredictionsForInterval(interval),
+            winRatios: await addMultipleProfileDataToWinRatios(await getWinRatios(interval))
         } as Analytics;
 
         return sendJson(res, 200, result);
@@ -40,6 +41,35 @@ export default async function statsRoutes(req: IncomingMessage, res: ServerRespo
         return sendJson(res, 200, result);
     }
 
+}
+
+function addMultipleProfileDataToWinRatios(entries: { highest: WinRatioEntry[]; lowest: WinRatioEntry[] }): Promise<{ highest: WinRatioEntry[]; lowest: WinRatioEntry[] }> {
+    return Promise.all([
+        fetchUserProfiles(entries.highest.map(entry => entry.user_name)).then(profiles => {
+            return entries.highest.map(entry => {
+                const profile = profiles.find(p => p.user_name === entry.user_name);
+                if (profile) {
+                    return {
+                        ...entry,
+                        profile_image_url: profile.profile_image_url
+                    };
+                }
+                return entry;
+            });
+        }),
+        fetchUserProfiles(entries.lowest.map(entry => entry.user_name)).then(profiles => {
+            return entries.lowest.map(entry => {
+                const profile = profiles.find(p => p.user_name === entry.user_name);
+                if (profile) {
+                    return {
+                        ...entry,
+                        profile_image_url: profile.profile_image_url
+                    };
+                }
+                return entry;
+            });
+        })
+    ]).then(([highest, lowest]) => ({ highest, lowest }));
 }
 
 function addMultipleProfileData(entries: UserEntry[]): Promise<UserEntry[]> {
