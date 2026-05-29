@@ -28,7 +28,7 @@ export type SingleEntry = {
     prediction_id: string;
     bet_amount: number;
     won_amount: number | null;
-    net_change: number | string;
+    net_change?: number | string;
     bet_time?: string;
 };
 
@@ -62,4 +62,15 @@ export type WinRatioEntry = {
     win_percentage: number;
     total_predictions: number;
     won_predictions: number;
+}
+
+export type PredictionDetails = {
+    prediction_id: string;
+    prediction_title: string;
+    prediction_start_time: string;
+    options: {
+        title: string;
+        won: boolean;
+        votes: SingleEntry[];
+    }[];
 }

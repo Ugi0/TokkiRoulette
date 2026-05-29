@@ -51,3 +51,29 @@ export function LosersTotalBetTitle(betAmount: number | string, wonAmount: numbe
 
     return `Bet total ${betAmount}`
 }
+
+const SPECIAL_ORDER = [
+    "RED",
+    "BLACK",
+    "GREEN",
+    "1st 12",
+    "2nd 12",
+    "3rd 12"
+];
+
+export function sortPredictionOptions(a: { title: string }, b: { title: string }) {
+    const aIndex = SPECIAL_ORDER.indexOf(a.title);
+    const bIndex = SPECIAL_ORDER.indexOf(b.title);
+
+    const aIsSpecial = aIndex !== -1;
+    const bIsSpecial = bIndex !== -1;
+
+    if (aIsSpecial && bIsSpecial) {
+        return aIndex - bIndex;
+    }
+
+    if (aIsSpecial) return -1;
+    if (bIsSpecial) return 1;
+
+    return a.title.localeCompare(b.title);
+}

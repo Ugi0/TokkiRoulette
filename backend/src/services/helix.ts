@@ -108,6 +108,7 @@ export async function registerPredictionHook(
 }
 
 export async function fetchUserProfile(username: string): Promise<HelixUser> {
+  console.log(username);
   const resp = await fetch(`https://api.twitch.tv/helix/users?login=${encodeURIComponent(username)}`, {
     headers: {
       "Client-ID": process.env.TWITCH_CLIENT_ID!,

@@ -4,14 +4,14 @@
     width: fit-content;
     height: fit-content;
     overflow: hidden;
-    background:  #d8dcdf;
+    background:  #2c3032;
     border-radius: 16px;
 }
 .header {
     display: flex;
     flex-direction: row;
     align-items: center;
-    background: #ffffff;
+    background: #181a1b;
     width: 100%;
     height: fit-content;
     padding-left: 8px;
@@ -24,7 +24,7 @@
 }
 
 .header h2 {
-    color: #000000;
+    color: var(--text-w);
     font-weight: bold;
     font-size: 1.3rem;
     font-family: "JetBrains Mono", sans-serif;
@@ -39,9 +39,9 @@
     gap: 4px;
 }
 
-.entry{
+.entry {
     display: grid;
-    grid-template-columns: 3rem minmax(9ch, 1fr) clamp(11ch, 24vw, 15ch) clamp(7ch, 18vw, 10ch);
+    grid-template-columns: 3rem minmax(0, 1fr) auto auto;
     align-items: center;
     padding: 8px;
     padding-right: 16px;
@@ -60,8 +60,9 @@
     font-family: "JetBrains Mono", sans-serif;
     font-size: 1.2rem;
     font-weight: 700;
-    min-width: 0;
     white-space: nowrap;
+    color: var(--text-w);
+    overflow: hidden;
 }
 
 .bet {
@@ -71,7 +72,7 @@
     text-align: center;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    color: #000000;
+    color: var(--text-w);
 }
 
 .bet.individual {
@@ -91,9 +92,8 @@
 
 .net {
     font-family: "JetBrains Mono", sans-serif;
-    font-size: 0.95rem;
     font-weight: 500;
-    color: #111111;
+    color: var(--text-w);
     text-align: right;
     font-variant-numeric: tabular-nums;
 }
@@ -115,9 +115,9 @@
 .expand-controls button {
   padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid #e0e0e0;
-  background: #fff;
-  color: #333;
+  border: 1px solid #393d40;
+  background: #181a1b;
+  color: #c8c3bc;
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
@@ -126,8 +126,8 @@
 }
 
 .expand-controls button:hover {
-  background: #f5f5f5;
-  border-color: #d0d0d0;
+  background: #1e2021;
+  border-color: #3d4245;
 }
 
 .expand-controls button:active {

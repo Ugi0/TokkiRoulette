@@ -36,7 +36,6 @@ export default function Leaderboard({ title, data, interval, expanded }: Leaderb
 
                 <div
                   className="name"
-                  style={{ color: entry.chat_color ?? "#000000" }}
                 >
                   {entry.user_name}
                 </div>

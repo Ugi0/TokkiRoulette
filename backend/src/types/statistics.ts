@@ -53,3 +53,14 @@ export type WinRatioEntry = {
     total_predictions: number;
     won_predictions: number;
 }
+
+export type PredictionDetails = {
+    prediction_id: string;
+    prediction_title: string;
+    prediction_start_time: string;
+    options: {
+        won: boolean;
+        title: string;
+        votes: UserEntry[];
+    }[];
+}

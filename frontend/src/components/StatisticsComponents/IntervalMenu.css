@@ -10,8 +10,8 @@
 
 .btn.interval-toggle {
     border: 0;
-    color: #000000;
-    background:  #d8dcdf;
+    color: var(--text-w);
+    background:  #2c3032;
     font-family: "JetBrains Mono", sans-serif;
     font-size: 0.78rem;
     font-weight: 700;
@@ -23,22 +23,22 @@
 .btn.interval-toggle:focus,
 .btn.interval-toggle:active,
 .btn.interval-toggle.show {
-    background: #e7ebed;
-    color: #58595a;
+    background: #3a3f41;
+    color: var(--text-w);
 }
 
 .interval-menu {
     width: fit-content;
     padding: 4px 20px;
-    border: 1px solid  #d8dcdf;
+    border: 1px solid  #3a3f41;
     border-radius: 8px;
-    background: #FFFFFF;
+    background: #181a1b;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
 }
 
 .interval-menu-item {
     border-radius: 6px;
-    color: #000000;
+    color: var(--text-w);
     font-family: "JetBrains Mono", sans-serif;
     font-size: 0.85rem;
     font-weight: 600;
@@ -46,11 +46,11 @@
 
 .interval-menu-item:hover,
 .interval-menu-item:focus {
-    background: #eef2f3;
-    color: #58595a;
+    background: #2c3032;
+    color: var(--text-w);
 }
 
 .interval-menu-item.active {
-    background: #d8dcdf;
-    color: #ffffff;
+    background: #3a3f41;
+    color: var(--text-w);
 }

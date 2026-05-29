@@ -1,6 +1,7 @@
 import db from "./db.js";
-import { Interval, PredictionEntry, UserEntry, WinRatioEntry } from "../types/statistics.js";
+import { Interval, PredictionDetails, PredictionEntry, UserEntry, WinRatioEntry } from "../types/statistics.js";
 import { getIntervalCondition } from "../utils/statisticsHelpers.js";
+import { fetchUserProfiles } from "../routes/stats.js";
 
 const netChangeSql = "COALESCE(won_amount, -bet_amount)";
 
@@ -152,7 +153,7 @@ export async function getUserProfiles(user_ids: string[]): Promise<Record<string
         WHERE user_name = ANY($1)
     `;
 
-    const { rows } = await db.query(query, [user_ids]);
+    const { rows } = await db.query(query, [user_ids.filter((name): name is string => !!name)]);
       return rows.reduce((acc, row) => {
           acc[row.user_name] = row.profile_image_url;
           return acc;
@@ -214,4 +215,106 @@ export async function getWinRatios(interval: Interval): Promise<{ highest: WinRa
     const lowest = rows.slice(-10).reverse();
 
     return { highest, lowest };
+}
+
+export async function loadPredictionDetails(predictionId: string): Promise<PredictionDetails | null> {
+    const query = `
+        SELECT
+            p.id AS prediction_id,
+            p.title AS prediction_title,
+            p.start_time AS prediction_start_time,
+
+            o.title AS option_title,
+            (o.option_id = po.winning_option_id) AS won,
+
+            r.user_id,
+            r.user_name,
+            r.bet_amount,
+            r.won_amount,
+            r.result_time AS bet_time
+
+        FROM predictions p
+
+        JOIN options o 
+            ON o.prediction_id = p.id
+
+        LEFT JOIN votes v 
+            ON v.prediction_id = p.id 
+            AND v.option_id = o.option_id
+
+        LEFT JOIN results r 
+            ON r.prediction_id = v.prediction_id 
+            AND r.user_id = v.user_id
+
+        LEFT JOIN prediction_outcomes po
+            ON po.prediction_id = p.id
+
+        WHERE p.id = $1;
+    `;
+
+    const { rows } = await db.query(query, [predictionId]);
+
+    if (rows.length === 0) {
+        return null;
+    }
+
+    const predictionDetails: PredictionDetails = {
+        prediction_id: rows[0].prediction_id,
+        prediction_title: rows[0].prediction_title,
+        prediction_start_time: rows[0].prediction_start_time,
+        options: []
+    };
+
+    const optionMap: Record<string, number> = {};
+
+    rows.forEach(row => {
+        if (optionMap[row.option_title] === undefined) {
+            optionMap[row.option_title] = predictionDetails.options.length;
+            predictionDetails.options.push({
+                title: row.option_title,
+                won: !!row.won,
+                votes: []
+            });
+        }
+
+        const optionIndex = optionMap[row.option_title];
+
+        if (row.user_id !== null && row.user_name !== null) {
+            predictionDetails.options[optionIndex].votes.push({
+                prediction_id: predictionId,
+                user_id: row.user_id,
+                user_name: row.user_name,
+                bet_amount: row.bet_amount,
+                won_amount: row.won_amount,
+                bet_time: row.bet_time,
+                net_change: "",
+                total_net: "",
+                predictions_count: ""
+            });
+        }
+    });
+
+    await Promise.all(
+        predictionDetails.options.map(async option => {
+            const profilesArray = await fetchUserProfiles(
+                option.votes.map(vote => vote.user_name)
+            );
+
+            const profiles: Record<string, string | null> = {};
+            profilesArray.forEach(p => {
+                profiles[p.user_name] = p.profile_image_url;
+            });
+
+            option.votes = option.votes.map(vote => ({
+                ...vote,
+                profile_image_url: profiles[vote.user_name] || null
+            }));
+        })
+    );
+
+    //for (const option of predictionDetails.options) {
+    //    console.log(option);
+    //}
+
+    return predictionDetails;
 }

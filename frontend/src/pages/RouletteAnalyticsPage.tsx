@@ -4,9 +4,9 @@ import RouletteAnalytics from "../components/StatisticsComponents/RouletteAnalyt
 import SiteHeader from "../components/SiteHeader";
 import IntervalMenu from "../components/StatisticsComponents/IntervalMenu.tsx";
 import { useEffect, useState } from "react";
-import { StatsInterval, type Analytics } from "../types/analytics.ts";
-
-const endpoint = "/api/analytics/data";
+import { StatsInterval, type Analytics, type PredictionEntry } from "../types/analytics.ts";
+import PredictionDetails from "../components/StatisticsComponents/PredictionDetailsView.tsx";
+import { loadIndividual, loadIntervals } from "../utils/statisticsQueries.ts";
 
 export default function RouletteAnalyticsPage() {
     const [interval, setInterval] = useState<StatsInterval>(StatsInterval.ALL.queryParam);
@@ -14,44 +14,11 @@ export default function RouletteAnalyticsPage() {
     const [analytics, setAnalytics] = useState<Analytics | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedPrediction, setSelectedPrediction] = useState<PredictionEntry | null>(null);
 
     useEffect(() => {
-            async function loadIntervals() {
-                const response = await fetch("/api/analytics/intervals");
-                const data = await response.json();
-                setAvailableIntervals(data);
-            }
-    
-            loadIntervals();
-    
-            async function loadIndividual() {
-                try {
-                    setLoading(true);
-                    setError(null);
-    
-                    const separator = endpoint.includes("?") ? "&" : "?";
-                    const requestUrl = `${endpoint}${separator}interval=${interval}`;
-    
-    
-                    const response = await fetch(requestUrl, {
-                        credentials: "include",
-                    });
-    
-                    const data = await response.json();
-    
-                    if (!response.ok) {
-                        throw new Error(data.error ?? "Failed to load data;");
-                    }
-    
-                    setAnalytics(data as Analytics | null);
-                } catch (err) {
-                    setError(err instanceof Error ? err.message : "Unknown error");
-                } finally {
-                    setLoading(false);
-                }
-            }
-    
-            loadIndividual();
+            loadIntervals(setAvailableIntervals);
+            loadIndividual({ setLoading, setError, setAnalytics, interval });
         }, [interval]);
 
         return (
@@ -61,6 +28,7 @@ export default function RouletteAnalyticsPage() {
 
             {analytics && !error && (
                 <div className="page-root">
+                    {selectedPrediction && <PredictionDetails prediction={selectedPrediction} onClose={() => setSelectedPrediction(null)} />}
                     <SiteHeader titleExtra={"Analytics"} />
                     <IntervalMenu
                         value={interval}
@@ -69,7 +37,7 @@ export default function RouletteAnalyticsPage() {
                     />
                     <main className="roulette-stats-page">
 
-                        <RouletteAnalytics analytics={analytics!} />
+                        <RouletteAnalytics analytics={analytics!} setSelectedPrediction={setSelectedPrediction} />
                     </main>
                     <Footer />
                 </div>

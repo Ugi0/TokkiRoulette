@@ -8,16 +8,12 @@ import { ExpandableSection } from "./ExpandableSection.tsx";
 import WinRatioLeaderboard from "./WinRatioLeaderboard.tsx";
 import PredictionsList from "./PredictionsList.tsx";
 import { useState } from "react";
-import PredictionDetails from "./PredictionDetails.tsx";
 
-export default function RouletteAnalytics({ analytics }: { analytics: Analytics }) {
+export default function RouletteAnalytics({ analytics, setSelectedPrediction }: { analytics: Analytics; setSelectedPrediction: (prediction: PredictionEntry | null) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedPrediction, setSelectedPrediction] = useState<PredictionEntry | null>(null);
 
   return (
     <div className="roulette-analytics">
-      {selectedPrediction && <PredictionDetails prediction={selectedPrediction} />}
-
       <div className="stats-container">
         
       {analytics.interval !== "RECENT" && analytics.predictions.length !== 0 && (

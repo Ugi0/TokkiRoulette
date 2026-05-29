@@ -11,10 +11,10 @@
   display: flex;
   flex-direction: column;
 
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(24, 26, 27, 0.9);
   backdrop-filter: blur(8px);
 
-  border-right: 1px solid #e5e5e5;
+  border-right: 1px solid #373c3e;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.06);
 
   transition: width 0.3s ease;
@@ -60,8 +60,8 @@
   justify-content: center;
 
   border-radius: 50%;
-  border: 1px solid #ddd;
-  background: white;
+  border: 1px solid #3a3e41;
+  background: #181a1b;
 
   font-size: 20px;
   line-height: 1;
@@ -71,7 +71,7 @@
 }
 
 .sidebar-toggle:hover {
-  background: #f5f5f5;
+  background: #373c3e;
   transform: translateX(1px);
 }
 
@@ -122,10 +122,11 @@
   padding: 8px;
   border-radius: 8px;
   transition: all 0.15s ease;
+  color: var(--text-w);
 }
 
 .prediction-item:hover {
-  background: #f5f5f5;
+  background: #373c3e;
 }
 
 .prediction-item:active {

@@ -32,10 +32,7 @@ export default function Individual({ title, data, expanded }: IndividualProps) {
                   alt="˙◠˙"
                 />
 
-                <div
-                  className="name"
-                  style={{ color: entry.chat_color ?? "#000000" }}
-                >
+                <div className="name">
                   {entry.user_name}
                 </div>
 

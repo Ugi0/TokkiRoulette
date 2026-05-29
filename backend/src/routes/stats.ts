@@ -1,5 +1,5 @@
 import {IncomingMessage, ServerResponse} from "http";
-import {getSingles, getLeaderboard, getIntervals, getUserProfiles, getPredictionsForInterval, getWinRatios} from "../services/statistics_queries.js";
+import {getSingles, getLeaderboard, getIntervals, getUserProfiles, getPredictionsForInterval, getWinRatios, loadPredictionDetails} from "../services/statistics_queries.js";
 import sendJson from "../utils/sendJson.js";
 import { parseInterval } from "../utils/statisticsHelpers.js";
 import { Analytics, Interval, WinRatioEntry, type UserEntry} from "../types/statistics.js";
@@ -41,6 +41,12 @@ export default async function statsRoutes(req: IncomingMessage, res: ServerRespo
         return sendJson(res, 200, result);
     }
 
+    if (url.pathname.startsWith("/analytics/prediction/")) {
+        const predictionId = url.pathname.split("/").pop();
+        const result = await loadPredictionDetails(predictionId!);
+
+        return sendJson(res, 200, result);
+    }
 }
 
 function addMultipleProfileDataToWinRatios(entries: { highest: WinRatioEntry[]; lowest: WinRatioEntry[] }): Promise<{ highest: WinRatioEntry[]; lowest: WinRatioEntry[] }> {
@@ -87,7 +93,7 @@ function addMultipleProfileData(entries: UserEntry[]): Promise<UserEntry[]> {
     });
 }
 
-async function fetchUserProfiles(userNames: string[]) {
+export async function fetchUserProfiles(userNames: string[]) {
     const savedProfiles = await getUserProfiles(userNames);
 
     return Promise.all(userNames.map(userName => {
