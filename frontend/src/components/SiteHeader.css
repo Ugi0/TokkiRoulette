@@ -9,6 +9,18 @@
     backdrop-filter: blur(16px);
 }
 
+.site-header {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+@media (max-height: 900px) {
+    .site-header {
+        opacity: 0;
+        transform: translateY(-100%);
+        pointer-events: none;
+    }
+}
+
 .site-header__nav {
     display: flex;
     align-items: center;
