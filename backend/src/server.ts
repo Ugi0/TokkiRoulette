@@ -8,6 +8,7 @@ import debugRoutes from "./routes/debug.js";
 import { initWebSocketServer } from "./routes/wsServer.js";
 import { handleResourcesRoute } from "./routes/resources.js";
 import statsRoutes from "./routes/stats.js";
+import { handleQuotesRoute } from "./routes/quotes.js";
 
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -63,7 +64,11 @@ const server = http.createServer(
       }
 
       if (url.pathname.startsWith("/resources")) {
-        return handleResourcesRoute(req, res, url);
+        return await handleResourcesRoute(req, res, url);
+      }
+
+      if (url.pathname === "/quote") {
+        return await handleQuotesRoute(req, res, url);
       }
 
       res.writeHead(404, { "Content-Type": "text/plain" });

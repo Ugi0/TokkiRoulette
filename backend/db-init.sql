@@ -83,5 +83,5 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 
 CREATE TABLE IF NOT EXISTS participants (
     user_name TEXT PRIMARY KEY,
-    profile_image_url TEXT NOT NULL
+    profile_image_url TEXT
 )
