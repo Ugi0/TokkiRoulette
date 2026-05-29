@@ -25,7 +25,7 @@ export default function Individual({ title, data, expanded }: IndividualProps) {
             const netChange = toNumber(entry.net_change);
 
             return (
-              <div className="entry" key={entry.user_id}>
+              <div className="entry" key={`${entry.user_id}-${entry.bet_time}`}>
                 <img
                   className="pfp"
                   src={entry.profile_image_url ?? "/default-pfp.jpg"}
