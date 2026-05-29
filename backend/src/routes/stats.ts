@@ -54,7 +54,7 @@ function addMultipleProfileDataToWinRatios(entries: { highest: WinRatioEntry[]; 
         fetchUserProfiles(entries.highest.map(entry => entry.user_name)).then(profiles => {
             return entries.highest.map(entry => {
                 const profile = profiles.find(p => p.user_name === entry.user_name);
-                if (profile) {
+                if (profile !== undefined) {
                     return {
                         ...entry,
                         profile_image_url: profile.profile_image_url
@@ -66,7 +66,7 @@ function addMultipleProfileDataToWinRatios(entries: { highest: WinRatioEntry[]; 
         fetchUserProfiles(entries.lowest.map(entry => entry.user_name)).then(profiles => {
             return entries.lowest.map(entry => {
                 const profile = profiles.find(p => p.user_name === entry.user_name);
-                if (profile) {
+                if (profile !== undefined) {
                     return {
                         ...entry,
                         profile_image_url: profile.profile_image_url
@@ -82,7 +82,7 @@ function addMultipleProfileData(entries: UserEntry[]): Promise<UserEntry[]> {
     return fetchUserProfiles(entries.map(entry => entry.user_name)).then(profiles => {
         return entries.map(entry => {
             const profile = profiles.find(p => p.user_name === entry.user_name);
-            if (profile) {
+            if (profile !== undefined) {
                 return {
                     ...entry,
                     profile_image_url: profile.profile_image_url
@@ -97,7 +97,7 @@ export async function fetchUserProfiles(userNames: string[]) {
     const savedProfiles = await getUserProfiles(userNames);
 
     return Promise.all(userNames.map(userName => {
-        if (savedProfiles[userName]) {
+        if (savedProfiles[userName] !== undefined) {
             return {
                 user_name: userName,
                 profile_image_url: savedProfiles[userName]

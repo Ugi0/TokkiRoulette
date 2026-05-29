@@ -160,7 +160,7 @@ export async function getUserProfiles(user_ids: string[]): Promise<Record<string
       }, {} as Record<string, string>)
 };
 
-export async function saveUserProfile(user_name: string, profile_image_url: string): Promise<void> {
+export async function saveUserProfile(user_name: string, profile_image_url: string | null): Promise<void> {
     const query = `
         INSERT INTO participants (user_name, profile_image_url)
         VALUES ($1, $2)
@@ -311,10 +311,6 @@ export async function loadPredictionDetails(predictionId: string): Promise<Predi
             }));
         })
     );
-
-    //for (const option of predictionDetails.options) {
-    //    console.log(option);
-    //}
 
     return predictionDetails;
 }
