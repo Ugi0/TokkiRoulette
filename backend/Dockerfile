@@ -1,32 +1,31 @@
-FROM node:20-alpine AS dev
+FROM node:20-slim AS dev
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 EXPOSE 8080
 CMD ["npm", "run", "dev"]
 
-
-FROM node:20-alpine AS build
+FROM node:20-slim AS build
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
 
-FROM node:20-alpine AS prod
+FROM node:20-slim AS prod
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm i --omit=dev
+RUN npm install --omit=dev
 
 COPY --from=build /app/dist ./dist
 
