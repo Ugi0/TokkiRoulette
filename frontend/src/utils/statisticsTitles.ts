@@ -1,5 +1,24 @@
 import { toNumber } from "./statisticsCommon";
 
+function formatInterval(interval: string): string {
+    switch (interval) {
+        case "ONE_MONTH":
+            return "1 Month";
+        case "THREE_MONTHS":
+            return "3 Months";
+        case "SIX_MONTHS":
+            return "6 Months";
+        case "ONE_YEAR":
+            return "1 Year";
+        case "ALL":
+            return "All Time";
+        case "RECENT":
+            return "Recent";
+        default:
+            return interval;
+    }
+}
+
 export function losersSingleTitle(interval: string): string {
     switch (interval) {
         case "RECENT":
@@ -7,7 +26,7 @@ export function losersSingleTitle(interval: string): string {
         case "ALL":
             return "Biggest Single Loss ($TKS)";
         default:
-            return `Biggest Losers in the Last ${interval.replace("_", " ")}`;
+            return `Biggest Single Loss in the last ${formatInterval(interval)}`;
     }
 }
 
@@ -18,7 +37,7 @@ export function winnersSingleTitle(interval: string): string {
         case "ALL":
             return "Biggest Single Win ($TKS)";
         default:
-            return `Biggest Winners in the Last ${interval.replace("_", " ")}`;
+            return `Biggest Single Win in the last ${formatInterval(interval)}`;
     }
 }
 
@@ -29,7 +48,7 @@ export function losersTotalTitle(interval: string): string {
         case "ALL":
             return "Top Total Losers ($TKS)";
         default:
-            return `Top Losers in the Last ${interval.replace("_", " ")}`;
+            return `Top Total Losers in the last ${formatInterval(interval)}`;
     }
 }
 
@@ -40,7 +59,7 @@ export function winnersTotalTitle(interval: string): string {
         case "ALL":
             return "Top Total Winners ($TKS)";
         default:
-            return `Top Winners in the Last ${interval.replace("_", " ")}`;
+            return `Top Total Winners in the last ${formatInterval(interval)}`;
     }
 }
 

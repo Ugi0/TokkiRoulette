@@ -38,3 +38,10 @@ export function getIntervalCondition(interval: Interval): string {
     }
     return `AND p.start_time > NOW() - INTERVAL '${Interval[interval].query_param}'`;
 }
+
+export function getResultsIntervalCondition(interval: Interval): string {
+    if (interval === "ALL") {
+        return "";
+    }
+    return `AND results.result_time > NOW() - INTERVAL '${Interval[interval].query_param}'`;
+}

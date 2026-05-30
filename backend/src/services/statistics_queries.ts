@@ -1,6 +1,6 @@
 import db from "./db.js";
 import { Interval, PredictionDetails, PredictionEntry, UserEntry, WinRatioEntry } from "../types/statistics.js";
-import { getIntervalCondition } from "../utils/statisticsHelpers.js";
+import { getIntervalCondition, getResultsIntervalCondition } from "../utils/statisticsHelpers.js";
 import { fetchUserProfiles } from "../routes/stats.js";
 
 const netChangeSql = "COALESCE(won_amount, -bet_amount)";
@@ -203,12 +203,12 @@ export async function getWinRatios(interval: Interval): Promise<{ highest: WinRa
             (SUM(CASE WHEN won_amount IS NOT NULL THEN 1 ELSE 0 END)::float / COUNT(*)) * 100 AS win_percentage
         FROM results
         WHERE roulette_prediction = true
-        ${getIntervalCondition(interval)}
+        ${getResultsIntervalCondition(interval)}
         GROUP BY user_id, user_name
         HAVING COUNT(*) >= 3
         ORDER BY win_percentage DESC;
     `;
-
+    
     const { rows } = await db.query<WinRatioEntry>(query);
 
     const highest = rows.slice(0, 10);
