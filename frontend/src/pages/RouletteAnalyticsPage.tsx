@@ -9,7 +9,7 @@ import PredictionDetails from "../components/StatisticsComponents/PredictionDeta
 import { loadIndividual, loadIntervals } from "../utils/statisticsQueries.ts";
 
 export default function RouletteAnalyticsPage() {
-    const [interval, setInterval] = useState<StatsInterval>(StatsInterval.ALL.queryParam);
+    const [interval, setInterval] = useState<StatsInterval>(StatsInterval.ONE_MONTH.queryParam);
     const [availableIntervals, setAvailableIntervals] = useState<StatsInterval[]>([]);
     const [analytics, setAnalytics] = useState<Analytics | null>(null);
     const [loading, setLoading] = useState(true);
