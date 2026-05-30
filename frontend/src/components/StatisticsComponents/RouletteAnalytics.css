@@ -1,7 +1,15 @@
 .roulette-analytics {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 64px;
+}
+
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: fit-content;
 }
 
 .stats {
@@ -10,26 +18,31 @@
     width: 100%;
     height: fit-content;
     gap: 12px;
+    margin: 20px;
     align-items: center;
     justify-content: center;
 }
-.roulette-page h1 {
+
+.roulette-analytics .stats > h1 {
     font-family: "JetBrains Mono", sans-serif;
-    font-size: 36px;
+    font-size: 2rem;
+    font-weight: 700;
     color: #ced5d5;
+    margin: 0;
 }
-.roulette-page h2 {
-    font-family: "JetBrains Mono", sans-serif;
-    font-size: 20px;
-    font-weight: 500;
-    color: #ced5d5;
-}
+
 .content {
     display: flex;
     flex-direction: row;
-    width: fit-content;
+    width: 100%;
     gap: 64px;
 }
+
+
+.content > * {
+    flex: 1;
+}
+
 .board {
     display: flex;
     flex-direction: column;

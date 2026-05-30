@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import "./RouletteTable.css";
-import RouletteWheel from "./RouletteWheel";
 import { numbers, zero } from "./RouletteNumber";
+import RouletteWheel from "./RouletteWheel";
 
 type RouletteResult = {
   number: number;

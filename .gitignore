@@ -1,6 +1,8 @@
 # Node modules
 node_modules/
 
+/package-lock.json
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
@@ -26,6 +28,10 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+
+# Local/private database dumps
+*.sql
+!backend/db-init.sql
 
 # Optional: coverage
 coverage/

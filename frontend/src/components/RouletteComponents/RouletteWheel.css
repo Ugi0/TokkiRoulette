@@ -34,7 +34,7 @@
 
   font-weight: bold;
   font-size: 15px;
-  color: white;
+  color: var(--text-w);
 
   transform-origin: center center;
 

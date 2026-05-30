@@ -16,17 +16,11 @@
 .roulette-page__header {
   width: min(1100px, calc(100% - 32px));
   margin: 0 auto 16px;
-  color: #ffffff;
-  font-family: "JetBrains Mono", sans-serif;
 }
 
 .roulette-page__header h1 {
   font-family: "JetBrains Mono", sans-serif;
   font-size: 36px;
-  color: #ced5d5;
-  margin: 0 0 8px;
-}
-
-.roulette-page__link {
-  color: #ced5d5;
+  margin: 0;
+  color: #ffffff;
 }

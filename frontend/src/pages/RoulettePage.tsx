@@ -1,8 +1,9 @@
-import RouletteTable from "../components/RouletteTable";
+import RouletteTable from "../components/RouletteComponents/RouletteTable";
 import "./RoulettePage.css";
 import Footer from "../components/Footer";
 import { useState } from "react";
 import Notification from "../components/Notification";
+import SiteHeader from "../components/SiteHeader";
 import { useResultsSocket } from "../components/Overlay/UseSocket";
 import { AssistantUI } from "../components/ResultsPanel/AssistantUI";
 import type { HookData } from "../types/hookData";
@@ -40,6 +41,7 @@ export default function RoulettePage() {
 
   return (
     <div className="page-root">
+      <SiteHeader />
       <main className="roulette-page">
         <div className="roulette-page__header">
           <h1>Totally not rigged Roulette table</h1>

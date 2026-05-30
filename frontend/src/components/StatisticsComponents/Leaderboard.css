@@ -1,0 +1,149 @@
+.leaderboard {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    height: fit-content;
+    overflow: hidden;
+    background:  #2c3032;
+    border-radius: 16px;
+}
+.header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #181a1b;
+    width: 100%;
+    height: fit-content;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    justify-content: space-between;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.header h2 {
+    color: var(--text-w);
+    font-weight: bold;
+    font-size: 1.3rem;
+    font-family: "JetBrains Mono", sans-serif;
+    height: fit-content;
+    margin: 0;
+    min-width: 0;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.entry {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    padding: 8px;
+    padding-right: 16px;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pfp {
+    width: 3rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 100%;
+}
+
+.name {
+    font-family: "JetBrains Mono", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--text-w);
+    overflow: hidden;
+}
+
+.bet {
+    font-family: "JetBrains Mono", sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text-w);
+}
+
+.bet.individual {
+  display: flex;
+  flex-direction: column;
+}
+
+.bet-amount {
+  font-weight: 600;
+}
+
+.bet-time {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #666;
+}
+
+.net {
+    font-family: "JetBrains Mono", sans-serif;
+    font-weight: 500;
+    color: var(--text-w);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.net.positive {
+    color: #11CC3A;
+}
+
+.net.negative {
+    color: #FF0000;
+}
+
+.expand-controls {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.expand-controls button {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #393d40;
+  background: #181a1b;
+  color: #c8c3bc;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.expand-controls button:hover {
+  background: #1e2021;
+  border-color: #3d4245;
+}
+
+.expand-controls button:active {
+  transform: scale(0.97);
+}
+
+.win-ratio {
+  font-weight: 600;
+}
+
+.win-details {
+  font-size: 0.75rem;
+  color: #777;
+}
+
+.entry .bet {
+  display: flex;
+  flex-direction: column;
+}

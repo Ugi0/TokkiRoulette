@@ -80,3 +80,8 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 
     UNIQUE (user_id)
 );
+
+CREATE TABLE IF NOT EXISTS participants (
+    user_name TEXT PRIMARY KEY,
+    profile_image_url TEXT
+)

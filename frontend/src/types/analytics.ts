@@ -1,41 +1,76 @@
 export const StatsInterval = {
-    ONE_MONTH: { queryParam: "1m" },
-    THREE_MONTHS: { queryParam: "3m" },
-    SIX_MONTHS: { queryParam: "6m" },
-    ONE_YEAR: { queryParam: "1y" },
-    ALL: { queryParam: "all" },
-    RECENT: { queryParam: "recent" },
+    ONE_MONTH: { queryParam: "ONE_MONTH" },
+    THREE_MONTHS: { queryParam: "THREE_MONTHS" },
+    SIX_MONTHS: { queryParam: "SIX_MONTHS" },
+    ONE_YEAR: { queryParam: "ONE_YEAR" },
+    ALL: { queryParam: "ALL" },
+    RECENT: { queryParam: "RECENT" },
 } as const;
 
 export type StatsInterval =
     (typeof StatsInterval)[keyof typeof StatsInterval]["queryParam"];
 
 export type LeaderboardEntry = {
-    user_Id: string;
-    user_Name: string;
-    profile_Image_URL: string | null;
-    chat_Color: string | null;
-    bet_Amount: number;
-    total_Net: number;
-    predictions_Count: number;
+    user_id: number;
+    user_name: string;
+    profile_image_url?: string | null;
+    chat_color?: string | null;
+    bet_amount?: number | string;
+    total_net: number | string;
+    predictions_count: number | string;
 };
 
 export type SingleEntry = {
-    user_Id: string;
-    user_Name: string;
-    profile_Image_URL: string | null;
-    chat_Color: string | null;
-    prediction_Id: string;
-    bet_Amount: number;
-    won_Amount: number | null;
-    net_Change: number;
+    user_id: number;
+    user_name: string;
+    profile_image_url?: string | null;
+    chat_color?: string | null;
+    prediction_id: string;
+    bet_amount: number;
+    won_amount: number | null;
+    net_change?: number | string;
+    bet_time?: string;
 };
 
 export type Analytics = {
-    recentWinners: LeaderboardEntry[];
-    recentLosers: LeaderboardEntry[];
-    topWinners: LeaderboardEntry[];
-    topLosers: LeaderboardEntry[];
-    topProfit: SingleEntry;
-    topLost: SingleEntry;
+    leaderboardEntries: {
+        topWinners: LeaderboardEntry[];
+        topLosers: LeaderboardEntry[];
+    }
+    singleEntries: {
+        topProfit: SingleEntry[];
+        topLost: SingleEntry[];
+    },
+    interval: StatsInterval;
+    winRatios: {
+        highest: WinRatioEntry[];
+        lowest: WinRatioEntry[];
+    };
+    predictions: PredictionEntry[];
 };
+
+export type PredictionEntry = {
+    prediction_id: string;
+    prediction_start_time: string;
+    prediction_title: string;
+};
+
+export type WinRatioEntry = {
+    user_id: number;
+    user_name: string;
+    profile_image_url?: string | null;
+    win_percentage: number;
+    total_predictions: number;
+    won_predictions: number;
+}
+
+export type PredictionDetails = {
+    prediction_id: string;
+    prediction_title: string;
+    prediction_start_time: string;
+    options: {
+        title: string;
+        won: boolean;
+        votes: SingleEntry[];
+    }[];
+}
