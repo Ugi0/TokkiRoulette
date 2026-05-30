@@ -47,6 +47,8 @@ export default async function statsRoutes(req: IncomingMessage, res: ServerRespo
 
         return sendJson(res, 200, result);
     }
+
+    return sendJson(res, 404, { error: "Not found" });
 }
 
 function addMultipleProfileDataToWinRatios(entries: { highest: WinRatioEntry[]; lowest: WinRatioEntry[] }): Promise<{ highest: WinRatioEntry[]; lowest: WinRatioEntry[] }> {

@@ -183,8 +183,6 @@ export async function getPredictionsForInterval(interval: Interval): Promise<Pre
         ORDER BY p.start_time DESC;
     `;
 
-    await db.query(query);
-
     const { rows } = await db.query<PredictionEntry>(query);
     return rows;
 }

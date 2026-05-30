@@ -47,7 +47,7 @@ export default function WinRatioLeaderboard({
 
                 <div
                   className={`net ${
-                    entry.win_percentage >= 0.5 ? "positive" : "negative"
+                    entry.win_percentage >= 50 ? "positive" : "negative"
                   }`}
                 >
                   {winPct}%

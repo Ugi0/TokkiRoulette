@@ -57,6 +57,8 @@
 }
 
 .prediction-details .close {
+  background: none;
+  border: none;
   color: #aaa;
   text-align: right;
   height: fit-content;

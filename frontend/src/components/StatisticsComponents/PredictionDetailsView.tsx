@@ -42,11 +42,9 @@ export default function PredictionDetailsView({ prediction, onClose }: Predictio
                         <br/> <br/>
                         <p style={{ fontSize: "4rem" }}>˙◠˙</p>
                     </div>
-                    <div className="spacer button-container">
-                        <span className="close" onClick={onClose}>
-                            &times;
-                        </span>
-                    </div>
+                    <button type="button" className="close" onClick={onClose} aria-label="Close prediction details">
+                        &times;
+                    </button>
                 </div>
             </div>
         );
@@ -100,11 +98,9 @@ export default function PredictionDetailsView({ prediction, onClose }: Predictio
                         ))}
                     </div>
                 </div>
-                <div className="spacer button-container">
-                    <span className="close" onClick={onClose}>
-                        &times;
-                    </span>
-                </div>
+                <button type="button" className="close" onClick={onClose} aria-label="Close prediction details">
+                    &times;
+                </button>
             </div>
         </div>
     );
