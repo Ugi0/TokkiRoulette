@@ -41,7 +41,7 @@
 
 .entry {
     display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr) auto auto;
+    grid-template-columns: 3rem minmax(12rem, max-content) auto auto;
     align-items: center;
     padding: 8px;
     padding-right: 16px;
