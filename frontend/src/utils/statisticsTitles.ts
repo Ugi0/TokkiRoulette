@@ -64,8 +64,12 @@ export function winnersTotalTitle(interval: string): string {
 }
 
 export function LosersTotalBetTitle(betAmount: number | string, wonAmount: number | string, interval: string): string {
-    if (interval == "RECENT" && toNumber(wonAmount) < 0) {
-        return "";
+    if (interval == "RECENT") {
+        if (toNumber(wonAmount) < 0) {
+            return "";
+        }
+
+        return `Bet ${betAmount}`
     }
 
     return `Bet total ${betAmount}`
