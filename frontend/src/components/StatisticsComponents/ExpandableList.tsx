@@ -11,7 +11,7 @@ export function ExpandableList<T>({
   expanded,
   renderItem,
   initialCount = 1,
-  expandedCount = 10,
+  expandedCount = 20,
 }: ExpandableListProps<T>) {
   const visibleItems = expanded
     ? data.slice(0, expandedCount)

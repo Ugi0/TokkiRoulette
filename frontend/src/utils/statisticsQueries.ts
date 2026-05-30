@@ -20,9 +20,8 @@ export async function loadIndividual({ setLoading, setError, setAnalytics, inter
         setLoading(true);
         setError(null);
 
-        const separator = endpoint.includes("?") ? "&" : "?";
-        const requestUrl = `${endpoint}${separator}interval=${interval}`;
-
+        const countParam = interval === "RECENT" ? "&limit=20" : "";
+        const requestUrl = `${endpoint}?interval=${interval}${countParam}`;
 
         const response = await fetch(requestUrl, {
             credentials: "include",
