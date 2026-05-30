@@ -98,9 +98,16 @@ export async function getSingles(interval: Interval, type: "win" | "loss" ): Pro
 export async function getLeaderboard(count: number, interval: Interval, type: "win" | "loss" ): Promise<UserEntry[]> {
     const orderDir = type === "win" ? 'DESC' : 'ASC';
 
-    const filterClause = type === "win"
-        ? `won_amount IS NOT NULL`
-        : `won_amount IS NULL`;
+    let filterClause = ""
+    if (interval === Interval.RECENT.query_param) {
+        filterClause = type === "win"
+            ? `AND won_amount IS NOT NULL`
+            : `AND won_amount IS NULL`;
+    } else {
+            filterClause = type === "win"
+            ? `HAVING SUM(${netChangeSql}) > 0`
+            : `HAVING SUM(${netChangeSql}) < 0`;
+    }
 
     let whereClause = 'WHERE roulette_prediction = true';
 
@@ -132,8 +139,9 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
             COUNT(*) AS predictions_count
         FROM results 
             ${whereClause}
-            AND ${filterClause}
+            ${interval === Interval.RECENT.query_param ? filterClause : ''}
         GROUP BY user_id, user_name
+        ${interval !== Interval.RECENT.query_param ? `${filterClause}` : ''}
         ORDER BY total_net ${orderDir}
         LIMIT $1;
     `;
