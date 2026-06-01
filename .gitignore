@@ -71,4 +71,4 @@ dist-ssr
 deploy.sh
 
 # Tokki model, not to be distributed
-backend/src/resources/model/*
+backend/resources/model/*

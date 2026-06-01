@@ -33,6 +33,7 @@ export function ResultsPanel({data, time, onClose, closing}: {data: HookData; ti
     paddingLeft: "6px",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
+    paddingTop: '15px'
   };
 
   const sortedLosers = [...losers].sort(
