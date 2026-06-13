@@ -1,0 +1,192 @@
+.results-panel {
+  position: fixed;
+  top: 100px;
+  right: 100px;
+  width: 30vw;
+  height: 80vh;
+  min-width: 600px;
+  max-height: 610px;
+  display: flex;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.page {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  max-height: 610px;
+  overflow: hidden;
+  background-color: #fffdf5;
+  color: #333;
+  font-family: 'Patrick Hand', cursive;
+
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      #fffdf5,
+      #fffdf5 28px,
+      #e0e0e0 29px
+    ),
+    linear-gradient(to right, #ffaaaa 2px, transparent 2px);
+
+  background-position: 0 0, 40px 0;
+}
+
+.page-left {
+  border-right: 1px solid #ddd;
+  box-shadow: inset -6px 0 10px rgba(0,0,0,0.1);
+}
+
+.page-right {
+  box-shadow: inset 6px 0 10px rgba(0,0,0,0.05);
+  clip-path: polygon(0 0, calc(100% - 50px) 0, 100% 50px, 100% 100%, 0 100%);
+}
+
+.row {
+  height: 29px;
+  min-height: 29px;
+  display: flex;
+  align-items: flex-start;
+  padding-left: 6px;
+  padding-top: 15px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.results-header {
+  font-size: 20px;
+  text-decoration: underline;
+  justify-content: center;
+  align-items: flex-start;
+  background: transparent;
+}
+
+.grid-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 80px) 70px;
+  column-gap: 8px;
+  padding-right: 6px;
+}
+
+.subheader {
+  font-size: 14px;
+  font-weight: bold;
+  color: #222;
+}
+
+.loser-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 8px;
+  align-items: flex-start;
+
+  span {
+    display: flex;
+  }
+
+}
+
+.close-area {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 50px;
+  z-index: 30;
+  cursor: pointer;
+}
+
+.close-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 45px;
+  height: 55px;
+  background-color: #fffdf5;
+
+  background-image:
+    repeating-linear-gradient(
+      -90deg,
+      #fffdf5,
+      #fffdf5 28px,
+      #e0e0e0 29px
+    ),
+    linear-gradient(to right, #ffaaaa 2px, transparent 2px);
+
+  background-position: 50px 0, 0 0px;
+  box-shadow: -1px 1px 5px rgba(0,0,0,0.25);
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.close-fold-shadow {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 0;
+  height: 0;
+  border-top: 46px solid rgba(0,0,0,0.2);
+  border-left: 46px solid transparent;
+  filter: blur(2px);
+  z-index: 2;
+}
+
+.close-fold {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  background-color: #fffdf5;
+
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      #fffdf5,
+      #fffdf5 28px,
+      #e0e0e0 29px
+    ),
+    linear-gradient(to right, #ffaaaa 2px, transparent 2px);
+
+  background-position: 0 0, 40px 0;
+  filter: brightness(0.92);
+  z-index: 3;
+}
+
+.close-x {
+  color: #c33;
+  position: absolute;
+  right: 6px;
+  font-size: 16px;
+  transform: rotate(-22deg);
+  font-family: 'Patrick Hand', cursive;
+  font-weight: bold;
+}
+
+.close-line1 {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 60px;
+  height: 2px;
+  background: rgba(120, 110, 90, 0.25);
+  transform: rotate(45deg);
+  transform-origin: top right;
+  z-index: 4;
+}
+
+.close-line2 {
+  position: absolute;
+  top: 1px;
+  right: 0px;
+  width: 60px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.6);
+  transform: rotate(45deg);
+  transform-origin: top right;
+  z-index: 5;
+}
