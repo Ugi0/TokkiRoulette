@@ -15,6 +15,8 @@
 
 .roulette-page__header {
   text-align: center;
+  display: flex;
+  justify-content: center;
 }
 
 .roulette-page__header h1 {
@@ -70,6 +72,7 @@
   text-align: center;
   cursor: pointer;
   margin: 20px;
+  width: fit-content;
 }
 
 .not-word {
