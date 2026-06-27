@@ -18,6 +18,8 @@
         opacity: 0;
         transform: translateY(-100%);
         pointer-events: none;
+        max-height: 0;
+        min-height: unset;
     }
 }
 

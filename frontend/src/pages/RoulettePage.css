@@ -69,6 +69,7 @@
 .roulette-title {
   text-align: center;
   cursor: pointer;
+  margin: 20px;
 }
 
 .not-word {
