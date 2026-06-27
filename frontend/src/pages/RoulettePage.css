@@ -14,13 +14,80 @@
 }
 
 .roulette-page__header {
-  width: min(1100px, calc(100% - 32px));
-  margin: 0 auto 16px;
+  text-align: center;
 }
 
 .roulette-page__header h1 {
   font-family: "JetBrains Mono", sans-serif;
-  font-size: 36px;
-  margin: 0;
-  color: #ffffff;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  background: linear-gradient(90deg, #ff4d4d, #ffffff, #e0ffed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+}
+
+.fancy-i {
+  top: 1px;
+  position: relative;
+  display: inline-block;
+
+  background: linear-gradient(90deg, #f7a4a4, #ffffff, #edfff4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fancy-i::before {
+  content: "i";
+  color: inherit;
+}
+
+.fancy-i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 0.35em;
+  height: 0.35em;
+
+  background: url("/logo.png") no-repeat center;
+  background-size: contain;
+}
+
+
+@keyframes bounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -3px); }
+}
+
+.roulette-title {
+  text-align: center;
+  cursor: pointer;
+}
+
+.not-word {
+  display: inline-block;
+  margin-left: 24px;
+
+  transition:
+    width 0.35s ease,
+    margin 0.35s ease,
+    opacity 0.35s ease;
+}
+
+.not-word::after {
+  content: " ";
+}
+
+.roulette-title:hover .not-word {
+  width: 0;
+  margin-left: -4px;
+  margin-right: -4px;
+  opacity: 0;
 }

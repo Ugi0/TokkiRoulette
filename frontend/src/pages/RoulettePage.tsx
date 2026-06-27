@@ -44,7 +44,12 @@ export default function RoulettePage() {
       <SiteHeader />
       <main className="roulette-page">
         <div className="roulette-page__header">
-          <h1>Totally not rigged Roulette table</h1>
+          <h1 className="roulette-title">
+            <span className="start-word">Totally</span>
+            <span className="not-word">not</span> R
+            <span className="fancy-i"/>
+            gged Roulette
+          </h1>
         </div>
 
         <RouletteTable setNotification={setNotification} />
