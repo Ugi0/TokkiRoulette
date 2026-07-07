@@ -123,6 +123,33 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
     const isRoulette = await isPredictionRoulette(predictionId);
     const hookData = await getTotalPredictionResults(prediction_event);
 
+    // Backfill any missing votes from the final event
+    // This is needed because if someone votes right before the prediction ends, twitch might not send the progress event at all, 
+    //    causing it to not end up in the votes table
+    const insertVoteQuery = `
+      INSERT INTO votes (
+        prediction_id,
+        option_id,
+        points_used,
+        user_name,
+        user_id
+      )
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (prediction_id, user_id) DO NOTHING
+    `;
+
+    for (const outcome of prediction_event.event.outcomes) {
+      for (const predictor of outcome.top_predictors) {
+        await db.query(insertVoteQuery, [
+          predictionId,
+          outcome.id,
+          predictor.channel_points_used,
+          predictor.user_name,
+          predictor.user_id
+        ]);
+      }
+    }
+
     const insertResultQuery = `
       INSERT INTO results (
         prediction_id,
