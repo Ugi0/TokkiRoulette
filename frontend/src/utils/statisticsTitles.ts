@@ -3,16 +3,16 @@ import { toNumber } from "./statisticsCommon";
 function formatInterval(interval: string): string {
     switch (interval) {
         case "CURRENT_MONTH":
-            return "1 Month";
+            return "current month";
         case "LAST_MONTH":
-            return "Last Month";
+            return "previous month";
         case "LAST_3_MONTHS":
-            return "Last 3 Months";
+            return "last 3 months";
         case "LAST_6_MONTHS":
-            return "Last 6 Months";
+            return "last 6 months";
         case "LAST_12_MONTHS":
-            return "Last 12 Months";
-        case "ALL":
+            return "last 12 months";
+        case "ALL_TIME":
             return "All Time";
         case "RECENT":
             return "Recent";
@@ -25,10 +25,10 @@ export function losersSingleTitle(interval: string): string {
     switch (interval) {
         case "RECENT":
             throw new Error("This should never be shown for recent interval");
-        case "ALL":
-            return "Biggest Single Loss ($TKS)";
+        case "ALL_TIME":
+            return "Biggest Single Loss";
         default:
-            return `Biggest Single Loss in the last ${formatInterval(interval)}`;
+            return `Biggest Single Loss in the ${formatInterval(interval)}`;
     }
 }
 
@@ -36,10 +36,10 @@ export function winnersSingleTitle(interval: string): string {
     switch (interval) {
         case "RECENT":
             throw new Error("This should never be shown for recent interval");
-        case "ALL":
-            return "Biggest Single Win ($TKS)";
+        case "ALL_TIME":
+            return "Biggest Single Win";
         default:
-            return `Biggest Single Win in the last ${formatInterval(interval)}`;
+            return `Biggest Single Win in the ${formatInterval(interval)}`;
     }
 }
 
@@ -47,10 +47,10 @@ export function losersTotalTitle(interval: string): string {
     switch (interval) {
         case "RECENT":
             return "Sore Losers";
-        case "ALL":
-            return "Top Total Losers ($TKS)";
+        case "ALL_TIME":
+            return "Top Total Losers";
         default:
-            return `Top Total Losers in the last ${formatInterval(interval)}`;
+            return `Top Total Losers in the ${formatInterval(interval)}`;
     }
 }
 
@@ -58,10 +58,10 @@ export function winnersTotalTitle(interval: string): string {
     switch (interval) {
         case "RECENT":
             return "Lucky Winners";
-        case "ALL":
-            return "Top Total Winners ($TKS)";
+        case "ALL_TIME":
+            return "Top Total Winners";
         default:
-            return `Top Total Winners in the last ${formatInterval(interval)}`;
+            return `Top Total Winners in the ${formatInterval(interval)}`;
     }
 }
 
