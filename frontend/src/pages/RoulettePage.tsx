@@ -1,7 +1,7 @@
 import RouletteTable from "../components/RouletteComponents/RouletteTable";
 import "./RoulettePage.css";
 import Footer from "../components/Footer";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Notification from "../components/Notification";
 import SiteHeader from "../components/SiteHeader";
 import { useResultsSocket } from "../components/Overlay/UseSocket";
@@ -12,6 +12,25 @@ export default function RoulettePage() {
   const [notification, _setNotification] = useState<string | null>(null);
   const [results, setResults] = useState<HookData | null>(null);
   const [socketEnabled, setSocketEnabled] = useState(false);
+
+
+  const [hideNotWord, setHideNotWord] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
+
+  const handleMouseEnter = () => {
+    timeoutRef.current = window.setTimeout(() => {
+      setHideNotWord(true);
+    }, 1000);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    setHideNotWord(false);
+  };
+
 
   const setNotification: React.Dispatch<React.SetStateAction<string | null>> = (value) => {
     if (typeof value === "function") {
@@ -43,10 +62,13 @@ export default function RoulettePage() {
     <div className="page-root">
       <SiteHeader />
       <main className="roulette-page">
-        <div className="roulette-page__header">
+        <div className="roulette-page__header"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <h1 className="roulette-title">
             <span className="start-word">Totally</span>
-            <span className="not-word">not</span> R
+            <span className={`not-word ${hideNotWord ? "hidden" : ""}`}>not</span> R
             <span className="fancy-i"/>
             gged Roulette
           </h1>

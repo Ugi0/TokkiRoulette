@@ -80,18 +80,18 @@
   margin-left: 24px;
 
   transition:
-    width 0.35s ease,
-    margin 0.35s ease,
-    opacity 0.35s ease;
+    width 0.5s ease,
+    margin 0.5s ease,
+    opacity 0.02s ease;
 }
 
-.not-word::after {
-  content: " ";
-}
-
-.roulette-title:hover .not-word {
+.not-word.hidden {
   width: 0;
   margin-left: -4px;
   margin-right: -4px;
   opacity: 0;
+}
+
+.not-word::after {
+  content: " ";
 }
