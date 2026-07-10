@@ -12,36 +12,55 @@ export async function getIntervals(): Promise<Interval[]> {
         WHERE roulette_prediction = true;
     `;
 
-    const { rows } = await db.query<{ oldest_result_time: Date | string | null }>(query);
+    const { rows } = await db.query<{
+        oldest_result_time: Date | string | null;
+    }>(query);
+
     const oldestDate = rows[0]?.oldest_result_time;
 
     if (!oldestDate) {
-        return ["RECENT", "ALL"];
+        return ["RECENT", "ALL_TIME"];
     }
 
-    const oldestTime = new Date(oldestDate).getTime();
-    const millisecondsPerDay = 1000 * 60 * 60 * 24;
-    const elapsedDays = Math.floor((Date.now() - oldestTime) / millisecondsPerDay);
+    const oldest = new Date(oldestDate);
+
+    const startOfCurrentMonth = new Date();
+    startOfCurrentMonth.setDate(1);
+    startOfCurrentMonth.setHours(0, 0, 0, 0);
 
     const intervals: Interval[] = ["RECENT"];
 
-    if (elapsedDays >= 30) {
-        intervals.push("ONE_MONTH");
+    intervals.push("CURRENT_MONTH");
+
+    const startOfLastMonth = new Date(startOfCurrentMonth);
+    startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1);
+
+    if (oldest < startOfCurrentMonth) {
+        intervals.push("LAST_MONTH");
     }
 
-    if (elapsedDays >= 90) {
-        intervals.push("THREE_MONTHS");
+    const startOf3Months = new Date(startOfCurrentMonth);
+    startOf3Months.setMonth(startOf3Months.getMonth() - 3);
+
+    if (oldest < startOf3Months) {
+        intervals.push("LAST_3_MONTHS");
     }
 
-    if (elapsedDays >= 180) {
-        intervals.push("SIX_MONTHS");
+    const startOf6Months = new Date(startOfCurrentMonth);
+    startOf6Months.setMonth(startOf6Months.getMonth() - 6);
+
+    if (oldest < startOf6Months) {
+        intervals.push("LAST_6_MONTHS");
     }
 
-    if (elapsedDays >= 365) {
-        intervals.push("ONE_YEAR");
+    const startOf12Months = new Date(startOfCurrentMonth);
+    startOf12Months.setMonth(startOf12Months.getMonth() - 12);
+
+    if (oldest < startOf12Months) {
+        intervals.push("LAST_12_MONTHS");
     }
 
-    intervals.push("ALL");
+    intervals.push("ALL_TIME");
 
     return intervals;
 }
@@ -58,15 +77,46 @@ export async function getSingles(interval: Interval, type: "win" | "loss" ): Pro
 
     let whereClause = 'WHERE roulette_prediction = true';
 
-    if (interval === Interval.RECENT.query_param) {
+    if (interval === "RECENT") {
         return [];
     }
 
-    else if (interval !== Interval.ALL.query_param) {
-        whereClause = `
-            WHERE roulette_prediction = true
-            AND result_time > NOW() - INTERVAL '${Interval[interval].query_param}'
-        `;
+    switch (interval) {
+        case "CURRENT_MONTH":
+            whereClause = `
+                WHERE roulette_prediction = true
+                AND result_time >= date_trunc('month', CURRENT_DATE)
+            `;
+            break;
+
+        case "LAST_MONTH":
+            whereClause = `
+                WHERE roulette_prediction = true
+                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
+                AND result_time < date_trunc('month', CURRENT_DATE)
+            `;
+            break;
+
+        case "LAST_3_MONTHS":
+            whereClause = `
+                WHERE roulette_prediction = true
+                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
+            `;
+            break;
+
+        case "LAST_6_MONTHS":
+            whereClause = `
+                WHERE roulette_prediction = true
+                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
+            `;
+            break;
+
+        case "LAST_12_MONTHS":
+            whereClause = `
+                WHERE roulette_prediction = true
+                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
+            `;
+            break;
     }
 
     const query = `
@@ -99,7 +149,7 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
     const orderDir = type === "win" ? 'DESC' : 'ASC';
 
     let filterClause = ""
-    if (interval === Interval.RECENT.query_param) {
+    if (interval === "RECENT") {
         filterClause = type === "win"
             ? `AND won_amount IS NOT NULL`
             : `AND won_amount IS NULL`;
@@ -111,7 +161,7 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
 
     let whereClause = 'WHERE roulette_prediction = true';
 
-    if (interval === Interval.RECENT.query_param) {
+    if (interval === "RECENT") {
         whereClause = `
             WHERE roulette_prediction = true
             AND prediction_id = (
@@ -122,12 +172,48 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
                 LIMIT 1
             )
         `;
-    }
-    else if (interval !== Interval.ALL.query_param) {
-        whereClause = `
-            WHERE roulette_prediction = true
-            AND result_time > NOW() - INTERVAL '${Interval[interval].query_param}'
-        `;
+    } else {
+        switch (interval) {
+            case "CURRENT_MONTH":
+                whereClause = `
+                    WHERE roulette_prediction = true
+                    AND result_time >= date_trunc('month', CURRENT_DATE)
+                `;
+                break;
+
+            case "LAST_MONTH":
+                whereClause = `
+                    WHERE roulette_prediction = true
+                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
+                    AND result_time < date_trunc('month', CURRENT_DATE)
+                `;
+                break;
+
+            case "LAST_3_MONTHS":
+                whereClause = `
+                    WHERE roulette_prediction = true
+                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
+                `;
+                break;
+
+            case "LAST_6_MONTHS":
+                whereClause = `
+                    WHERE roulette_prediction = true
+                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
+                `;
+                break;
+
+            case "LAST_12_MONTHS":
+                whereClause = `
+                    WHERE roulette_prediction = true
+                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
+                `;
+                break;
+
+            case "ALL_TIME":
+            default:
+                break;
+        }
     }
 
     const query = `
@@ -139,9 +225,9 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
             COUNT(*) AS predictions_count
         FROM results 
             ${whereClause}
-            ${interval === Interval.RECENT.query_param ? filterClause : ''}
+            ${interval === "RECENT" ? filterClause : ''}
         GROUP BY user_id, user_name
-        ${interval !== Interval.RECENT.query_param ? `${filterClause}` : ''}
+        ${interval !== "RECENT" ? `${filterClause}` : ''}
         ORDER BY total_net ${orderDir}
         LIMIT $1;
     `;

@@ -1,9 +1,10 @@
 export const StatsInterval = {
-    ONE_MONTH: { queryParam: "ONE_MONTH" },
-    THREE_MONTHS: { queryParam: "THREE_MONTHS" },
-    SIX_MONTHS: { queryParam: "SIX_MONTHS" },
-    ONE_YEAR: { queryParam: "ONE_YEAR" },
-    ALL: { queryParam: "ALL" },
+    CURRENT_MONTH: { queryParam: "CURRENT_MONTH" },
+    LAST_MONTH: { queryParam: "LAST_MONTH" },
+    LAST_3_MONTHS: { queryParam: "LAST_3_MONTHS" },
+    LAST_6_MONTHS: { queryParam: "LAST_6_MONTHS" },
+    LAST_12_MONTHS: { queryParam: "LAST_12_MONTHS" },
+    ALL_TIME: { queryParam: "ALL_TIME" },
     RECENT: { queryParam: "RECENT" },
 } as const;
 

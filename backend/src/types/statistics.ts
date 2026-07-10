@@ -12,16 +12,14 @@ export type UserEntry = {
     bet_time?: string;
 };
 
-export const Interval = {
-    ONE_MONTH: {query_param: '1 month'},
-    THREE_MONTHS: {query_param: '3 months'},
-    SIX_MONTHS: {query_param: '6 months'},
-    ONE_YEAR: {query_param: '1 year'},
-    ALL: {query_param: 'ALL'},
-    RECENT: {query_param: 'RECENT'}
-} as const;
-
-export type Interval = keyof typeof Interval;
+export type Interval =
+    | "CURRENT_MONTH"
+    | "LAST_MONTH"
+    | "LAST_3_MONTHS"
+    | "LAST_6_MONTHS"
+    | "LAST_12_MONTHS"
+    | "ALL_TIME"
+    | "RECENT";
 
 export type Analytics = {
     leaderboardEntries: {

@@ -2,14 +2,16 @@ import { toNumber } from "./statisticsCommon";
 
 function formatInterval(interval: string): string {
     switch (interval) {
-        case "ONE_MONTH":
+        case "CURRENT_MONTH":
             return "1 Month";
-        case "THREE_MONTHS":
-            return "3 Months";
-        case "SIX_MONTHS":
-            return "6 Months";
-        case "ONE_YEAR":
-            return "1 Year";
+        case "LAST_MONTH":
+            return "Last Month";
+        case "LAST_3_MONTHS":
+            return "Last 3 Months";
+        case "LAST_6_MONTHS":
+            return "Last 6 Months";
+        case "LAST_12_MONTHS":
+            return "Last 12 Months";
         case "ALL":
             return "All Time";
         case "RECENT":
