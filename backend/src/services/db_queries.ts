@@ -1,3 +1,4 @@
+import { UserTokens } from "../types/helix.js";
 import db from "./db.js";
 
 export async function isPredictionRoulette(prediction_id: string): Promise<boolean> {
@@ -38,4 +39,27 @@ export async function getUserSession(user_id: string): Promise<string | null> {
 
   const { rows } = await db.query(query, [user_id]);
   return rows.length ? rows[0].session_id : null;
+}
+
+export async function getUserTokens(user_id: string): Promise<UserTokens | null> {
+  const query = `
+    SELECT access_token, refresh_token, expires_at
+    FROM user_sessions
+    WHERE user_id = $1
+  `;
+
+  const { rows } = await db.query(query, [user_id]);
+  return rows.length ? { access_token: rows[0].access_token, refresh_token: rows[0].refresh_token, expires_at: rows[0].expires_at } : null;
+}
+
+export async function getPredictionOutcomeId(prediction_id: string, option_text: string): Promise<string | null> {
+  const query = `
+    SELECT id
+    FROM prediction_outcomes
+    WHERE prediction_id = $1
+      AND option_text ILIKE '%' || $2 || '%'
+  `;
+
+  const { rows } = await db.query(query, [prediction_id, option_text]);
+  return rows.length ? rows[0].id : null;
 }

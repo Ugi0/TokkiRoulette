@@ -3,6 +3,8 @@ import {
   TwitchPredictionEndEvent,
   TwitchPredictionLockEvent
 } from "../types/events.js";
+import { UserTokens } from "../types/helix.js";
+import { TwitchTokenResponse, TwitchUser } from "../types/twitch.js";
 import { getCache, getTotalPredictionResults } from "./cache.js";
 
 import db from "./db.js";
@@ -216,13 +218,35 @@ export async function recordSpinResult(
   return rows[0].count;
 }
 
-export async function saveUserSession(user_id: string, session_id: string, user_name: string) {
+export async function saveUserSession(response: TwitchTokenResponse, userData: TwitchUser, session_id: string) {
   const query = `
-    INSERT INTO user_sessions (session_id, user_id, user_name)
-    VALUES ($1, $2, $3)
+    INSERT INTO user_sessions (session_id, user_id, access_token, refresh_token, expires_at)
+    VALUES ($1, $2, $3, $4, $5)
     ON CONFLICT (user_id) DO UPDATE
-      SET session_id = EXCLUDED.session_id
+    SET
+      session_id = EXCLUDED.session_id,
+      access_token = EXCLUDED.access_token,
+      refresh_token = EXCLUDED.refresh_token,
+      expires_at = EXCLUDED.expires_at
   `;
 
-  await db.query(query, [session_id, user_id, user_name]);
+  await db.query(query, [session_id, userData.id, response.access_token, response.refresh_token, new Date(Date.now() + response.expires_in * 1000)]);
+}
+
+export async function saveUserTokens(user_id: string, tokens: UserTokens): Promise<void> {
+  const query = `
+    UPDATE user_tokens
+    SET
+      access_token = $2,
+      refresh_token = $3,
+      expires_at = $4
+    WHERE user_id = $1
+  `;
+
+  await db.query(query, [
+    user_id,
+    tokens.access_token,
+    tokens.refresh_token,
+    tokens.expires_at,
+  ]);
 }

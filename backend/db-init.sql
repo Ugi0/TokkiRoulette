@@ -74,6 +74,9 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     session_id TEXT NOT NULL,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
 
     UNIQUE (user_id)
 );

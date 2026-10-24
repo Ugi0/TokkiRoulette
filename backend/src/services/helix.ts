@@ -1,5 +1,7 @@
-import { HelixUser } from "../types/helix.js";
+import { HelixUser, UserTokens } from "../types/helix.js";
 import { TwitchTokenResponse } from "../types/twitch.js";
+import { getPredictionOutcomeId, getUserTokens } from "./db_queries.js";
+import { saveUserTokens } from "./db_updates.js";
 import { saveUserProfile } from "./statistics_queries.js";
 
 let cachedToken: string | null = null;
@@ -66,6 +68,57 @@ export async function getAppToken(): Promise<string> {
   return cachedToken;
 }
 
+async function refreshAccessToken(refreshToken: string): Promise<UserTokens> {
+  const response = await fetch(
+    "https://id.twitch.tv/oauth2/token",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: process.env.TWITCH_CLIENT_ID!,
+        client_secret: process.env.TWITCH_CLIENT_SECRET!,
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to refresh Twitch token");
+  }
+
+  const data = await response.json();
+
+  return {
+    access_token: data.access_token,
+    refresh_token: data.refresh_token ?? refreshToken,
+    expires_at: new Date(Date.now() + data.expires_in * 1000),
+  };
+}
+
+export async function getUserToken(user_id: string): Promise<string> {
+  const tokens = await getUserTokens(user_id);
+
+  if (!tokens) {
+    throw new Error(`No tokens found for user_id: ${user_id}`);
+  }
+
+  const isExpired =
+    Date.now() >= new Date(tokens.expires_at).getTime() - 60_000;
+
+  if (!isExpired) {
+    return tokens.access_token;
+  }
+
+  const refreshed = await refreshAccessToken(tokens.refresh_token);
+
+  await saveUserTokens(user_id, refreshed);
+
+  return refreshed.access_token;
+}
+
 export async function registerTwitchHooks(username: string, user_id: string, accessToken: string): Promise<void> {
   await registerPredictionHook(username, user_id, accessToken, "begin");
   await registerPredictionHook(username, user_id, accessToken, "lock");
@@ -105,6 +158,28 @@ export async function registerPredictionHook(
     throw new Error(`Failed to register EventSub hook: ${error}`);
   }
   
+}
+
+export async function finishRoulettePrediction(prediction_id: number, result: string): Promise<void> {
+  const resp = await fetch(`https://api.twitch.tv/helix/predictions`, {
+    method: "PATCH",
+    headers: {
+      "Client-Id": process.env.TWITCH_CLIENT_ID!,
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${await getUserToken(process.env.TOKKI_USER_ID!)}`,
+    },
+    body: JSON.stringify({
+      broadcaster_id: process.env.TOKKI_USER_ID!,
+      id: prediction_id.toString(),
+      status: "RESOLVED",
+      winning_outcome_id: await getPredictionOutcomeId(prediction_id.toString(), result),
+    }),
+  });
+
+  if (!resp.ok) {
+    const error = await resp.text();
+    throw new Error(`Failed to resolve prediction: ${error}`);
+  }
 }
 
 export async function fetchUserProfile(username: string): Promise<HelixUser> {

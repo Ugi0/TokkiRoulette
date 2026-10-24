@@ -16,3 +16,9 @@ export type HelixUser = {
   view_count: number;
   created_at: string;
 }
+
+export type UserTokens = {
+  access_token: string;
+  refresh_token: string;
+  expires_at: Date;
+}

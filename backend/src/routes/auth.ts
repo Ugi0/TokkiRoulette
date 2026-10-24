@@ -48,8 +48,7 @@ export default async function authRoutes(
 
     pendingStates.delete(state);
 
-    const tokenData: TwitchTokenResponse =
-      await exchangeCodeForToken(code);
+    const tokenData: TwitchTokenResponse = await exchangeCodeForToken(code);
 
     const userData: TwitchUser = await getUserProfile(tokenData.access_token);
 
@@ -57,16 +56,17 @@ export default async function authRoutes(
       return sendJson(res, 500, { error: "Failed to fetch user profile" });
     }
 
-    if (userData.id === process.env.TOKKI_USER_ID) {
+    // Already registered hooks. Hooks can be registered multiple times so this it only done once for the main user.
+    /*if (userData.id === process.env.TOKKI_USER_ID) {
       await registerTwitchHooks(userData.login, userData.id, tokenData.access_token).catch((err) => {
         console.error("Failed to register Twitch webhook:", err);
       });
-    }
+    }*/
 
     const sessionId = crypto.randomUUID();
     console.log("User authenticated:", userData.login, "Session ID:", sessionId);
 
-    await saveUserSession(userData.id, sessionId, userData.login);
+    await saveUserSession(tokenData, userData, sessionId);
 
     res.setHeader("Set-Cookie", [
       `session_id=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SIX_MONTHS}`

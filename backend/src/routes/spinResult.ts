@@ -3,6 +3,7 @@ import { getJsonBody } from "./twitchWebhooks.js";
 import { markPredictionAsRoulette, recordSpinResult } from "../services/db_updates.js";
 import { checkForLockedPrediction, getUserSession } from "../services/db_queries.js";
 import { SIX_MONTHS } from "./auth.js";
+import { finishRoulettePrediction } from "../services/helix.js";
 
 type RouletteResult = {
   number: number;
@@ -52,6 +53,7 @@ export default async function spinResult(
                 }
 
                 await markPredictionAsRoulette(lockedPredictionId);
+                await finishRoulettePrediction(lockedPredictionId, body.tags.filter(tag => ["green", "red", "black"].includes(tag))[0]);
 
                 res.writeHead(200, { "Content-Type": "application/json" });
                 return res.end(JSON.stringify({ status: "authorized" }));
