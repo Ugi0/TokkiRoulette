@@ -323,7 +323,7 @@ export async function loadPredictionDetails(predictionId: string): Promise<Predi
             (o.option_id = po.winning_option_id) AS won,
 
             r.user_id,
-            r.user_name,
+            par.user_name,
             r.bet_amount,
             r.won_amount,
             r.result_time AS bet_time
@@ -340,6 +340,9 @@ export async function loadPredictionDetails(predictionId: string): Promise<Predi
         LEFT JOIN results r 
             ON r.prediction_id = v.prediction_id 
             AND r.user_id = v.user_id
+
+        INNER JOIN participants AS par
+            ON par.user_id = r.user_id
 
         LEFT JOIN prediction_outcomes po
             ON po.prediction_id = p.id
