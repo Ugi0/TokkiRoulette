@@ -79,33 +79,33 @@ export function getResultsIntervalCondition(interval: Interval): string {
     switch (interval) {
         case "CURRENT_MONTH":
             return `
-                AND (results.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
+                AND (r.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
                     >= ${monthStart}
             `;
 
         case "LAST_MONTH":
             return `
-                AND (results.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
+                AND (r.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
                     >= ${monthStart} - INTERVAL '1 month'
-                AND (results.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
+                AND (r.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
                     < ${monthStart}
             `;
 
         case "LAST_3_MONTHS":
             return `
-                AND (results.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
+                AND (r.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
                     >= ${monthStart} - INTERVAL '3 months'
             `;
 
         case "LAST_6_MONTHS":
             return `
-                AND (results.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
+                AND (r.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
                     >= ${monthStart} - INTERVAL '6 months'
             `;
 
         case "LAST_12_MONTHS":
             return `
-                AND (results.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
+                AND (r.result_time AT TIME ZONE '${LEADERBOARD_TIMEZONE}')
                     >= ${monthStart} - INTERVAL '12 months'
             `;
 

@@ -3,13 +3,13 @@ import { Interval, PredictionDetails, PredictionEntry, UserEntry, WinRatioEntry 
 import { getIntervalCondition, getResultsIntervalCondition } from "../utils/statisticsHelpers.js";
 import { fetchUserProfiles } from "../routes/stats.js";
 
-const netChangeSql = "COALESCE(won_amount, -bet_amount)";
+const netChangeSql = "COALESCE(r.won_amount, -r.bet_amount)";
 
 export async function getIntervals(): Promise<Interval[]> {
     const query = `
-        SELECT MIN(result_time) AS oldest_result_time
-        FROM results
-        WHERE roulette_prediction = true;
+        SELECT MIN(r.result_time) AS oldest_result_time
+        FROM results AS r
+        WHERE r.roulette_prediction = true;
     `;
 
     const { rows } = await db.query<{
@@ -75,7 +75,7 @@ export async function getIntervals(): Promise<Interval[]> {
 export async function getSingles(interval: Interval, type: "win" | "loss" ): Promise<UserEntry[]> {
     const orderDir = type === "win" ? 'DESC' : 'ASC';
 
-    let whereClause = 'WHERE roulette_prediction = true';
+    let whereClause = 'WHERE r.roulette_prediction = true';
 
     if (interval === "RECENT") {
         return [];
@@ -84,51 +84,52 @@ export async function getSingles(interval: Interval, type: "win" | "loss" ): Pro
     switch (interval) {
         case "CURRENT_MONTH":
             whereClause = `
-                WHERE roulette_prediction = true
-                AND result_time >= date_trunc('month', CURRENT_DATE)
+                WHERE r.roulette_prediction = true
+                AND r.result_time >= date_trunc('month', CURRENT_DATE)
             `;
             break;
 
         case "LAST_MONTH":
             whereClause = `
-                WHERE roulette_prediction = true
-                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
-                AND result_time < date_trunc('month', CURRENT_DATE)
+                WHERE r.roulette_prediction = true
+                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
+                AND r.result_time < date_trunc('month', CURRENT_DATE)
             `;
             break;
 
         case "LAST_3_MONTHS":
             whereClause = `
-                WHERE roulette_prediction = true
-                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
+                WHERE r.roulette_prediction = true
+                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
             `;
             break;
 
         case "LAST_6_MONTHS":
             whereClause = `
-                WHERE roulette_prediction = true
-                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
+                WHERE r.roulette_prediction = true
+                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
             `;
             break;
 
         case "LAST_12_MONTHS":
             whereClause = `
-                WHERE roulette_prediction = true
-                AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
+                WHERE r.roulette_prediction = true
+                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
             `;
             break;
     }
 
     const query = `
         SELECT 
-            user_id, 
-            user_name, 
-            prediction_id,
-            bet_amount, 
-            won_amount, 
+            r.user_id, 
+            p.user_name, 
+            r.prediction_id,
+            r.bet_amount, 
+            r.won_amount, 
             ${netChangeSql} AS net_change, 
-            result_time as bet_time
-        FROM results
+            r.result_time as bet_time
+        FROM results AS r
+        INNER JOIN PARTICIPANTS AS p ON r.user_id = p.user_id
         ${whereClause}
         ORDER BY net_change ${orderDir}
         LIMIT 10;
@@ -159,12 +160,12 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
             : `HAVING SUM(${netChangeSql}) < 0`;
     }
 
-    let whereClause = 'WHERE roulette_prediction = true';
+    let whereClause = 'WHERE r.roulette_prediction = true';
 
     if (interval === "RECENT") {
         whereClause = `
-            WHERE roulette_prediction = true
-            AND prediction_id = (
+            WHERE r.roulette_prediction = true
+            AND r.prediction_id = (
                 SELECT prediction_id
                 FROM results
                 WHERE roulette_prediction = true
@@ -176,37 +177,37 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
         switch (interval) {
             case "CURRENT_MONTH":
                 whereClause = `
-                    WHERE roulette_prediction = true
-                    AND result_time >= date_trunc('month', CURRENT_DATE)
+                    WHERE r.roulette_prediction = true
+                    AND r.result_time >= date_trunc('month', CURRENT_DATE)
                 `;
                 break;
 
             case "LAST_MONTH":
                 whereClause = `
-                    WHERE roulette_prediction = true
-                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
-                    AND result_time < date_trunc('month', CURRENT_DATE)
+                    WHERE r.roulette_prediction = true
+                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
+                    AND r.result_time < date_trunc('month', CURRENT_DATE)
                 `;
                 break;
 
             case "LAST_3_MONTHS":
                 whereClause = `
-                    WHERE roulette_prediction = true
-                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
+                    WHERE r.roulette_prediction = true
+                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
                 `;
                 break;
 
             case "LAST_6_MONTHS":
                 whereClause = `
-                    WHERE roulette_prediction = true
-                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
+                    WHERE r.roulette_prediction = true
+                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
                 `;
                 break;
 
             case "LAST_12_MONTHS":
                 whereClause = `
-                    WHERE roulette_prediction = true
-                    AND result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
+                    WHERE r.roulette_prediction = true
+                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
                 `;
                 break;
 
@@ -218,15 +219,16 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
 
     const query = `
         SELECT
-            user_id,
-            user_name,
-            SUM(bet_amount) AS bet_amount,
+            r.user_id,
+            p.user_name,
+            SUM(r.bet_amount) AS bet_amount,
             SUM(${netChangeSql}) AS total_net,
             COUNT(*) AS predictions_count
-        FROM results 
+        FROM results AS r
+        INNER JOIN PARTICIPANTS AS p ON r.user_id = p.user_id
             ${whereClause}
             ${interval === "RECENT" ? filterClause : ''}
-        GROUP BY user_id, user_name
+        GROUP BY r.user_id, p.user_name
         ${interval !== "RECENT" ? `${filterClause}` : ''}
         ORDER BY total_net ${orderDir}
         LIMIT $1;
@@ -288,15 +290,16 @@ export async function getWinRatios(interval: Interval): Promise<{ highest: WinRa
 
     const query = `
         SELECT 
-            user_id,
-            user_name,
+            r.user_id,
+            p.user_name,
             COUNT(*) AS total_predictions,
-            SUM(CASE WHEN won_amount IS NOT NULL THEN 1 ELSE 0 END) AS won_predictions,
-            (SUM(CASE WHEN won_amount IS NOT NULL THEN 1 ELSE 0 END)::float / COUNT(*)) * 100 AS win_percentage
-        FROM results
-        WHERE roulette_prediction = true
+            SUM(CASE WHEN r.won_amount IS NOT NULL THEN 1 ELSE 0 END) AS won_predictions,
+            (SUM(CASE WHEN r.won_amount IS NOT NULL THEN 1 ELSE 0 END)::float / COUNT(*)) * 100 AS win_percentage
+        FROM results AS r
+        INNER JOIN participants p ON r.user_id = p.user_id
+        WHERE r.roulette_prediction = true
         ${getResultsIntervalCondition(interval)}
-        GROUP BY user_id, user_name
+        GROUP BY r.user_id, p.user_name
         HAVING COUNT(*) >= 3
         ORDER BY win_percentage DESC;
     `;

@@ -5,12 +5,14 @@ type WinRatioLeaderboardProps = {
   title: string;
   data: WinRatioEntry[];
   expanded: boolean;
+  invertSort?: boolean;
 };
 
 export default function WinRatioLeaderboard({
   title,
   data,
   expanded,
+  invertSort = false,
 }: WinRatioLeaderboardProps) {
   return (
     <section className="leaderboard">
@@ -20,7 +22,14 @@ export default function WinRatioLeaderboard({
 
       <div className="body">
         <ExpandableList
-          data={data}
+          data={
+            data.sort((a, b) => {
+              if (invertSort) {
+                return a.win_percentage - b.win_percentage || b.total_predictions - a.total_predictions;
+              }
+              return b.win_percentage - a.win_percentage || b.total_predictions - a.total_predictions;
+            })
+          }
           expanded={expanded}
           initialCount={1}
           expandedCount={10}

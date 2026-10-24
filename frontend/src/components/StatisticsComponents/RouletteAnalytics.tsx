@@ -101,6 +101,7 @@ export default function RouletteAnalytics({ analytics, setSelectedPrediction }: 
                         title="Lowest Win Rate"
                         data={analytics.winRatios.lowest}
                         expanded={expanded}
+                        invertSort={true}
                     />
                     </>
                 )}

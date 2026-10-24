@@ -20,7 +20,6 @@ CREATE TABLE votes (
     prediction_id TEXT NOT NULL,
     option_id TEXT NOT NULL,
     points_used INTEGER NOT NULL,
-    user_name TEXT NOT NULL,
     user_id INTEGER NOT NULL,
 
     PRIMARY KEY (prediction_id, user_id),
@@ -44,7 +43,6 @@ CREATE TABLE prediction_outcomes (
 CREATE TABLE results (
     prediction_id TEXT NOT NULL,
     user_id INTEGER NOT NULL,
-    user_name TEXT NOT NULL,
 
     bet_amount INTEGER NOT NULL,
     won_amount INTEGER,
@@ -75,7 +73,6 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     session_id TEXT NOT NULL,
     user_id INTEGER NOT NULL,
-    user_name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     UNIQUE (user_id)
