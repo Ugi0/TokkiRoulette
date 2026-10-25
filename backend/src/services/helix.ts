@@ -160,7 +160,7 @@ export async function registerPredictionHook(
   
 }
 
-export async function finishRoulettePrediction(prediction_id: number, result: string): Promise<void> {
+export async function finishRoulettePrediction(prediction_id: number, resultTags: string[]): Promise<void> {
   const resp = await fetch(`https://api.twitch.tv/helix/predictions`, {
     method: "PATCH",
     headers: {
@@ -172,7 +172,7 @@ export async function finishRoulettePrediction(prediction_id: number, result: st
       broadcaster_id: process.env.TOKKI_USER_ID!,
       id: prediction_id.toString(),
       status: "RESOLVED",
-      winning_outcome_id: await getPredictionOutcomeId(prediction_id.toString(), result),
+      winning_outcome_id: await getPredictionOutcomeId(prediction_id.toString(), resultTags),
     }),
   });
 

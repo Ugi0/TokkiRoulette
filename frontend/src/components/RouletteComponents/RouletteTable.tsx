@@ -94,21 +94,21 @@ export default function RouletteTable({ setNotification }: RouletteTableProps) {
 
           <button
             type="button"
-            className={`cell cell--bet green ${result?.tags.includes("column1") ? "winner" : ""}`}
+            className={`cell cell--bet green ${result?.tags.includes("1st 12") ? "winner" : ""}`}
             style={{ gridColumn: "2 / span 4", gridRow: 4 }}
           >
             1st 12
           </button>
           <button
             type="button"
-            className={`cell cell--bet green ${result?.tags.includes("column2") ? "winner" : ""}`}
+            className={`cell cell--bet green ${result?.tags.includes("2nd 12") ? "winner" : ""}`}
             style={{ gridColumn: "6 / span 4", gridRow: 4 }}
           >
             2nd 12
           </button>
           <button
             type="button"
-            className={`cell cell--bet green ${result?.tags.includes("column3") ? "winner" : ""}`}
+            className={`cell cell--bet green ${result?.tags.includes("3rd 12") ? "winner" : ""}`}
             style={{ gridColumn: "10 / span 4", gridRow: 4 }}
           >
             3rd 12

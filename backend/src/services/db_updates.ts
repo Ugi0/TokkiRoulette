@@ -83,10 +83,9 @@ export async function lockPrediction(prediction_event: TwitchPredictionLockEvent
       prediction_id,
       option_id,
       points_used,
-      user_name,
       user_id
     )
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1, $2, $3, $4)
     ON CONFLICT (prediction_id, user_id) DO NOTHING
   `;
 
@@ -95,7 +94,6 @@ export async function lockPrediction(prediction_event: TwitchPredictionLockEvent
       predictionId,
       user.voted_option,
       user.bet_amount,
-      user.user_name,
       user.user_id
     ]);
   }
@@ -133,10 +131,9 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
         prediction_id,
         option_id,
         points_used,
-        user_name,
         user_id
       )
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3, $4)
       ON CONFLICT (prediction_id, user_id) DO NOTHING
     `;
 
@@ -146,7 +143,6 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
           predictionId,
           outcome.id,
           predictor.channel_points_used,
-          predictor.user_name,
           predictor.user_id
         ]);
       }
@@ -156,13 +152,12 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
       INSERT INTO results (
         prediction_id,
         user_id,
-        user_name,
         bet_amount,
         won_amount,
         result_time,
         roulette_prediction
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6)
       ON CONFLICT (prediction_id, user_id) DO NOTHING
     `;
 
@@ -172,7 +167,6 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
       await db.query(insertResultQuery, [
         predictionId,
         user.user_id,
-        user.user_name,
         user.bet_amount,
         user.won_amount,
         new Date(),
@@ -235,7 +229,7 @@ export async function saveUserSession(response: TwitchTokenResponse, userData: T
 
 export async function saveUserTokens(user_id: string, tokens: UserTokens): Promise<void> {
   const query = `
-    UPDATE user_tokens
+    UPDATE user_sessions
     SET
       access_token = $2,
       refresh_token = $3,

@@ -53,7 +53,7 @@ export default async function spinResult(
                 }
 
                 await markPredictionAsRoulette(lockedPredictionId);
-                await finishRoulettePrediction(lockedPredictionId, body.tags.filter(tag => ["green", "red", "black"].includes(tag))[0]);
+                await finishRoulettePrediction(lockedPredictionId, body.tags);
 
                 res.writeHead(200, { "Content-Type": "application/json" });
                 return res.end(JSON.stringify({ status: "authorized" }));

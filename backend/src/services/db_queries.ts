@@ -52,14 +52,23 @@ export async function getUserTokens(user_id: string): Promise<UserTokens | null>
   return rows.length ? { access_token: rows[0].access_token, refresh_token: rows[0].refresh_token, expires_at: rows[0].expires_at } : null;
 }
 
-export async function getPredictionOutcomeId(prediction_id: string, option_text: string): Promise<string | null> {
+export async function getPredictionOutcomeId(prediction_id: string, option_texts: string[]): Promise<string | null> {
   const query = `
-    SELECT id
-    FROM prediction_outcomes
+    SELECT option_id
+    FROM options
     WHERE prediction_id = $1
-      AND option_text ILIKE '%' || $2 || '%'
+      AND (
+        ${option_texts.map((_, i) => `title ILIKE $${i + 2}`).join(" OR ")}
+      )
+    LIMIT 1
   `;
 
-  const { rows } = await db.query(query, [prediction_id, option_text]);
-  return rows.length ? rows[0].id : null;
+  const params = [
+    prediction_id,
+    ...option_texts.map(text => `%${text}%`)
+  ];
+
+  const { rows } = await db.query(query, params);
+
+  return rows.length ? rows[0].option_id : null;
 }
