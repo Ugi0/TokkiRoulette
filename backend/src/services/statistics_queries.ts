@@ -129,7 +129,7 @@ export async function getSingles(interval: Interval, type: "win" | "loss" ): Pro
             ${netChangeSql} AS net_change, 
             r.result_time as bet_time
         FROM results AS r
-        INNER JOIN PARTICIPANTS AS p ON r.user_id = p.user_id
+        LEFT JOIN PARTICIPANTS AS p ON r.user_id = p.user_id
         ${whereClause}
         ORDER BY net_change ${orderDir}
         LIMIT 10;
@@ -225,7 +225,7 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
             SUM(${netChangeSql}) AS total_net,
             COUNT(*) AS predictions_count
         FROM results AS r
-        INNER JOIN PARTICIPANTS AS p ON r.user_id = p.user_id
+        LEFT JOIN PARTICIPANTS AS p ON r.user_id = p.user_id
             ${whereClause}
             ${interval === "RECENT" ? filterClause : ''}
         GROUP BY r.user_id, p.user_name
@@ -256,14 +256,15 @@ export async function getUserProfiles(user_ids: string[]): Promise<Record<string
       }, {} as Record<string, string>)
 };
 
-export async function saveUserProfile(user_name: string, profile_image_url: string | null): Promise<void> {
+export async function saveUserProfile(user_id: string, user_name: string, profile_image_url: string | null): Promise<void> {
     const query = `
-        INSERT INTO participants (user_name, profile_image_url)
-        VALUES ($1, $2)
-        ON CONFLICT (user_name) DO UPDATE SET profile_image_url = EXCLUDED.profile_image_url;
+        INSERT INTO participants (user_id, user_name, profile_image_url)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (user_id) DO UPDATE 
+        SET user_name = EXCLUDED.user_name,
+            profile_image_url = EXCLUDED.profile_image_url;
     `;
-
-    await db.query(query, [user_name, profile_image_url]);
+    await db.query(query, [user_id, user_name, profile_image_url]);
 }
 
 export async function getPredictionsForInterval(interval: Interval): Promise<PredictionEntry[]> {
@@ -395,7 +396,7 @@ export async function loadPredictionDetails(predictionId: string): Promise<Predi
     await Promise.all(
         predictionDetails.options.map(async option => {
             const profilesArray = await fetchUserProfiles(
-                option.votes.map(vote => vote.user_name)
+                option.votes.map(vote => ({ user_id: String(vote.user_id), user_name: vote.user_name }))
             );
 
             const profiles: Record<string, string | null> = {};

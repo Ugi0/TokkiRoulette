@@ -182,27 +182,29 @@ export async function finishRoulettePrediction(prediction_id: number, resultTags
   }
 }
 
-export async function fetchUserProfile(username: string): Promise<HelixUser> {
-  const resp = await fetch(`https://api.twitch.tv/helix/users?login=${encodeURIComponent(username)}`, {
-    headers: {
-      "Client-ID": process.env.TWITCH_CLIENT_ID!,
-      "Authorization": `Bearer ${await getAppToken()}`,
-    },
-  });
+export async function fetchUserProfile(userId: string): Promise<HelixUser> {
+    const resp = await fetch(
+        `https://api.twitch.tv/helix/users?id=${encodeURIComponent(userId)}`,
+        {
+            headers: {
+                "Client-ID": process.env.TWITCH_CLIENT_ID!,
+                "Authorization": `Bearer ${await getAppToken()}`,
+            },
+        }
+    );
 
-  if (!resp.ok) {
-    throw new Error(`Failed to fetch user profile: ${resp.status}`);
-  }
+    if (!resp.ok) {
+        throw new Error(`Failed to fetch user profile: ${resp.status}`);
+    }
 
-  const data = await resp.json();
+    const data = await resp.json();
+    const result: HelixUser = data.data[0];
 
-  const result: HelixUser = data.data[0];
+    if (result !== undefined) {
+        await saveUserProfile(userId, result.display_name ?? result.login, result.profile_image_url);
+    } else {
+        await saveUserProfile(userId, userId, null);
+    }
 
-  if (result !== undefined) {
-    await saveUserProfile(username, result.profile_image_url);
-  } else {
-    await saveUserProfile(username, null);
-  }
-
-  return result;
+    return result;
 }
