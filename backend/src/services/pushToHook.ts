@@ -1,9 +1,8 @@
-import { clients } from "../routes/wsServer.js";
+import { sendOrQueue } from "../routes/wsServer.js";
 import { TwitchPredictionEndEvent } from "../types/events.js";
 import { HookData } from "../types/hookData.js";
 import { getTotalPredictionResults } from "./cache.js";
 import { getUserSession } from "./db_queries.js";
-import WebSocket from "ws";
 
 export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent) {
   // Change to endEvent.event.broadcaster_user_id if need to support other broadcasters in the future
@@ -25,14 +24,11 @@ export async function handlePredictionEndPush(endEvent: TwitchPredictionEndEvent
 }
 
 async function pushToSession(sessionId: string, payload: Payload) {
-  const ws = clients.get(sessionId);
+  const delivered = sendOrQueue(sessionId, JSON.stringify(payload));
 
-  if (!ws || ws.readyState !== WebSocket.OPEN) {
-    console.log("Websocket not open for session:", sessionId);
-    return;
+  if (!delivered) {
+    console.log("Websocket not open for session, queued results:", sessionId);
   }
-
-  ws.send(JSON.stringify(payload));
 }
 
 type Payload = {
