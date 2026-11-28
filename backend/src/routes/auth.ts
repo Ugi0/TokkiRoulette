@@ -7,9 +7,19 @@ import type { TwitchUser, TwitchTokenResponse } from "../types/twitch.js";
 import { HelixUsersResponse } from "../types/helix.js";
 import { registerTwitchHooks } from "../services/helix.js";
 import { saveUserSession } from "../services/db_updates.js";
+import { TWITCH_MOCK } from "../services/devMode.js";
+import { setSessionCookie } from "../utils/sessionCookie.js";
 
-const pendingStates = new Set<string>();
-export const SIX_MONTHS = 6 * 30 * 24 * 60 * 60;
+// OAuth state -> creation time. Entries expire so abandoned logins don't accumulate forever.
+const STATE_TTL_MS = 10 * 60 * 1000;
+const pendingStates = new Map<string, number>();
+
+function pruneStates() {
+  const now = Date.now();
+  for (const [state, createdAt] of pendingStates) {
+    if (now - createdAt > STATE_TTL_MS) pendingStates.delete(state);
+  }
+}
 
 export default async function authRoutes(
   req: IncomingMessage,
@@ -17,8 +27,14 @@ export default async function authRoutes(
   url: URL
 ): Promise<IncomingMessage | ServerResponse | void> {
   if (url.pathname === "/auth/login") {
+    if (TWITCH_MOCK) {
+      res.writeHead(302, { Location: "/api/dev/login?as=broadcaster" });
+      return res.end();
+    }
+
+    pruneStates();
     const state = crypto.randomUUID();
-    pendingStates.add(state);
+    pendingStates.set(state, Date.now());
 
     const authUrl = new URL("https://id.twitch.tv/oauth2/authorize");
     authUrl.searchParams.set("client_id", requiredEnv("TWITCH_CLIENT_ID"));
@@ -42,6 +58,7 @@ export default async function authRoutes(
       return sendJson(res, 400, { error: "Missing code or state" });
     }
 
+    pruneStates();
     if (!pendingStates.has(state)) {
       return sendJson(res, 400, { error: "Invalid OAuth state" });
     }
@@ -68,9 +85,7 @@ export default async function authRoutes(
 
     await saveUserSession(tokenData, userData, sessionId);
 
-    res.setHeader("Set-Cookie", [
-      `session_id=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SIX_MONTHS}`
-    ]);
+    setSessionCookie(res, sessionId);
 
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     return res.end(renderSuccessPage(userData.display_name ?? userData.login));

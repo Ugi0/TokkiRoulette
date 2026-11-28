@@ -3,9 +3,15 @@ import type { Analytics, PredictionDetails, StatsInterval } from "../types/analy
 const endpoint = "/api/analytics/data";
 
 export async function loadIntervals(setAvailableIntervals: React.Dispatch<React.SetStateAction<StatsInterval[]>>) {
-    const response = await fetch("/api/analytics/intervals");
-    const data = await response.json();
-    setAvailableIntervals(data);
+    try {
+        const response = await fetch("/api/analytics/intervals");
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        setAvailableIntervals(await response.json());
+    } catch (err) {
+        console.error("Failed to load intervals:", err);
+    }
 }
 
 type loadIndividualProps = {
@@ -43,7 +49,7 @@ export async function loadIndividual({ setLoading, setError, setAnalytics, inter
 
 export async function loadPredictionDetails(predictionId: string): Promise<PredictionDetails | null> {
     try {
-        const response = await fetch(`/api/analytics/prediction/${predictionId}`);
+        const response = await fetch(`/api/analytics/prediction/${encodeURIComponent(predictionId)}`);
 
         const data = await response.json();
 

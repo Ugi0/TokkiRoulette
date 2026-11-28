@@ -1,13 +1,14 @@
 import {IncomingMessage, ServerResponse} from "http";
-import {getSingles, getLeaderboard, getIntervals, getUserProfiles, getPredictionsForInterval, getWinRatios, loadPredictionDetails, saveUserProfile} from "../services/statistics_queries.js";
+import {getSingles, getLeaderboard, getIntervals, getPredictionsForInterval, getWinRatios, loadPredictionDetails} from "../services/statistics_queries.js";
 import sendJson from "../utils/sendJson.js";
 import { parseInterval } from "../utils/statisticsHelpers.js";
 import { Analytics, Interval, WinRatioEntry, type UserEntry} from "../types/statistics.js";
-import { fetchUserProfile } from "../services/helix.js";
+import { fetchUserProfiles } from "../services/profiles.js";
 
 export default async function statsRoutes(req: IncomingMessage, res: ServerResponse, url: URL): Promise<IncomingMessage | ServerResponse | void> {
     if (url.pathname.startsWith("/analytics/data")) {
-        const limit = Number(url.searchParams.get("limit") ?? "10");
+        const requestedLimit = Number.parseInt(url.searchParams.get("limit") ?? "10", 10);
+        const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 100) : 10;
         const interval: Interval = parseInterval(url.searchParams.get("interval"));
 
         const result = {
@@ -42,8 +43,11 @@ export default async function statsRoutes(req: IncomingMessage, res: ServerRespo
     }
 
     if (url.pathname.startsWith("/analytics/prediction/")) {
-        const predictionId = url.pathname.split("/").pop();
-        const result = await loadPredictionDetails(predictionId!);
+        const predictionId = decodeURIComponent(url.pathname.split("/").pop() ?? "");
+        if (!predictionId) {
+            return sendJson(res, 400, { error: "Missing prediction id" });
+        }
+        const result = await loadPredictionDetails(predictionId);
 
         return sendJson(res, 200, result);
     }
@@ -87,40 +91,4 @@ function addMultipleProfileData(entries: UserEntry[]): Promise<UserEntry[]> {
             };
         });
     });
-}
-
-export async function fetchUserProfiles(entries: { user_id: string; user_name?: string | null }[]) {
-    const validEntries = entries.filter(e => !!e.user_id);
-    if (validEntries.length === 0) return [];
-
-    const knownEntries = validEntries.filter(e => !!e.user_name);
-    const unknownEntries = validEntries.filter(e => !e.user_name);
-
-    const savedProfiles = await getUserProfiles(
-        knownEntries.map(e => e.user_name!)
-    );
-
-    const results = await Promise.all(validEntries.map(async entry => {
-        if (entry.user_name && savedProfiles[entry.user_name] !== undefined) {
-            return {
-                user_id: entry.user_id,
-                user_name: entry.user_name,
-                profile_image_url: savedProfiles[entry.user_name]
-            };
-        }
-
-        const profile = await fetchUserProfile(entry.user_id);
-        const userName = profile?.display_name ?? profile?.login ?? entry.user_id;
-        const imageUrl = profile?.profile_image_url ?? null;
-
-        await saveUserProfile(entry.user_id, userName, imageUrl);
-
-        return {
-            user_id: entry.user_id,
-            user_name: userName,
-            profile_image_url: imageUrl
-        };
-    }));
-
-    return results;
 }

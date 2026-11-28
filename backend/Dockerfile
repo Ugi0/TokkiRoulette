@@ -29,7 +29,7 @@ RUN npm install --omit=dev
 
 COPY --from=build /app/dist ./dist
 
-COPY src/resources ./resources
+COPY resources ./resources
 
 ENV NODE_ENV=production
 ENV PORT=8080

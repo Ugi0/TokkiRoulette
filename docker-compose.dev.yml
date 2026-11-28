@@ -30,6 +30,9 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      # Simulate Twitch locally (control panel at http://localhost/api/dev).
+      # Run with TWITCH_MOCK=false to use the real Twitch credentials from backend/.env.
+      - TWITCH_MOCK=${TWITCH_MOCK:-true}
     restart: unless-stopped
 
   database:

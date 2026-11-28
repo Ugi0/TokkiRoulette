@@ -1,3 +1,4 @@
+import { TWITCH_MOCK } from "./services/devMode.js";
 import http, { IncomingMessage, ServerResponse } from "node:http";
 import { URL } from "node:url";
 import sendJson from "./utils/sendJson.js";
@@ -9,6 +10,7 @@ import { initWebSocketServer } from "./routes/wsServer.js";
 import { handleResourcesRoute } from "./routes/resources.js";
 import statsRoutes from "./routes/stats.js";
 import { handleQuotesRoute } from "./routes/quotes.js";
+import devRoutes from "./routes/dev.js";
 
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -45,6 +47,10 @@ const server = http.createServer(
 
       if (url.pathname.startsWith("/auth")) {
         return await authRoutes(req, res, url);
+      }
+
+      if (TWITCH_MOCK && (url.pathname === "/dev" || url.pathname.startsWith("/dev/"))) {
+        return await devRoutes(req, res, url);
       }
 
       if (url.pathname.startsWith("/debug")) {
@@ -84,5 +90,8 @@ initWebSocketServer(server);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  if (TWITCH_MOCK) {
+    console.log("TWITCH_MOCK is on: Twitch is simulated. Control panel: http://localhost/api/dev");
+  }
 });
 

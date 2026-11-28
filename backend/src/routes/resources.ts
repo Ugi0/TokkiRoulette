@@ -1,24 +1,39 @@
 import fs from "fs";
 import { IncomingMessage, ServerResponse } from "http";
 import path from "path";
-import { parseCookies } from "./spinResult.js";
+import { parseCookies } from "../utils/sessionCookie.js";
+import { sessionExists } from "../services/db_queries.js";
+import { IS_DEVELOPMENT } from "../services/devMode.js";
 
 const MODEL_ROOT = "resources/";
 
-export async function handleResourcesRoute(req: IncomingMessage, res: ServerResponse, url: URL) {
-  const cookies = parseCookies(req);
-  const sessionId = cookies.session_id;
+const contentTypes: Record<string, string> = {
+  ".json": "application/json",
+  ".js": "text/javascript",
+  ".moc3": "application/octet-stream",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".atlas": "text/plain",
+};
 
-  if (!sessionId && process.env.NODE_ENV !== "development") {
+export async function handleResourcesRoute(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const sessionId = parseCookies(req).session_id;
+
+  if (!IS_DEVELOPMENT && !(sessionId && await sessionExists(sessionId))) {
     res.writeHead(401, { "Content-Type": "text/plain" });
     return res.end("Unauthorized");
   }
 
-  const decodedPath = decodeURIComponent(url.pathname);
-  let strippedPath = decodedPath.replace(/^\/resources/, "");
+  let decodedPath: string;
+  try {
+    decodedPath = decodeURIComponent(url.pathname);
+  } catch {
+    res.writeHead(400, { "Content-Type": "text/plain" });
+    return res.end("Invalid path");
+  }
 
-  strippedPath = strippedPath.replace(/^\/+/, "");
-
+  const strippedPath = decodedPath.replace(/^\/resources/, "").replace(/^\/+/, "");
   const resolvedPath = path.resolve(MODEL_ROOT, strippedPath);
 
   if (!resolvedPath.startsWith(path.resolve(MODEL_ROOT) + path.sep)) {
@@ -26,29 +41,25 @@ export async function handleResourcesRoute(req: IncomingMessage, res: ServerResp
     return res.end("Invalid path");
   }
 
-  if (!fs.existsSync(resolvedPath)) {
+  // Directories must be rejected too: streaming one emits EISDIR, which crashed the process.
+  const stat = await fs.promises.stat(resolvedPath).catch(() => null);
+  if (!stat?.isFile()) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     return res.end("Not found");
   }
 
   const ext = path.extname(resolvedPath).toLowerCase();
 
-  const contentTypes: Record<string, string> = {
-    ".json": "application/json",
-    ".moc3": "application/octet-stream",
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".atlas": "text/plain",
-    ".physics3.json": "application/json",
-  };
-
-  const contentType = contentTypes[ext] || "application/octet-stream";
-
   res.writeHead(200, {
-    "Content-Type": contentType,
+    "Content-Type": contentTypes[ext] || "application/octet-stream",
+    "Content-Length": stat.size,
     "Access-Control-Allow-Origin": "*",
   });
 
-  fs.createReadStream(resolvedPath).pipe(res);
+  const stream = fs.createReadStream(resolvedPath);
+  stream.on("error", err => {
+    console.error("Failed to stream resource:", err);
+    res.destroy(err);
+  });
+  stream.pipe(res);
 }

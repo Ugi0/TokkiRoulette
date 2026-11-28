@@ -1,3 +1,14 @@
+-- Schema matches production after 20261024_002_normalize_participants_up.sql.
+-- user_name lives only in participants; votes, results and user_sessions reference it by user_id.
+CREATE TABLE participants (
+    user_id INTEGER PRIMARY KEY,
+    user_name TEXT NOT NULL,
+    profile_image_url TEXT
+);
+
+CREATE INDEX participants_user_name_lower_idx
+    ON participants (LOWER(user_name));
+
 CREATE TABLE predictions (
     id TEXT PRIMARY KEY,
     broadcaster_name TEXT NOT NULL,
@@ -26,7 +37,11 @@ CREATE TABLE votes (
 
     FOREIGN KEY (prediction_id, option_id)
         REFERENCES options (prediction_id, option_id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT votes_participant_user_id_fkey
+        FOREIGN KEY (user_id) REFERENCES participants (user_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE prediction_outcomes (
@@ -58,7 +73,11 @@ CREATE TABLE results (
 
     FOREIGN KEY (prediction_id)
         REFERENCES prediction_outcomes(prediction_id)
-        ON DELETE RESTRICT
+        ON DELETE RESTRICT,
+
+    CONSTRAINT results_participant_user_id_fkey
+        FOREIGN KEY (user_id) REFERENCES participants (user_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE spin_counter (
@@ -78,10 +97,9 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     refresh_token TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
 
-    UNIQUE (user_id)
-);
+    UNIQUE (user_id),
 
-CREATE TABLE IF NOT EXISTS participants (
-    user_name TEXT PRIMARY KEY,
-    profile_image_url TEXT
-)
+    CONSTRAINT user_sessions_participant_user_id_fkey
+        FOREIGN KEY (user_id) REFERENCES participants (user_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+);

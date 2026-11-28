@@ -1,8 +1,9 @@
 import { HelixUser, UserTokens } from "../types/helix.js";
 import { TwitchTokenResponse } from "../types/twitch.js";
-import { getPredictionOutcomeId, getUserTokens } from "./db_queries.js";
+import { getUserTokens } from "./db_queries.js";
 import { saveUserTokens } from "./db_updates.js";
-import { saveUserProfile } from "./statistics_queries.js";
+import { TWITCH_MOCK } from "./devMode.js";
+import { mockHelixUsers, mockResolveViaApi } from "./twitchMock.js";
 
 let cachedToken: string | null = null;
 let tokenExpiry = 0;
@@ -40,6 +41,8 @@ export async function helixAppRequest(
 }
 
 export async function getAppToken(): Promise<string> {
+  if (TWITCH_MOCK) return "mock-app-token";
+
   const now = Date.now();
 
   if (cachedToken && now < tokenExpiry - 60_000) {
@@ -99,6 +102,8 @@ async function refreshAccessToken(refreshToken: string): Promise<UserTokens> {
 }
 
 export async function getUserToken(user_id: string): Promise<string> {
+  if (TWITCH_MOCK) return "mock-user-token";
+
   const tokens = await getUserTokens(user_id);
 
   if (!tokens) {
@@ -160,19 +165,28 @@ export async function registerPredictionHook(
   
 }
 
-export async function finishRoulettePrediction(prediction_id: number, resultTags: string[]): Promise<void> {
+/**
+ * Resolves a prediction on Twitch. Twitch answers right away and sends the
+ * channel.prediction.end webhook afterwards.
+ */
+export async function resolveTwitchPrediction(prediction_id: string, winningOutcomeId: string): Promise<void> {
+  if (TWITCH_MOCK) {
+    mockResolveViaApi(prediction_id, winningOutcomeId);
+    return;
+  }
+
   const resp = await fetch(`https://api.twitch.tv/helix/predictions`, {
     method: "PATCH",
     headers: {
-      "Client-Id": process.env.TWITCH_CLIENT_ID!,
+      "Client-Id": assertEnv("TWITCH_CLIENT_ID"),
       "Content-Type": "application/json",
       "Authorization": `Bearer ${await getUserToken(process.env.TOKKI_USER_ID!)}`,
     },
     body: JSON.stringify({
       broadcaster_id: process.env.TOKKI_USER_ID!,
-      id: prediction_id.toString(),
+      id: prediction_id,
       status: "RESOLVED",
-      winning_outcome_id: await getPredictionOutcomeId(prediction_id.toString(), resultTags),
+      winning_outcome_id: winningOutcomeId,
     }),
   });
 
@@ -182,29 +196,22 @@ export async function finishRoulettePrediction(prediction_id: number, resultTags
   }
 }
 
-export async function fetchUserProfile(userId: string): Promise<HelixUser> {
-    const resp = await fetch(
-        `https://api.twitch.tv/helix/users?id=${encodeURIComponent(userId)}`,
-        {
-            headers: {
-                "Client-ID": process.env.TWITCH_CLIENT_ID!,
-                "Authorization": `Bearer ${await getAppToken()}`,
-            },
-        }
-    );
+const HELIX_USERS_BATCH = 100; // Helix accepts up to 100 ids per /users request
 
-    if (!resp.ok) {
-        throw new Error(`Failed to fetch user profile: ${resp.status}`);
-    }
+/** Looks up Twitch users by id, batching requests. Unknown or deleted users are simply absent. */
+export async function fetchHelixUsers(userIds: string[]): Promise<HelixUser[]> {
+  const ids = [...new Set(userIds.filter(Boolean))];
+  if (ids.length === 0) return [];
 
-    const data = await resp.json();
-    const result: HelixUser = data.data[0];
+  if (TWITCH_MOCK) return mockHelixUsers(ids);
 
-    if (result !== undefined) {
-        await saveUserProfile(userId, result.display_name ?? result.login, result.profile_image_url);
-    } else {
-        await saveUserProfile(userId, userId, null);
-    }
+  const users: HelixUser[] = [];
 
-    return result;
+  for (let i = 0; i < ids.length; i += HELIX_USERS_BATCH) {
+    const batch = ids.slice(i, i + HELIX_USERS_BATCH);
+    const data = (await helixAppRequest("users", { id: batch })) as { data?: HelixUser[] };
+    users.push(...(data.data ?? []));
+  }
+
+  return users;
 }

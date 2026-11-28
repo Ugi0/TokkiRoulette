@@ -38,10 +38,12 @@ export function cacheUserResults(id: string, values: UserPrediction[]) {
 }
 
 export function getCache(key: string): CacheEntry | undefined {
-  const entry = cache.get(key);
-  if (!entry) return undefined;
+  return cache.get(key);
+}
 
-  return entry;
+/** Cached predictions for a prediction. Empty when nobody has bet (Twitch then never sends progress data). */
+export function getCachedPredictions(key: string): UserPrediction[] {
+  return cache.get(key)?.predictionStatus ?? [];
 }
 
 export function deleteCache(key: string) {
@@ -72,19 +74,13 @@ export async function getTotalPredictionResults(endEvent: TwitchPredictionEndEve
 
   const winningPool = winningOutcome.channel_points;
 
-  const cached = getCache(event.id);
-
-  if (!cached) {
-    throw new Error("Missing cache for prediction");
-  }
-
   const winners: UserData[] = [];
   const losers: UserData[] = [];
 
   const ratio =
     winningPool > 0 ? totalPool / winningPool : 0;
 
-  for (const user of cached.predictionStatus) {
+  for (const user of getCachedPredictions(event.id)) {
     const isWinner = user.voted_option === winningOptionId;
 
     let won_amount: number | null = null;

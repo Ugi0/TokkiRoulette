@@ -5,48 +5,79 @@ import {
 } from "../types/events.js";
 import { UserTokens } from "../types/helix.js";
 import { TwitchTokenResponse, TwitchUser } from "../types/twitch.js";
-import { getCache, getTotalPredictionResults } from "./cache.js";
+import { getCachedPredictions, getTotalPredictionResults } from "./cache.js";
 
-import db from "./db.js";
+import db, { Queryable, withTransaction } from "./db.js";
 import { isPredictionRoulette } from "./db_queries.js";
 
-export async function newPrediction(event: TwitchPredictionBeginEvent) {
-  const insertPredictionQuery = `
-    INSERT INTO predictions (
-      id,
-      broadcaster_name,
-      title,
-      start_time,
-      prediction_status,
-      roulette_prediction
-    )
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id
-  `;
-
-  const { rows } = await db.query(insertPredictionQuery, [
-    event.event.id,
-    event.event.broadcaster_user_login,
-    event.event.title,
-    new Date(event.event.started_at),
-    "active",
-    false
-  ]);
-
-  const insertOptionQuery = `
-    INSERT INTO options (prediction_id, option_id, title)
-    VALUES ($1, $2, $3)
-  `;
-
-  for (const outcome of event.event.outcomes) {
-    await db.query(insertOptionQuery, [
-      rows[0].id,
-      outcome.id,
-      outcome.title
-    ]);
+/**
+ * votes, results and user_sessions all have a foreign key to participants(user_id),
+ * so every user must exist there before any of those rows are written.
+ * Updates the name (users can rename) but keeps any stored profile image.
+ */
+async function upsertParticipants(
+  client: Queryable,
+  users: { user_id: string; user_name: string }[]
+) {
+  const unique = new Map<string, string>();
+  for (const u of users) {
+    if (u.user_id) unique.set(u.user_id, u.user_name || u.user_id);
   }
+  if (unique.size === 0) return;
 
-  return rows[0].id;
+  await client.query(
+    `INSERT INTO participants (user_id, user_name)
+     SELECT * FROM UNNEST($1::int[], $2::text[])
+     ON CONFLICT (user_id) DO UPDATE
+     SET user_name = EXCLUDED.user_name`,
+    [[...unique.keys()], [...unique.values()]]
+  );
+}
+
+const insertVoteQuery = `
+  INSERT INTO votes (
+    prediction_id,
+    option_id,
+    points_used,
+    user_id
+  )
+  VALUES ($1, $2, $3, $4)
+  ON CONFLICT (prediction_id, user_id) DO NOTHING
+`;
+
+export async function newPrediction(event: TwitchPredictionBeginEvent) {
+  // Twitch delivers EventSub messages at-least-once, so a redelivered BEGIN must not fail.
+  await withTransaction(async client => {
+    await client.query(
+      `INSERT INTO predictions (
+        id,
+        broadcaster_name,
+        title,
+        start_time,
+        prediction_status,
+        roulette_prediction
+      )
+      VALUES ($1, $2, $3, $4, 'active', false)
+      ON CONFLICT (id) DO NOTHING`,
+      [
+        event.event.id,
+        event.event.broadcaster_user_login,
+        event.event.title,
+        new Date(event.event.started_at),
+      ]
+    );
+
+    for (const outcome of event.event.outcomes) {
+      await client.query(
+        `INSERT INTO options (prediction_id, option_id, title)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (prediction_id, option_id) DO NOTHING`,
+        [event.event.id, outcome.id, outcome.title]
+      );
+    }
+  });
+
+  return event.event.id;
 }
 
 export async function cancelPrediction(prediction_event: TwitchPredictionEndEvent) {
@@ -62,57 +93,45 @@ export async function cancelPrediction(prediction_event: TwitchPredictionEndEven
 
 export async function lockPrediction(prediction_event: TwitchPredictionLockEvent) {
   const predictionId = prediction_event.event.id;
+  const cached = getCachedPredictions(predictionId);
 
-  await db.query(
-    `
-    UPDATE predictions
-    SET prediction_status = 'locked'
-    WHERE id = $1
-    `,
-    [predictionId]
-  );
+  await withTransaction(async client => {
+    await client.query(
+      `UPDATE predictions
+       SET prediction_status = 'locked'
+       WHERE id = $1`,
+      [predictionId]
+    );
 
-  const cached = getCache(predictionId);
+    await upsertParticipants(client, cached);
 
-  if (!cached) {
-    throw new Error("Missing cache for prediction");
-  }
-
-  const insertVoteQuery = `
-    INSERT INTO votes (
-      prediction_id,
-      option_id,
-      points_used,
-      user_id
-    )
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (prediction_id, user_id) DO NOTHING
-  `;
-
-  for (const user of cached.predictionStatus) {
-    await db.query(insertVoteQuery, [
-      predictionId,
-      user.voted_option,
-      user.bet_amount,
-      user.user_id
-    ]);
-  }
+    for (const user of cached) {
+      await client.query(insertVoteQuery, [
+        predictionId,
+        user.voted_option,
+        user.bet_amount,
+        user.user_id
+      ]);
+    }
+  });
 }
 
 export async function endPrediction(prediction_event: TwitchPredictionEndEvent) {
   const predictionId = prediction_event.event.id;
 
-  await db.query("BEGIN");
+  const isRoulette = await isPredictionRoulette(predictionId);
+  const hookData = await getTotalPredictionResults(prediction_event);
+  const allUsers = [...hookData.winners, ...hookData.losers];
 
-  try {
-    await db.query(
+  await withTransaction(async client => {
+    await client.query(
       `UPDATE predictions
        SET prediction_status = $1
        WHERE id = $2`,
       [prediction_event.event.status, predictionId]
     );
 
-    await db.query(
+    await client.query(
       `INSERT INTO prediction_outcomes (prediction_id, winning_option_id)
        VALUES ($1, $2)
        ON CONFLICT (prediction_id) DO UPDATE
@@ -120,32 +139,35 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
       [predictionId, prediction_event.event.winning_outcome_id]
     );
 
-    const isRoulette = await isPredictionRoulette(predictionId);
-    const hookData = await getTotalPredictionResults(prediction_event);
+    const finalPredictors = prediction_event.event.outcomes.flatMap(outcome =>
+      outcome.top_predictors.map(predictor => ({ outcome, predictor }))
+    );
+
+    await upsertParticipants(client, [
+      ...allUsers,
+      ...finalPredictors.map(({ predictor }) => predictor),
+    ]);
 
     // Backfill any missing votes from the final event
-    // This is needed because if someone votes right before the prediction ends, twitch might not send the progress event at all, 
+    // This is needed because if someone votes right before the prediction ends, twitch might not send the progress event at all,
     //    causing it to not end up in the votes table
-    const insertVoteQuery = `
-      INSERT INTO votes (
-        prediction_id,
-        option_id,
-        points_used,
-        user_id
-      )
-      VALUES ($1, $2, $3, $4)
-      ON CONFLICT (prediction_id, user_id) DO NOTHING
-    `;
+    for (const { outcome, predictor } of finalPredictors) {
+      await client.query(insertVoteQuery, [
+        predictionId,
+        outcome.id,
+        predictor.channel_points_used,
+        predictor.user_id
+      ]);
+    }
 
-    for (const outcome of prediction_event.event.outcomes) {
-      for (const predictor of outcome.top_predictors) {
-        await db.query(insertVoteQuery, [
-          predictionId,
-          outcome.id,
-          predictor.channel_points_used,
-          predictor.user_id
-        ]);
-      }
+    // Votes cached from progress events but no longer in the final top_predictors (Twitch only sends the top 10 per outcome)
+    for (const user of allUsers) {
+      await client.query(insertVoteQuery, [
+        predictionId,
+        user.voted_option,
+        user.bet_amount,
+        user.user_id
+      ]);
     }
 
     const insertResultQuery = `
@@ -161,10 +183,8 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
       ON CONFLICT (prediction_id, user_id) DO NOTHING
     `;
 
-    const allUsers = [...hookData.winners, ...hookData.losers];
-
     for (const user of allUsers) {
-      await db.query(insertResultQuery, [
+      await client.query(insertResultQuery, [
         predictionId,
         user.user_id,
         user.bet_amount,
@@ -173,24 +193,19 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
         isRoulette
       ]);
     }
-
-    await db.query("COMMIT");
-  } catch (err) {
-    await db.query("ROLLBACK");
-    throw err;
-  }
+  });
 }
 
-export async function markPredictionAsRoulette(
-  prediction_id: number
+export async function setPredictionRoulette(
+  prediction_id: string,
+  isRoulette: boolean
 ) {
-  const query = `
-    UPDATE predictions
-    SET roulette_prediction = true
-    WHERE id = $1
-  `;
-
-  await db.query(query, [prediction_id]);
+  await db.query(
+    `UPDATE predictions
+     SET roulette_prediction = $2
+     WHERE id = $1`,
+    [prediction_id, isRoulette]
+  );
 }
 
 export async function recordSpinResult(
@@ -213,18 +228,23 @@ export async function recordSpinResult(
 }
 
 export async function saveUserSession(response: TwitchTokenResponse, userData: TwitchUser, session_id: string) {
-  const query = `
-    INSERT INTO user_sessions (session_id, user_id, access_token, refresh_token, expires_at)
-    VALUES ($1, $2, $3, $4, $5)
-    ON CONFLICT (user_id) DO UPDATE
-    SET
-      session_id = EXCLUDED.session_id,
-      access_token = EXCLUDED.access_token,
-      refresh_token = EXCLUDED.refresh_token,
-      expires_at = EXCLUDED.expires_at
-  `;
+  await withTransaction(async client => {
+    await upsertParticipants(client, [
+      { user_id: userData.id, user_name: userData.display_name ?? userData.login },
+    ]);
 
-  await db.query(query, [session_id, userData.id, response.access_token, response.refresh_token, new Date(Date.now() + response.expires_in * 1000)]);
+    await client.query(
+      `INSERT INTO user_sessions (session_id, user_id, access_token, refresh_token, expires_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (user_id) DO UPDATE
+       SET
+         session_id = EXCLUDED.session_id,
+         access_token = EXCLUDED.access_token,
+         refresh_token = EXCLUDED.refresh_token,
+         expires_at = EXCLUDED.expires_at`,
+      [session_id, userData.id, response.access_token, response.refresh_token, new Date(Date.now() + response.expires_in * 1000)]
+    );
+  });
 }
 
 export async function saveUserTokens(user_id: string, tokens: UserTokens): Promise<void> {

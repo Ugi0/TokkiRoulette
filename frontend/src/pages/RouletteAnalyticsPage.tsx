@@ -23,7 +23,7 @@ export default function RouletteAnalyticsPage() {
 
         return (
             <>
-            {(loading || !analytics) && <p>Loading...</p>}
+            {loading && !error && <p>Loading...</p>}
             {error && <p>{error}</p>}
 
             {analytics && !error && (

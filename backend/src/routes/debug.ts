@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 import { getAppToken } from "../services/helix.js";
-import { SIX_MONTHS } from "./auth.js";
+import { setSessionCookie } from "../utils/sessionCookie.js";
 
 const TWITCH_API = "https://api.twitch.tv/helix";
 
@@ -30,13 +30,11 @@ export default async function debugRoutes(
     }
 
     if (req.method === "GET" && url.pathname === "/debug/twitch/token") {
-      const sessionId = "";
-      res.setHeader("Set-Cookie", [
-          `session_id=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SIX_MONTHS}`
-      ]); 
+      // Clears the session cookie
+      setSessionCookie(res, "", 0);
 
       res.writeHead(200, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ status: "Spin result recorded" }));
+      return res.end(JSON.stringify({ status: "Session cookie cleared" }));
     }
 
     res.writeHead(404);

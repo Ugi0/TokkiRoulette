@@ -1,7 +1,7 @@
 import db from "./db.js";
 import { Interval, PredictionDetails, PredictionEntry, UserEntry, WinRatioEntry } from "../types/statistics.js";
 import { getIntervalCondition, getResultsIntervalCondition } from "../utils/statisticsHelpers.js";
-import { fetchUserProfiles } from "../routes/stats.js";
+import { fetchUserProfiles } from "./profiles.js";
 
 const netChangeSql = "COALESCE(r.won_amount, -r.bet_amount)";
 
@@ -75,49 +75,14 @@ export async function getIntervals(): Promise<Interval[]> {
 export async function getSingles(interval: Interval, type: "win" | "loss" ): Promise<UserEntry[]> {
     const orderDir = type === "win" ? 'DESC' : 'ASC';
 
-    let whereClause = 'WHERE r.roulette_prediction = true';
-
     if (interval === "RECENT") {
         return [];
     }
 
-    switch (interval) {
-        case "CURRENT_MONTH":
-            whereClause = `
-                WHERE r.roulette_prediction = true
-                AND r.result_time >= date_trunc('month', CURRENT_DATE)
-            `;
-            break;
-
-        case "LAST_MONTH":
-            whereClause = `
-                WHERE r.roulette_prediction = true
-                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
-                AND r.result_time < date_trunc('month', CURRENT_DATE)
-            `;
-            break;
-
-        case "LAST_3_MONTHS":
-            whereClause = `
-                WHERE r.roulette_prediction = true
-                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
-            `;
-            break;
-
-        case "LAST_6_MONTHS":
-            whereClause = `
-                WHERE r.roulette_prediction = true
-                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
-            `;
-            break;
-
-        case "LAST_12_MONTHS":
-            whereClause = `
-                WHERE r.roulette_prediction = true
-                AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
-            `;
-            break;
-    }
+    const whereClause = `
+        WHERE r.roulette_prediction = true
+        ${getResultsIntervalCondition(interval)}
+    `;
 
     const query = `
         SELECT 
@@ -160,10 +125,8 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
             : `HAVING SUM(${netChangeSql}) < 0`;
     }
 
-    let whereClause = 'WHERE r.roulette_prediction = true';
-
-    if (interval === "RECENT") {
-        whereClause = `
+    const whereClause = interval === "RECENT"
+        ? `
             WHERE r.roulette_prediction = true
             AND r.prediction_id = (
                 SELECT prediction_id
@@ -172,50 +135,11 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
                 ORDER BY result_time DESC
                 LIMIT 1
             )
+        `
+        : `
+            WHERE r.roulette_prediction = true
+            ${getResultsIntervalCondition(interval)}
         `;
-    } else {
-        switch (interval) {
-            case "CURRENT_MONTH":
-                whereClause = `
-                    WHERE r.roulette_prediction = true
-                    AND r.result_time >= date_trunc('month', CURRENT_DATE)
-                `;
-                break;
-
-            case "LAST_MONTH":
-                whereClause = `
-                    WHERE r.roulette_prediction = true
-                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'
-                    AND r.result_time < date_trunc('month', CURRENT_DATE)
-                `;
-                break;
-
-            case "LAST_3_MONTHS":
-                whereClause = `
-                    WHERE r.roulette_prediction = true
-                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '3 months'
-                `;
-                break;
-
-            case "LAST_6_MONTHS":
-                whereClause = `
-                    WHERE r.roulette_prediction = true
-                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '6 months'
-                `;
-                break;
-
-            case "LAST_12_MONTHS":
-                whereClause = `
-                    WHERE r.roulette_prediction = true
-                    AND r.result_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '12 months'
-                `;
-                break;
-
-            case "ALL_TIME":
-            default:
-                break;
-        }
-    }
 
     const query = `
         SELECT
@@ -238,23 +162,26 @@ export async function getLeaderboard(count: number, interval: Interval, type: "w
     return rows;
 }
 
-export async function getUserProfiles(user_ids: string[]): Promise<Record<string, string>> {
+export async function getParticipantsByIds(
+    user_ids: string[]
+): Promise<Map<string, { user_name: string; profile_image_url: string | null }>> {
+    const result = new Map<string, { user_name: string; profile_image_url: string | null }>();
     if (user_ids.length === 0) {
-        return {};
+        return result;
     }
 
-    const query = `
-        SELECT user_name, profile_image_url
-        FROM participants
-        WHERE user_name = ANY($1)
-    `;
+    const { rows } = await db.query(
+        `SELECT user_id::text AS user_id, user_name, profile_image_url
+         FROM participants
+         WHERE user_id = ANY($1::int[])`,
+        [user_ids]
+    );
 
-    const { rows } = await db.query(query, [user_ids.filter((name): name is string => !!name)]);
-      return rows.reduce((acc, row) => {
-          acc[row.user_name] = row.profile_image_url;
-          return acc;
-      }, {} as Record<string, string>)
-};
+    for (const row of rows) {
+        result.set(row.user_id, { user_name: row.user_name, profile_image_url: row.profile_image_url });
+    }
+    return result;
+}
 
 export async function saveUserProfile(user_id: string, user_name: string, profile_image_url: string | null): Promise<void> {
     const query = `
@@ -342,7 +269,7 @@ export async function loadPredictionDetails(predictionId: string): Promise<Predi
             ON r.prediction_id = v.prediction_id 
             AND r.user_id = v.user_id
 
-        INNER JOIN participants AS par
+        LEFT JOIN participants AS par
             ON par.user_id = r.user_id
 
         LEFT JOIN prediction_outcomes po
@@ -378,7 +305,7 @@ export async function loadPredictionDetails(predictionId: string): Promise<Predi
 
         const optionIndex = optionMap[row.option_title];
 
-        if (row.user_id !== null && row.user_name !== null) {
+        if (row.user_id !== null) {
             predictionDetails.options[optionIndex].votes.push({
                 prediction_id: predictionId,
                 user_id: row.user_id,
@@ -399,15 +326,16 @@ export async function loadPredictionDetails(predictionId: string): Promise<Predi
                 option.votes.map(vote => ({ user_id: String(vote.user_id), user_name: vote.user_name }))
             );
 
-            const profiles: Record<string, string | null> = {};
-            profilesArray.forEach(p => {
-                profiles[p.user_name] = p.profile_image_url;
-            });
+            const profiles = new Map(profilesArray.map(p => [p.user_id, p]));
 
-            option.votes = option.votes.map(vote => ({
-                ...vote,
-                profile_image_url: profiles[vote.user_name] || null
-            }));
+            option.votes = option.votes.map(vote => {
+                const profile = profiles.get(String(vote.user_id));
+                return {
+                    ...vote,
+                    user_name: profile?.user_name ?? vote.user_name,
+                    profile_image_url: profile?.profile_image_url ?? null
+                };
+            });
         })
     );
 

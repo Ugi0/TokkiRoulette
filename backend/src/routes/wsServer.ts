@@ -1,6 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
-import { parseCookies } from "./spinResult.js";
+import { parseCookies } from "../utils/sessionCookie.js";
 
 type ClientMap = Map<string, WebSocket>;
 
@@ -22,6 +22,10 @@ export function sendOrQueue(sessionId: string, message: string): boolean {
 
   pendingMessages.set(sessionId, { message, expiresAt: Date.now() + PENDING_TTL_MS });
   return false;
+}
+
+export function clearPendingMessages() {
+  pendingMessages.clear();
 }
 
 function flushPending(sessionId: string, ws: WebSocket) {
