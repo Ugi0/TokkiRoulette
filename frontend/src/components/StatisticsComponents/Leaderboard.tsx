@@ -1,6 +1,7 @@
 import { StatsInterval, type LeaderboardEntry } from "../../types/analytics.ts";
 import "./Leaderboard.css";
 import { formatNet, netClassName, toNumber } from "../../utils/statisticsCommon.ts";
+import { ProfileAvatar, ProfileName } from "../Profiles/ProfileAvatar";
 import { ExpandableList } from "./ExpandableList.tsx";
 import { LosersTotalBetTitle } from "../../utils/statisticsTitles.ts";
 
@@ -14,11 +15,11 @@ type LeaderboardProps = {
 export default function Leaderboard({ title, data, interval, expanded }: LeaderboardProps) {
   return (
     <section className="leaderboard">
-      <div className="header">
-        <h2>{title}</h2>
-      </div>
+      <header className="lb-header">
+        <h3>{title}</h3>
+      </header>
 
-      <div className="body">
+      <div className="lb-body">
         <ExpandableList
           data={data}
           expanded={expanded}
@@ -27,24 +28,16 @@ export default function Leaderboard({ title, data, interval, expanded }: Leaderb
             const betAmount = toNumber(entry.bet_amount);
 
             return (
-              <div className="entry" key={entry.user_id}>
-                <img
-                  className="pfp"
-                  src={entry.profile_image_url ?? "/default-pfp.jpg"}
-                  alt="˙◠˙"
-                />
+              <div className="lb-entry" key={entry.user_id}>
+                <ProfileAvatar className="lb-avatar" userId={entry.user_id} userName={entry.user_name} imageUrl={entry.profile_image_url} />
 
-                <div
-                  className="name"
-                >
-                  {entry.user_name}
-                </div>
+                <ProfileName className="lb-name" userId={entry.user_id} userName={entry.user_name} />
 
-                <div className="bet">
+                <div className="lb-meta">
                   {LosersTotalBetTitle(betAmount, totalNet, interval)}
                 </div>
 
-                <div className={`net ${netClassName(totalNet)}`}>
+                <div className={`lb-value ${netClassName(totalNet)}`}>
                   {formatNet(totalNet)}
                 </div>
               </div>

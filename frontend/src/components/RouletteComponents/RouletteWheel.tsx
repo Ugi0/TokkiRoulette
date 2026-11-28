@@ -9,7 +9,7 @@ import {
 import "./RouletteWheel.css";
 import { numberColorMap } from "./RouletteNumber";
 import { RouletteGen, type RouletteResult } from "./RouletteGen";
-import clickSound from "../../sounds/click.mp3";
+import { getOutputLatency, playClick, startClickSound, stopClickSound } from "../../utils/clickSound";
 
 export type RouletteWheelHandle = {
   spin: () => void;
@@ -53,18 +53,6 @@ const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
 
     const lastTickIndexRef = useRef(0);
     const lastRotationRef = useRef(0);
-    const lastPlayRef = useRef(0);
-
-    const audioPoolRef = useRef<HTMLAudioElement[]>([]);
-    const poolIndexRef = useRef(0);
-
-    if (audioPoolRef.current.length === 0) {
-      for (let i = 0; i < 5; i++) {
-        const audio = new Audio(clickSound);
-        audio.volume = 0.5;
-        audioPoolRef.current.push(audio);
-      }
-    }
 
     useEffect(() => {
       let rafId: number;
@@ -72,7 +60,14 @@ const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
       const element = document.querySelector(".roulette-wheel") as HTMLElement;
       if (!element) return;
 
-      const track = () => {
+      let prevAngle: number | null = null;
+      let prevTime = 0;
+      // Slot index whose border crossing already has a click scheduled.
+      let scheduledFor: number | null = null;
+
+      const randomRate = () => 0.95 + Math.random() * 0.1;
+
+      const track = (now: number) => {
         const style = window.getComputedStyle(element);
         const transform = style.transform;
 
@@ -89,31 +84,38 @@ const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
 
             lastRotationRef.current = angle;
 
+            // Slot borders sit at whole multiples of `step` (slot centres are at half steps,
+            // since the pointer is at 180° = 18.5 steps), so this changes exactly at a border.
             const tickIndex = Math.floor(angle / step);
+
+            // Angular speed in degrees per second. The wheel only ever turns forward.
+            let speed = 0;
+            if (prevAngle !== null && now > prevTime) {
+              const delta = (angle - prevAngle + 360) % 360;
+              speed = delta < 180 ? delta / ((now - prevTime) / 1000) : 0;
+            }
+            const frameSeconds = prevAngle !== null ? (now - prevTime) / 1000 : 1 / 60;
+            prevAngle = angle;
+            prevTime = now;
 
             if (tickIndex !== lastTickIndexRef.current) {
               lastTickIndexRef.current = tickIndex;
+              // Crossed a border: click now unless the click was already scheduled for it.
+              if (scheduledFor !== tickIndex) {
+                playClick(randomRate());
+              }
+              scheduledFor = null;
+            }
 
-              const pool = audioPoolRef.current;
-              const index = poolIndexRef.current;
+            // Predict the next border and schedule its click ahead of time, so after the
+            // device's output latency it is heard right as the border passes the pointer.
+            if (speed > 1 && scheduledFor === null) {
+              const secondsToBorder = (step - (angle % step)) / speed;
+              const lookahead = getOutputLatency() + frameSeconds * 1.5;
 
-              poolIndexRef.current = (index + 1) % pool.length;
-
-              const now = performance.now();
-
-              if (now - lastPlayRef.current > 20) {
-                lastPlayRef.current = now;
-
-                const pool = audioPoolRef.current;
-                const index = poolIndexRef.current;
-                const audio = pool[index];
-
-                poolIndexRef.current = (index + 1) % pool.length;
-
-                audio.currentTime = 0;
-                audio.playbackRate = 0.95 + Math.random() * 0.1;
-
-                audio.play().catch(() => {});
+              if (secondsToBorder <= lookahead) {
+                scheduledFor = (tickIndex + 1) % WHEEL_NUMBERS.length;
+                playClick(randomRate(), secondsToBorder);
               }
             }
           }
@@ -140,6 +142,8 @@ const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
       if (isSpinningRef.current) return;
 
       isSpinningRef.current = true;
+      // spin() runs from the Spin button click, which is the user gesture browsers require for audio.
+      startClickSound();
       lastTickIndexRef.current = -1;
       lastRotationRef.current = 0;
 
@@ -163,6 +167,7 @@ const RouletteWheel = forwardRef<RouletteWheelHandle, RouletteWheelProps>(
 
       timeoutRef.current = window.setTimeout(() => {
         isSpinningRef.current = false;
+        stopClickSound();
         onFinishRef.current(result);
         sendSpinResult(result, setNotification);
       }, 12000);

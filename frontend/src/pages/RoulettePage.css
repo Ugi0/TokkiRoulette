@@ -1,44 +1,46 @@
-.page-root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #181a1b;
-}
-
-.page-root > main {
-  flex: 1;
-}
-
 .roulette-page {
-  padding: 24px 0 40px;
+  padding: 20px 0 56px;
 }
 
 .roulette-page__header {
-  text-align: center;
   display: flex;
   justify-content: center;
+  text-align: center;
 }
 
+/* Title keeps its monospace face: the logo "dot" over the i is positioned against these metrics. */
 .roulette-page__header h1 {
-  font-family: "JetBrains Mono", sans-serif;
-  font-size: 42px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-family: var(--mono);
+  font-size: clamp(28px, 4.2vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 
-  background: linear-gradient(90deg, #ff4d4d, #ffffff, #e0ffed);
+  background: linear-gradient(90deg, #ff6b6b 0%, #fff4e0 55%, #e3fff0 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  text-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+  text-shadow: 0 0 14px rgba(200, 32, 47, 0.3);
+}
+
+.roulette-title {
+  width: fit-content;
+  margin: 12px 20px 24px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.start-word {
+  display: inline-block;
 }
 
 .fancy-i {
-  top: 1px;
   position: relative;
+  top: 1px;
   display: inline-block;
 
-  background: linear-gradient(90deg, #f7a4a4, #ffffff, #edfff4);
+  background: linear-gradient(90deg, #ffd0c4, #ffffff, #effff6);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -62,21 +64,13 @@
   background-size: contain;
 }
 
-
-@keyframes bounce {
-  0%, 100% { transform: translate(-50%, 0); }
-  50% { transform: translate(-50%, -3px); }
-}
-
-.roulette-title {
-  text-align: center;
-  cursor: pointer;
-  margin: 20px;
-  width: fit-content;
-}
-
+/* vertical-align: top keeps the line height stable in both states. Without it the hidden
+   state's overflow: hidden moves the inline-block's baseline to its bottom edge and the
+   whole title jumps. */
 .not-word {
   display: inline-block;
+  vertical-align: top;
+  white-space: nowrap;
   margin-left: 24px;
 
   transition:

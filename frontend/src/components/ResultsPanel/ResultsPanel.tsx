@@ -61,9 +61,9 @@ export function ResultsPanel({data, time, onClose, closing}: ResultsPanelProps) 
       </div>
 
       <div className="page page-left">
-        <div className="row results-header">Lucky winners</div>
+        <div className="nb-row results-header">Lucky winners</div>
 
-        <div className="row grid-row subheader">
+        <div className="nb-row grid-row subheader">
           <span style={{ transform: "rotate(-8deg)" }}>Name</span>
           <span style={{ justifySelf: "center", transform: "rotate(-4deg)" }}>
             Bet
@@ -79,7 +79,7 @@ export function ResultsPanel({data, time, onClose, closing}: ResultsPanelProps) 
               key={i}
               initial={{ opacity: 0, x: -5 }}
               animate={{ opacity: 1, x: 0 }}
-              className="row grid-row"
+              className="nb-row grid-row"
             >
               <span style={{ justifySelf: "start" }}>
                 <TypewriterText
@@ -106,9 +106,9 @@ export function ResultsPanel({data, time, onClose, closing}: ResultsPanelProps) 
       </div>
 
       <div className="page page-right">
-          <div className="row results-header">Sore losers</div>
+          <div className="nb-row results-header">Sore losers</div>
 
-        <div className="row grid-row subheader loser-header">
+        <div className="nb-row grid-row subheader loser-header">
           <span style={{ transform: "rotate(3deg)", paddingTop: "8px" }}>Name</span>
           <span style={{ transform: "rotate(6deg)" }}>Lost</span>
         </div>
@@ -121,7 +121,7 @@ export function ResultsPanel({data, time, onClose, closing}: ResultsPanelProps) 
               key={i}
               initial={{ opacity: 0, x: -5 }}
               animate={{ opacity: 1, x: 0 }}
-              className="row loser-header"
+              className="nb-row loser-header"
             >
               <TypewriterText
                 text={sortedLosers[i]?.user_name ?? ""}

@@ -123,6 +123,11 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
   const hookData = await getTotalPredictionResults(prediction_event);
   const allUsers = [...hookData.winners, ...hookData.losers];
 
+  // Use the time the prediction actually ended: analytics intervals filter on result_time,
+  // and a late or replayed END event must not move results into the wrong month.
+  const endedAt = new Date(prediction_event.event.ended_at);
+  const resultTime = Number.isNaN(endedAt.getTime()) ? new Date() : endedAt;
+
   await withTransaction(async client => {
     await client.query(
       `UPDATE predictions
@@ -189,7 +194,7 @@ export async function endPrediction(prediction_event: TwitchPredictionEndEvent) 
         user.user_id,
         user.bet_amount,
         user.won_amount,
-        new Date(),
+        resultTime,
         isRoulette
       ]);
     }

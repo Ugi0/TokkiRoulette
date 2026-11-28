@@ -14,16 +14,17 @@ export default function RouletteAnalytics({ analytics, setSelectedPrediction }: 
 
   return (
     <div className="roulette-analytics">
-      <div className="stats-container">
-        
       {analytics.interval !== "RECENT" && analytics.predictions.length !== 0 && (
         <div className={`predictions-sidebar ${sidebarOpen ? "open" : "collapsed"}`}>
             
           <button
+            type="button"
             className="sidebar-toggle"
+            aria-label={sidebarOpen ? "Hide predictions" : "Show predictions"}
+            aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((prev) => !prev)}
           >
-            {sidebarOpen ? "‹" : "›"}
+            <span className={`chevron ${sidebarOpen ? "chevron--left" : "chevron--right"}`} aria-hidden="true" />
           </button>
 
           <div className="sidebar-content">
@@ -32,19 +33,18 @@ export default function RouletteAnalytics({ analytics, setSelectedPrediction }: 
         </div>
       )}
 
-
+      <div className={`stats-container${analytics.interval !== "RECENT" && analytics.predictions.length !== 0 ? " has-sidebar" : ""}`}>
         {analytics.interval === "RECENT" &&
           analytics.predictions[0]?.prediction_start_time && (
-            <>
-            <h2>
-                {analytics.predictions[0].prediction_title}
-            </h2>
-            <h2>
-              {parseDateToLocaleString(
-                new Date(analytics.predictions[0].prediction_start_time)
-              )}
-            </h2>
-            </>
+            <div className="recent-banner">
+              <span className="recent-banner__label">Latest prediction</span>
+              <h2>{analytics.predictions[0].prediction_title}</h2>
+              <p>
+                {parseDateToLocaleString(
+                  new Date(analytics.predictions[0].prediction_start_time)
+                )}
+              </p>
+            </div>
           )}
 
         {analytics.interval !== "RECENT" && (

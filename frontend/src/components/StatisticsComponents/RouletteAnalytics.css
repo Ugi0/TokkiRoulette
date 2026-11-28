@@ -1,54 +1,101 @@
 .roulette-analytics {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 64px;
+    position: relative;
+    text-align: left;
 }
 
 .stats-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    width: fit-content;
+    gap: 48px;
 }
 
-.stats {
+/* Leave room for the collapsed predictions drawer when the viewport is narrow. */
+@media (max-width: 1260px) and (min-width: 901px) {
+    .stats-container.has-sidebar {
+        padding-left: 36px;
+    }
+}
+
+.stats-section {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: fit-content;
-    gap: 12px;
-    margin: 20px;
+    gap: 16px;
+}
+
+.stats-section__header {
+    display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 16px;
 }
 
-.roulette-analytics .stats > h1 {
-    font-family: "JetBrains Mono", sans-serif;
-    font-size: 2rem;
+.stats-section__header h2 {
+    position: relative;
+    padding-left: 14px;
+    font-size: 1.25rem;
     font-weight: 700;
-    color: #ced5d5;
-    margin: 0;
 }
 
-.content {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    gap: 64px;
+.stats-section__header h2::before {
+    content: "";
+    position: absolute;
+    top: 0.15em;
+    bottom: 0.15em;
+    left: 0;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--gold);
 }
 
-
-.content > * {
-    flex: 1;
+.stats-section__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    gap: 20px;
+    align-items: start;
 }
 
-.board {
+.chevron {
+    width: 7px;
+    height: 7px;
+    margin-top: -3px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 150ms ease, margin 150ms ease;
+}
+
+.chevron.chevron--up {
+    margin-top: 3px;
+    transform: rotate(-135deg);
+}
+
+/* "Last" interval: banner describing the prediction being shown */
+.recent-banner {
     display: flex;
     flex-direction: column;
-    border-radius: 24px;
-    background: #d5d5d5;
-    overflow: hidden;
-    width: fit-content;
+    gap: 4px;
+    padding: 20px 24px;
+    border: 1px solid rgba(226, 181, 74, 0.25);
+    border-radius: var(--radius);
+    background:
+        radial-gradient(600px 200px at 0% 0%, var(--gold-soft), transparent 70%),
+        var(--surface);
 }
 
+.recent-banner__label {
+    color: var(--gold);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.recent-banner h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.recent-banner p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}

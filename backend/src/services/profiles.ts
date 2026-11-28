@@ -44,3 +44,18 @@ export async function fetchUserProfiles(entries: { user_id: string; user_name?: 
     };
   });
 }
+
+/** Always asks Twitch for the user's current name and image and stores them. Null if Twitch doesn't know the user. */
+export async function refreshUserProfile(userId: string): Promise<Profile | null> {
+  const [user] = await fetchHelixUsers([userId]);
+  if (!user) return null;
+
+  const profile: Profile = {
+    user_id: user.id,
+    user_name: user.display_name || user.login || user.id,
+    profile_image_url: user.profile_image_url || null,
+  };
+
+  await saveUserProfile(profile.user_id, profile.user_name, profile.profile_image_url);
+  return profile;
+}

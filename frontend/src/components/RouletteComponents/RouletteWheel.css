@@ -1,9 +1,18 @@
+/* A window onto the top arc of a large wheel. Edges fade out so the arc reads as a strip. */
 .roulette-window {
-  width: 600px;
-  height: 100px;
-  overflow: hidden;
   position: relative;
+  width: 600px;
+  max-width: 100%;
+  height: 100px;
   margin: 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(226, 181, 74, 0.12), transparent 60%),
+    #0b0c0e;
+  box-shadow: inset 0 0 0 1px var(--border), inset 0 12px 24px rgba(0, 0, 0, 0.6);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
 }
 
 .roulette-wheel {
@@ -12,9 +21,7 @@
   left: 50%;
   transform-origin: 50% 50%;
   transform: translate(-50%, -50%) rotate(var(--rotation, 0deg));
-
   border-radius: 50%;
-
   transition: transform 12s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -22,48 +29,66 @@
   position: absolute;
   top: 50%;
   left: 50%;
-
   width: 67px;
   height: 80px;
-
-  user-select: none;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-weight: bold;
-  font-size: 15px;
-  color: var(--text-w);
-
+  color: #fff;
+  font-family: var(--numerals);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 16px;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   transform-origin: center center;
-
-  clip-path: polygon(
-    0% 0%,
-    100% 0%,
-    90% 100%,
-    10% 100%
-  );
+  user-select: none;
+  clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+  box-shadow: inset 0 -2px 0 rgba(226, 181, 74, 0.55);
 }
 
 .wheel-slot.red {
-  background: #ef1e1e;
-}
-.wheel-slot.black {
-  background: #111;
-}
-.wheel-slot.green {
-  background: #138736;
+  background: linear-gradient(180deg, #d72a39, var(--roulette-red));
 }
 
+.wheel-slot.black {
+  background: linear-gradient(180deg, #23262a, var(--roulette-black));
+}
+
+.wheel-slot.green {
+  background: linear-gradient(180deg, #14a352, var(--roulette-green));
+}
+
+/* Pointer: a gold marker with a thin line down to the slots. */
 .wheel-indicator {
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
-
-  width: 4px;
-  height: 28px;
-  background: gold;
   z-index: 10;
+  width: 20px;
+  height: 40px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
+}
+
+.wheel-indicator::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 14px;
+  background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.wheel-indicator::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 2px;
+  height: 30px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, var(--gold-strong), transparent);
 }

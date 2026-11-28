@@ -13,23 +13,27 @@ export function ExpandableSection({
   children,
 }: ExpandableSectionProps) {
   const [expanded, setExpanded] = useState(interval == "RECENT");
+  const collapsible = interval !== "RECENT";
 
   return (
-    <div className="stats">
-      {interval !== "RECENT" && (
-        <h1>{title}</h1>
-      )}
-      <div className="content">
-        {children(expanded)}
-      </div>
-
-      {interval !== "RECENT" && (
-        <div className="expand-controls">
-          <button onClick={() => setExpanded((prev) => !prev)}>
+    <section className="stats-section">
+      {collapsible && (
+        <div className="stats-section__header">
+          <h2>{title}</h2>
+          <button
+            type="button"
+            className="btn-ghost"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((prev) => !prev)}
+          >
             {expanded ? "Show less" : "Show more"}
+            <span className={`chevron${expanded ? " chevron--up" : ""}`} aria-hidden="true" />
           </button>
         </div>
       )}
-    </div>
+      <div className="stats-section__grid">
+        {children(expanded)}
+      </div>
+    </section>
   );
 }

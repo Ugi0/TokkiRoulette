@@ -6,7 +6,9 @@ export default function SiteHeader({ titleExtra }: { titleExtra?: string }) {
         <header className="site-header">
             <nav className="site-header__nav" aria-label="Primary navigation">
                 <NavLink className="site-header__brand" to="/">
-                    Tokki Roulette {titleExtra}
+                    <img className="site-header__logo" src="/logo.png" alt="" />
+                    <span>Tokki Roulette</span>
+                    {titleExtra && <span className="site-header__section">{titleExtra}</span>}
                 </NavLink>
                 <div className="site-header__links">
                     <NavLink

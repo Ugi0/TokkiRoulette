@@ -1,7 +1,7 @@
 import "./Leaderboard.css";
-import "./IntervalMenu.css";
-import { formatNet, parseDateToLocaleStringShort, toNumber } from "../../utils/statisticsCommon.ts";
+import { formatNet, netClassName, parseDateToLocaleStringShort, toNumber } from "../../utils/statisticsCommon.ts";
 import type { SingleEntry } from "../../types/analytics.ts";
+import { ProfileAvatar, ProfileName } from "../Profiles/ProfileAvatar";
 import { ExpandableList } from "./ExpandableList.tsx";
 
 type IndividualProps = {
@@ -13,11 +13,11 @@ type IndividualProps = {
 export default function Individual({ title, data, expanded }: IndividualProps) {
   return (
     <section className="leaderboard">
-      <div className="header">
-        <h2>{title}</h2>
-      </div>
+      <header className="lb-header">
+        <h3>{title}</h3>
+      </header>
 
-      <div className="body">
+      <div className="lb-body">
         <ExpandableList
           data={data}
           expanded={expanded}
@@ -25,39 +25,21 @@ export default function Individual({ title, data, expanded }: IndividualProps) {
             const netChange = toNumber(entry.net_change);
 
             return (
-              <div className="entry" key={`${entry.user_id}-${entry.bet_time}`}>
-                <img
-                  className="pfp"
-                  src={entry.profile_image_url ?? "/default-pfp.jpg"}
-                  alt="˙◠˙"
-                />
+              <div className="lb-entry" key={`${entry.user_id}-${entry.bet_time}`}>
+                <ProfileAvatar className="lb-avatar" userId={entry.user_id} userName={entry.user_name} imageUrl={entry.profile_image_url} />
 
-                <div className="name">
-                  {entry.user_name}
+                <ProfileName className="lb-name" userId={entry.user_id} userName={entry.user_name} />
+
+                <div className="lb-meta lb-meta--stacked">
+                  {netChange > 0 && (
+                    <span className="lb-meta__primary">Bet {entry.bet_amount}</span>
+                  )}
+                  <span className="lb-meta__secondary">
+                    {parseDateToLocaleStringShort(new Date(entry.bet_time!))}
+                  </span>
                 </div>
 
-                <div className="bet individual">
-                        <>
-                        {netChange > 0 && (
-                        <div className="bet-amount">
-                            Bet {entry.bet_amount}
-                        </div>
-                        )}
-                        <div className="bet-time">
-                            {parseDateToLocaleStringShort(new Date(entry.bet_time!))}
-                        </div>
-                        </>
-                </div>
-
-                <div
-                  className={`net ${
-                    netChange < 0
-                      ? "negative"
-                      : netChange > 0
-                      ? "positive"
-                      : ""
-                  }`}
-                >
+                <div className={`lb-value ${netClassName(netChange)}`}>
                   {formatNet(netChange)}
                 </div>
               </div>

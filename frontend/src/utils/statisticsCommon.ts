@@ -26,18 +26,18 @@ export function netClassName(netChange: number): string {
     return "";
 }
 
+// Dates are shown in the viewer's own timezone (no timeZone option = the browser's zone).
+// The backend sends UTC ISO timestamps, so this converts them correctly for each viewer.
 export function parseDateToLocaleString(date: Date): string {
-    return date.toLocaleString('en-US', { 
-        timeZone: 'America/Chicago', 
-        timeStyle: 'short', 
-        dateStyle: 'full' 
+    return date.toLocaleString('en-US', {
+        timeStyle: 'short',
+        dateStyle: 'full'
     });
 }
 
 export function parseDateToLocaleStringShort(date: Date): string {
-    return date.toLocaleString('en-US', { 
-        timeZone: 'America/Chicago', 
-        timeStyle: 'short', 
-        dateStyle: 'short' 
+    return date.toLocaleString('en-US', {
+        timeStyle: 'short',
+        dateStyle: 'short'
     });
 }

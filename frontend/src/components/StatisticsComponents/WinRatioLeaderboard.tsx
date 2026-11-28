@@ -1,5 +1,7 @@
 import type { WinRatioEntry } from "../../types/analytics";
+import { ProfileAvatar, ProfileName } from "../Profiles/ProfileAvatar";
 import { ExpandableList } from "./ExpandableList";
+import "./Leaderboard.css";
 
 type WinRatioLeaderboardProps = {
   title: string;
@@ -16,11 +18,11 @@ export default function WinRatioLeaderboard({
 }: WinRatioLeaderboardProps) {
   return (
     <section className="leaderboard">
-      <div className="header">
-        <h2>{title}</h2>
-      </div>
+      <header className="lb-header">
+        <h3>{title}</h3>
+      </header>
 
-      <div className="body">
+      <div className="lb-body">
         <ExpandableList
           data={
             data.sort((a, b) => {
@@ -33,29 +35,22 @@ export default function WinRatioLeaderboard({
           expanded={expanded}
           initialCount={1}
           expandedCount={10}
+          emptyText="Needs at least 3 predictions per player."
           renderItem={(entry) => {
             const winPct = (entry.win_percentage).toFixed(1);
 
             return (
-              <div className="entry" key={entry.user_id}>
-                <img
-                  className="pfp"
-                  src={entry.profile_image_url ?? "/default-pfp.jpg"}
-                  alt="pfp"
-                />
+              <div className="lb-entry" key={entry.user_id}>
+                <ProfileAvatar className="lb-avatar" userId={entry.user_id} userName={entry.user_name} imageUrl={entry.profile_image_url} />
 
-                <div className="name">
-                  {entry.user_name}
-                </div>
+                <ProfileName className="lb-name" userId={entry.user_id} userName={entry.user_name} />
 
-                <div className="bet">
-                  <div className="win-details">
-                    {entry.won_predictions} / {entry.total_predictions}
-                  </div>
+                <div className="lb-meta">
+                  {entry.won_predictions} / {entry.total_predictions} won
                 </div>
 
                 <div
-                  className={`net ${
+                  className={`lb-value ${
                     entry.win_percentage >= 50 ? "positive" : "negative"
                   }`}
                 >

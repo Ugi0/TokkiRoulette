@@ -1,163 +1,231 @@
 .roulette-table {
-    width: min(1200px, calc(100% - 32px));
+    width: min(var(--content-width), calc(100% - 32px));
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 0px;
+    align-items: center;
+    gap: 28px;
     color: #ffffff;
 }
 
-.roulette-table__header {
+/* ---------------------------------------------------------------------------
+   Wheel stage: framed window onto the wheel + spin controls
+--------------------------------------------------------------------------- */
+.wheel-stage {
+    width: min(640px, 100%);
+    padding: 14px 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    box-shadow: var(--shadow);
+}
+
+.wheel-stage__footer {
     display: flex;
-    justify-content: right;
     align-items: center;
+    justify-content: space-between;
     gap: 16px;
+    padding: 14px 6px 0;
 }
 
-.roulette-table__header h2 {
-    margin: 0;
+.wheel-stage__result {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
-.roulette-table__status {
-    min-height: 24px;
+.result-chip {
+    display: inline-grid;
+    place-items: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 6px;
+    border-radius: 50%;
+    color: #fff;
+    font-family: var(--numerals);
+    font-variant-numeric: lining-nums tabular-nums;
+    font-size: 1.05rem;
+    font-weight: 800;
+    box-shadow: 0 0 0 2px var(--gold), 0 0 18px rgba(226, 181, 74, 0.45);
 }
 
-.roulette-table__status p {
-    margin: 0;
-}
+.result-chip.red { background: var(--roulette-red); }
+.result-chip.black { background: var(--roulette-black); }
+.result-chip.green { background: var(--roulette-green); }
 
 .spin-button {
-    padding: 14px 28px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #ffffff;
-    background: #0f6dff;
+    min-width: 132px;
+    padding: 12px 30px;
     border: 0;
     border-radius: 999px;
+    background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+    color: #1a1406;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: transform 150ms ease, box-shadow 150ms ease;
+    box-shadow: 0 6px 18px -6px rgba(226, 181, 74, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
 }
 
-.spin-button:hover {
+.spin-button:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+    filter: brightness(1.05);
+    box-shadow: 0 10px 24px -6px rgba(226, 181, 74, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
+.spin-button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.spin-button:disabled {
+    cursor: progress;
+    filter: saturate(0.4) brightness(0.8);
+    box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Felt table
+--------------------------------------------------------------------------- */
 .table-shell {
-    padding: 24px;
-    background: #1d7a32;
-    border-radius: 40px;
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08);
-    overflow-x: auto;
-    width: fit-content;
     align-self: center;
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 28px;
+    border-radius: 40px;
+    background:
+        radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.07), transparent 65%),
+        linear-gradient(180deg, var(--felt), var(--felt-dark));
+    box-shadow:
+        inset 0 0 0 1px rgba(226, 181, 74, 0.35),
+        inset 0 0 0 9px rgba(0, 0, 0, 0.18),
+        inset 0 0 0 10px rgba(226, 181, 74, 0.18),
+        inset 0 0 50px rgba(0, 0, 0, 0.45),
+        var(--shadow-lg);
 }
 
-.table-grid, .table-underlay {
-    --cell-size: clamp(42px, 5vw, 76px);
-    padding: 2px;
-    border-radius: 8px;
+.table-stack {
+    --cell-size: clamp(42px, 5vw, 72px);
+    display: grid;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.table-stack > * {
+    grid-area: 1 / 1;
+}
+
+.table-grid,
+.table-underlay {
     display: grid;
     grid-template-columns: repeat(14, var(--cell-size));
     grid-template-rows: repeat(5, var(--cell-size));
     gap: 2px;
     width: fit-content;
     margin: 0 auto;
+    padding: 2px;
 }
+
 .table-underlay {
     z-index: 1;
     pointer-events: none;
 }
 
-
 .table-grid {
-    z-index: 2;
     position: relative;
+    z-index: 2;
 }
 
+/* The underlay shows through the grid gaps as the table's chalk lines. */
 .underlay {
     width: calc(100% + 4px);
     height: calc(100% + 4px);
-    background: #ffffff;
     justify-self: center;
     align-self: center;
+    background: rgba(255, 250, 235, 0.82);
 }
 
-.table-stack {
-    --cell-size: clamp(42px, 5vw, 76px);
-    display: grid;
-    width: fit-content;
-    margin: 0 auto;
-}
-.left {
-    border-radius: 16px 0px 0px 16px;
-}
-.center {
-    border-radius: 0px 0px 16px 16px;
-}
-.right {
-    border-radius: 0px 16px 16px 0px;
-}
-.table-stack > * {
-    grid-area: 1 / 1;
-}
+.underlay.left { border-radius: 16px 0 0 16px; }
+.underlay.center { border-radius: 0 0 16px 16px; }
+.underlay.right { border-radius: 0 16px 16px 0; }
 
 .cell {
-    font-family: "Goblin One", serif;
-    color: #ffffff;
-    font-weight: 700;
+    position: relative;
     border: 0;
-    cursor: pointer;
     border-radius: 2px;
+    color: #fff;
+    font-family: var(--numerals);
+    font-variant-numeric: lining-nums tabular-nums;
+    font-weight: 700;
+    cursor: pointer;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 -10px 18px rgba(0, 0, 0, 0.18);
     transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
 }
 
 .cell:hover {
-    transform: scale(0.97);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-    filter: brightness(1.05);
+    filter: brightness(1.18);
 }
 
 .cell--number {
-    min-height: 0;
-    font-size: 2rem;
+    font-size: 1.7rem;
+    font-weight: 800;
 }
 
 .cell--bet {
-    min-height: 0;
-    padding: 12px 8px;
-    font-size: 1.35rem;
+    padding: 10px 6px;
+    font-family: var(--sans);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
 .cell--zero {
-    min-height: 0;
-    font-size: 3rem;
+    font-family: var(--numerals);
+    font-variant-numeric: lining-nums tabular-nums;
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: 0;
 }
 
-.cell.red { background: #ff2424; }
-.cell.black { background: #000000; }
-.cell.green { background: #1a6d34; }
-.cell--zero.green { background: #21da08; }
+.cell.red { background: var(--roulette-red); }
+.cell.black { background: var(--roulette-black); }
+.cell.green { background: var(--felt); }
+.cell--zero.green { background: var(--roulette-green); }
 
-.cell.tl {
-    border-top-left-radius: 14px;
-}
+.cell.tl { border-top-left-radius: 14px; }
+.cell.tr { border-top-right-radius: 14px; }
+.cell.bl { border-bottom-left-radius: 14px; }
+.cell.br { border-bottom-right-radius: 14px; }
 
-.cell.tr {
-    border-top-right-radius: 14px;
-}
-
-.cell.bl {
-    border-bottom-left-radius: 14px;
-}
-
-.cell.br {
-    border-bottom-right-radius: 14px;
-}
-
-.winner {
-    outline: 3px solid gold;
-    box-shadow: 0 0 12px gold;
+.cell.winner {
+    z-index: 3;
     transform: scale(1.06);
+    filter: brightness(1.15);
+    outline: 3px solid var(--gold-strong);
+    box-shadow: 0 0 0 5px rgba(243, 201, 95, 0.25), 0 0 26px rgba(243, 201, 95, 0.7);
+    animation: winner-pulse 1.6s ease-in-out infinite;
 }
 
+@keyframes winner-pulse {
+    50% {
+        box-shadow: 0 0 0 8px rgba(243, 201, 95, 0.12), 0 0 34px rgba(243, 201, 95, 0.9);
+    }
+}
+
+@media (max-width: 640px) {
+    .table-shell {
+        padding: 16px;
+        border-radius: 24px;
+    }
+
+    .cell--number { font-size: 1.15rem; }
+    .cell--bet { font-size: 0.7rem; padding: 4px; }
+    .cell--zero { font-size: 1.6rem; }
+}

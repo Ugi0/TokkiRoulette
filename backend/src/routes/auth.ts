@@ -8,7 +8,8 @@ import { HelixUsersResponse } from "../types/helix.js";
 import { registerTwitchHooks } from "../services/helix.js";
 import { saveUserSession } from "../services/db_updates.js";
 import { TWITCH_MOCK } from "../services/devMode.js";
-import { setSessionCookie } from "../utils/sessionCookie.js";
+import { parseCookies, setSessionCookie } from "../utils/sessionCookie.js";
+import { sessionExists } from "../services/db_queries.js";
 
 // OAuth state -> creation time. Entries expire so abandoned logins don't accumulate forever.
 const STATE_TTL_MS = 10 * 60 * 1000;
@@ -26,6 +27,12 @@ export default async function authRoutes(
   res: ServerResponse,
   url: URL
 ): Promise<IncomingMessage | ServerResponse | void> {
+  if (url.pathname === "/auth/session") {
+    const sessionId = parseCookies(req).session_id;
+    const authenticated = !!sessionId && await sessionExists(sessionId);
+    return sendJson(res, 200, { authenticated });
+  }
+
   if (url.pathname === "/auth/login") {
     if (TWITCH_MOCK) {
       res.writeHead(302, { Location: "/api/dev/login?as=broadcaster" });

@@ -1,29 +1,29 @@
-.page-root {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #181a1b;
-}
-
-.page-root > main {
-    flex: 1;
-}
-
 .roulette-stats-page {
-    padding: 0px 0 40px;
+    width: min(var(--content-width), calc(100% - 32px));
+    margin: 0 auto;
+    padding: 32px 0 64px;
 }
 
-.roulette-stats-page__header {
-    width: min(1100px, calc(100% - 32px));
-    margin: 0 auto 16px;
-    color: #ffffff;
-    font-family: "JetBrains Mono", sans-serif;
+.analytics-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 24px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
 }
 
-.roulette-stats-page__header h1 {
-    font-family: "JetBrains Mono", sans-serif;
-    font-size: 4rem;
-    color: #ced5d5;
-    font-weight: 400;
-    margin: 0;
+.analytics-toolbar__titles h1 {
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.analytics-toolbar__titles p {
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
 }

@@ -23,7 +23,7 @@ export default function Footer() {
 
   return (
     <footer className="footer">
-      <p>© {year} TokkiCorp Roulette. All rights reserved.</p>
+      <p className="footer__copy">© {year} TokkiCorp Roulette. All rights reserved.</p>
       <small className="disclaimer">
         {text || "Loading wisdom from TokkiCorp..."}
       </small>

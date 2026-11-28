@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import "./RouletteTable.css";
-import { numbers, zero } from "./RouletteNumber";
+import { numberColorMap, numbers, zero } from "./RouletteNumber";
 import RouletteWheel from "./RouletteWheel";
 
 type RouletteResult = {
@@ -14,25 +14,53 @@ type RouletteTableProps = {
 
 export default function RouletteTable({ setNotification }: RouletteTableProps) {
   const [result, setResult] = useState<RouletteResult | null>(null);
+  const [spinning, setSpinning] = useState(false);
   const wheelRef = useRef<{ spin: () => void }>(null);
+
+  const handleSpin = () => {
+    if (spinning) return;
+    setSpinning(true);
+    setResult(null);
+    wheelRef.current?.spin();
+  };
 
   return (
     <section className="roulette-table">
-      <div className="roulette-table__header">
-        <button
-          type="button"
-          className="spin-button"
-          onClick={() => wheelRef.current?.spin()}
-        >
-          Spin &gt;
-        </button>
-      </div>
+      <div className="wheel-stage">
+        <RouletteWheel
+          onFinish={(res) => {
+            setResult(res);
+            setSpinning(false);
+          }}
+          setNotification={setNotification}
+          ref={wheelRef}
+        />
 
-      <RouletteWheel
-        onFinish={(res) => setResult(res)}
-        setNotification={setNotification}
-        ref={wheelRef}
-      />
+        <div className="wheel-stage__footer">
+          <button
+            type="button"
+            className="spin-button"
+            onClick={handleSpin}
+            disabled={spinning}
+          >
+            {spinning ? "Spinning…" : "Spin"}
+          </button>
+          <div className="wheel-stage__result" aria-live="polite">
+            {result ? (
+              <>
+                Landed on{" "}
+                <span className={`result-chip ${numberColorMap.get(result.number)}`}>
+                  {result.number}
+                </span>
+              </>
+            ) : spinning ? (
+              "No more bets"
+            ) : (
+              "Place your bets"
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="table-shell">
         <div className="table-stack">

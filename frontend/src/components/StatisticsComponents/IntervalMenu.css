@@ -1,55 +1,40 @@
-.interval-dropdown {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    border-radius: 10px;
-    margin: 10px 40px 0;
+.interval-tabs {
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
 }
 
-.btn.interval-toggle {
+.interval-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.interval-tab {
+    flex: 0 0 auto;
+    padding: 6px 14px;
     border: 0;
-    color: var(--text-w);
-    background:  #2c3032;
-    font-family: "JetBrains Mono", sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    line-height: 1.35;
-    border-radius: 8px;
-}
-
-.btn.interval-toggle:hover,
-.btn.interval-toggle:focus,
-.btn.interval-toggle:active,
-.btn.interval-toggle.show {
-    background: #3a3f41;
-    color: var(--text-w);
-}
-
-.interval-menu {
-    width: fit-content;
-    padding: 4px 20px;
-    border: 1px solid  #3a3f41;
-    border-radius: 8px;
-    background: #181a1b;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
-}
-
-.interval-menu-item {
-    border-radius: 6px;
-    color: var(--text-w);
-    font-family: "JetBrains Mono", sans-serif;
-    font-size: 0.85rem;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.82rem;
     font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
 }
 
-.interval-menu-item:hover,
-.interval-menu-item:focus {
-    background: #2c3032;
-    color: var(--text-w);
+.interval-tab:hover {
+    color: var(--text);
+    background: var(--surface-2);
 }
 
-.interval-menu-item.active {
-    background: #3a3f41;
-    color: var(--text-w);
+.interval-tab--active,
+.interval-tab--active:hover {
+    color: #1a1406;
+    background: var(--gold);
 }
